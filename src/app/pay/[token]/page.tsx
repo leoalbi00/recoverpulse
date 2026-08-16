@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import { resolveInvoiceIdFromToken } from "@/lib/payment-links";
 import { getTransaction, type FailedTransaction } from "@/lib/transactions";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
+import { DemoCardForm } from "@/components/update-payment/demo-card-form";
 
 const DEMO_TOKENS = ["test-token-123", "demo"];
 
@@ -99,22 +100,6 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   const { token } = await params;
 
   if (DEMO_TOKENS.includes(token)) {
-    let demoClientSecret: string | null;
-    try {
-      const setupIntent = await stripe.setupIntents.create({
-        payment_method_types: ["card"],
-        usage: "off_session",
-      });
-      demoClientSecret = setupIntent.client_secret;
-    } catch (error) {
-      console.error("Errore creazione SetupIntent Stripe (demo):", error);
-      demoClientSecret = null;
-    }
-
-    if (!demoClientSecret) {
-      return <SetupError />;
-    }
-
     const amountFormatted = formatAmount(DEMO_TRANSACTION.amount, DEMO_TRANSACTION.currency);
 
     return (
@@ -140,13 +125,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
           <p className="mt-1 text-xs text-zinc-500">{DEMO_TRANSACTION.reason}</p>
         </div>
 
-        <UpdatePaymentForm
-          token={token}
-          clientSecret={demoClientSecret}
-          planName={DEMO_TRANSACTION.planName}
-          amountFormatted={amountFormatted}
-          demoMode
-        />
+        <DemoCardForm planName={DEMO_TRANSACTION.planName} amountFormatted={amountFormatted} />
       </Shell>
     );
   }

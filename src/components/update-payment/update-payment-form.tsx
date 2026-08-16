@@ -16,20 +16,17 @@ type UpdatePaymentFormProps = {
   clientSecret: string;
   planName: string;
   amountFormatted: string;
-  demoMode?: boolean;
 };
 
 function CardStep({
   token,
   planName,
   amountFormatted,
-  demoMode,
   onSuccess,
 }: {
   token: string;
   planName: string;
   amountFormatted: string;
-  demoMode?: boolean;
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
@@ -52,11 +49,6 @@ function CardStep({
     if (submitError || !setupIntent) {
       setError(submitError?.message ?? "Impossibile verificare la carta. Riprova.");
       setSubmitting(false);
-      return;
-    }
-
-    if (demoMode) {
-      onSuccess();
       return;
     }
 
@@ -127,7 +119,6 @@ export function UpdatePaymentForm({
   clientSecret,
   planName,
   amountFormatted,
-  demoMode,
 }: UpdatePaymentFormProps) {
   const [success, setSuccess] = useState(false);
 
@@ -158,7 +149,6 @@ export function UpdatePaymentForm({
         token={token}
         planName={planName}
         amountFormatted={amountFormatted}
-        demoMode={demoMode}
         onSuccess={() => setSuccess(true)}
       />
     </Elements>

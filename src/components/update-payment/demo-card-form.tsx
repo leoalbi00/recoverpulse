@@ -1,0 +1,116 @@
+"use client";
+
+import { useState } from "react";
+import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+
+type DemoCardFormProps = {
+  planName: string;
+  amountFormatted: string;
+};
+
+function SuccessStep({ planName }: { planName: string }) {
+  return (
+    <div className="flex flex-col items-center gap-4 py-6 text-center">
+      <span className="flex size-14 items-center justify-center rounded-full bg-emerald-400/10 ring-1 ring-emerald-400/30">
+        <CheckCircle2 className="size-7 text-emerald-400" />
+      </span>
+      <div>
+        <p className="text-lg font-semibold text-white">Carta aggiornata con successo</p>
+        <p className="mt-1.5 text-sm text-zinc-400">
+          Il pagamento è stato riaddebitato e l&apos;abbonamento <span className="text-white">{planName}</span>{" "}
+          è di nuovo attivo. Riceverai una conferma via email.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Modulo carta interamente simulato: nessuna chiamata a Stripe.js o alle API,
+// pensato per demo/anteprima del portale 1-click senza dipendenze esterne.
+export function DemoCardForm({ planName, amountFormatted }: DemoCardFormProps) {
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvc, setCvc] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  if (success) {
+    return <SuccessStep planName={planName} />;
+  }
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      setSuccess(true);
+    }, 900);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-3 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="demo-card-number" className="text-xs font-medium text-zinc-400">
+            Numero carta
+          </label>
+          <input
+            id="demo-card-number"
+            type="text"
+            inputMode="numeric"
+            required
+            placeholder="4242 4242 4242 4242"
+            value={cardNumber}
+            onChange={(event) => setCardNumber(event.target.value)}
+            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+          />
+        </div>
+        <div className="flex gap-3">
+          <div className="flex flex-1 flex-col gap-1.5">
+            <label htmlFor="demo-card-expiry" className="text-xs font-medium text-zinc-400">
+              Scadenza
+            </label>
+            <input
+              id="demo-card-expiry"
+              type="text"
+              required
+              placeholder="MM/AA"
+              value={expiry}
+              onChange={(event) => setExpiry(event.target.value)}
+              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5">
+            <label htmlFor="demo-card-cvc" className="text-xs font-medium text-zinc-400">
+              CVC
+            </label>
+            <input
+              id="demo-card-cvc"
+              type="text"
+              inputMode="numeric"
+              required
+              placeholder="123"
+              value={cvc}
+              onChange={(event) => setCvc(event.target.value)}
+              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-500 px-4 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+      >
+        {submitting && <Loader2 className="size-4 animate-spin" />}
+        {submitting ? "Verifica in corso…" : `Aggiorna carta e sblocca ${planName}`}
+      </button>
+
+      <p className="flex items-center justify-center gap-1.5 text-xs text-zinc-500">
+        <ShieldCheck className="size-3.5" />
+        Modulo di prova (demo) · nessun dato inviato a Stripe · {amountFormatted}
+      </p>
+    </form>
+  );
+}
