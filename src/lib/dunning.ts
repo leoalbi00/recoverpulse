@@ -14,7 +14,7 @@ export async function startDunningSequence(transaction: FailedTransaction) {
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
   );
-  const portalPath = `/update-payment/${transaction.paymentLinkToken}`;
+  const portalPath = `/pay/${transaction.paymentLinkToken}`;
 
   if (channels.length === 0) {
     console.log(

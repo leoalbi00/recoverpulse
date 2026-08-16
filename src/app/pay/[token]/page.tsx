@@ -48,6 +48,24 @@ function InvalidLink() {
   );
 }
 
+function SetupError() {
+  return (
+    <Shell>
+      <div className="flex flex-col items-center gap-4 py-4 text-center">
+        <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
+          <XCircle className="size-7 text-red-400" />
+        </span>
+        <div>
+          <p className="text-lg font-semibold text-white">Impossibile avviare l&apos;aggiornamento</p>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            Si è verificato un problema nel comunicare con Stripe. Riprova più tardi o contatta il tuo fornitore.
+          </p>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
 function AlreadyRecovered({ transaction }: { transaction: FailedTransaction }) {
   return (
     <Shell>
@@ -67,7 +85,7 @@ function AlreadyRecovered({ transaction }: { transaction: FailedTransaction }) {
   );
 }
 
-export default async function UpdatePaymentPage({ params }: PageProps<"/update-payment/[token]">) {
+export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[token]">) {
   const { token } = await params;
   const invoiceId = resolveInvoiceIdFromToken(token);
   const transaction = invoiceId ? getTransaction(invoiceId) : null;
@@ -80,14 +98,21 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/update-p
     return <AlreadyRecovered transaction={transaction} />;
   }
 
-  const setupIntent = await stripe.setupIntents.create({
-    customer: transaction.customerId,
-    payment_method_types: ["card"],
-    usage: "off_session",
-  });
+  let clientSecret: string | null;
+  try {
+    const setupIntent = await stripe.setupIntents.create({
+      customer: transaction.customerId,
+      payment_method_types: ["card"],
+      usage: "off_session",
+    });
+    clientSecret = setupIntent.client_secret;
+  } catch (error) {
+    console.error("Errore creazione SetupIntent Stripe:", error);
+    clientSecret = null;
+  }
 
-  if (!setupIntent.client_secret) {
-    throw new Error("Stripe non ha restituito un client secret per il SetupIntent.");
+  if (!clientSecret) {
+    return <SetupError />;
   }
 
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
@@ -117,7 +142,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/update-p
 
       <UpdatePaymentForm
         token={token}
-        clientSecret={setupIntent.client_secret}
+        clientSecret={clientSecret}
         planName={transaction.planName}
         amountFormatted={amountFormatted}
       />

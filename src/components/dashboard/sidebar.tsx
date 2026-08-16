@@ -100,7 +100,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      <div className="hidden border-r border-zinc-800 bg-zinc-950 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
+      <div className="hidden border-r border-zinc-800 bg-zinc-900 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
         <SidebarContent user={user} />
       </div>
 
