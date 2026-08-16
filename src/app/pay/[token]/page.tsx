@@ -5,6 +5,16 @@ import { resolveInvoiceIdFromToken } from "@/lib/payment-links";
 import { getTransaction, type FailedTransaction } from "@/lib/transactions";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 
+const DEMO_TOKENS = ["test-token-123", "demo"];
+
+const DEMO_TRANSACTION = {
+  customerName: "Cliente Demo",
+  planName: "Abbonamento Pro",
+  amount: 8900,
+  currency: "usd",
+  reason: "Carta rifiutata dall'istituto emittente (dati simulati)",
+};
+
 function formatAmount(amount: number, currency: string) {
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
@@ -87,6 +97,60 @@ function AlreadyRecovered({ transaction }: { transaction: FailedTransaction }) {
 
 export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[token]">) {
   const { token } = await params;
+
+  if (DEMO_TOKENS.includes(token)) {
+    let demoClientSecret: string | null;
+    try {
+      const setupIntent = await stripe.setupIntents.create({
+        payment_method_types: ["card"],
+        usage: "off_session",
+      });
+      demoClientSecret = setupIntent.client_secret;
+    } catch (error) {
+      console.error("Errore creazione SetupIntent Stripe (demo):", error);
+      demoClientSecret = null;
+    }
+
+    if (!demoClientSecret) {
+      return <SetupError />;
+    }
+
+    const amountFormatted = formatAmount(DEMO_TRANSACTION.amount, DEMO_TRANSACTION.currency);
+
+    return (
+      <Shell>
+        <div className="mb-6 text-center">
+          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+            Demo · Portale 1-Click
+          </p>
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            Riattiva il tuo abbonamento
+          </h1>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            Ciao {DEMO_TRANSACTION.customerName}, questa è un&apos;anteprima con dati simulati del portale di
+            aggiornamento carta.
+          </p>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-zinc-400">{DEMO_TRANSACTION.planName}</p>
+            <p className="text-sm font-semibold text-white">{amountFormatted}/mese</p>
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">{DEMO_TRANSACTION.reason}</p>
+        </div>
+
+        <UpdatePaymentForm
+          token={token}
+          clientSecret={demoClientSecret}
+          planName={DEMO_TRANSACTION.planName}
+          amountFormatted={amountFormatted}
+          demoMode
+        />
+      </Shell>
+    );
+  }
+
   const invoiceId = resolveInvoiceIdFromToken(token);
   const transaction = invoiceId ? getTransaction(invoiceId) : null;
 

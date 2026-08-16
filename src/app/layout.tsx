@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "RecoverPulse — Recupera più forte. Performa più a lungo.",
   description:
     "RecoverPulse trasforma i dati del tuo corpo in un punteggio di recupero chiaro e in un piano d'azione quotidiano per atleti e appassionati di performance.",
+};
+
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#09090b",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
