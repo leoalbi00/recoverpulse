@@ -1,12 +1,23 @@
 import type { FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
+import { sendDunningEmail } from "@/lib/email";
 
 export type { DunningChannel };
+
+function getAppBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("it-IT", { style: "currency", currency: currency.toUpperCase() }).format(
+    amount / 100
+  );
+}
 
 /**
  * Avvia la sequenza dunning (WhatsApp -> SMS -> Email) per una fattura fallita,
  * rispettando i canali attivati in Impostazioni > Sequenze Dunning.
- * TODO: collegare i provider reali (es. WhatsApp Business API / Twilio per SMS / Resend per Email)
+ * TODO: collegare i provider reali per WhatsApp Business API e SMS (Twilio)
  * usando le credenziali del cliente una volta disponibili.
  */
 export async function startDunningSequence(transaction: FailedTransaction) {
@@ -15,6 +26,7 @@ export async function startDunningSequence(transaction: FailedTransaction) {
     (channel) => settings.channels[channel]
   );
   const portalPath = `/pay/${transaction.paymentLinkToken}`;
+  const recoveryLink = `${getAppBaseUrl()}${portalPath}`;
 
   if (channels.length === 0) {
     console.log(
@@ -27,8 +39,18 @@ export async function startDunningSequence(transaction: FailedTransaction) {
     `[dunning] avvio sequenza per fattura ${transaction.invoiceId} (${transaction.customerEmail}) su canali: ${channels.join(", ")} — link portale: ${portalPath}`
   );
 
-  // Placeholder: qui andrà l'invio effettivo del primo messaggio della sequenza,
-  // con il link al portale 1-click (portalPath) incluso nel testo.
+  if (channels.includes("email")) {
+    await sendDunningEmail({
+      to: transaction.customerEmail,
+      customerName: transaction.customerName,
+      planName: transaction.planName,
+      amountFormatted: formatAmount(transaction.amount, transaction.currency),
+      recoveryLink,
+    });
+  }
+
+  // Placeholder: qui andrà l'invio effettivo dei messaggi WhatsApp/SMS della
+  // sequenza, con il link al portale 1-click (recoveryLink) incluso nel testo.
 }
 
 /**
