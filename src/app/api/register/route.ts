@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createUser } from "@/lib/users";
+import { createUser, DuplicateEmailError } from "@/lib/users";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Il nome deve avere almeno 2 caratteri."),
@@ -24,8 +24,14 @@ export async function POST(request: Request) {
     const user = await createUser(parsed.data);
     return NextResponse.json({ id: user.id, email: user.email });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Errore durante la registrazione.";
-    return NextResponse.json({ error: message }, { status: 409 });
+    if (error instanceof DuplicateEmailError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+
+    console.error("Errore durante la registrazione:", error);
+    return NextResponse.json(
+      { error: "Errore durante la registrazione. Riprova più tardi." },
+      { status: 500 }
+    );
   }
 }

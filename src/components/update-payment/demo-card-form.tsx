@@ -101,7 +101,7 @@ export function DemoCardForm({ planName, amountFormatted }: DemoCardFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-500 px-4 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-black shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? "Verifica in corso…" : `Aggiorna carta e sblocca ${planName}`}

@@ -5,6 +5,7 @@ import { stripe } from "@/lib/stripe";
 import { markInvoiceRecovered, recordFailedPayment } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser } from "@/lib/billing";
+import { createPaymentToken } from "@/lib/tokens";
 
 async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null) {
   if (!customerId) {
@@ -39,9 +40,15 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     invoice.last_finalization_error?.message ??
     "Pagamento rifiutato dall'istituto emittente della carta.";
   const planName = invoice.lines.data[0]?.description ?? "Abbonamento";
+  const invoiceId = invoice.id ?? crypto.randomUUID();
+
+  // Token monouso valido 7 giorni per il portale 1-click di aggiornamento carta:
+  // generato e salvato (hashato) su Supabase ad ogni fallimento di pagamento, così
+  // il link inviato nella sequenza di dunning è sempre nuovo e verificabile lato server.
+  const paymentLinkToken = await createPaymentToken({ customerId: customer.id });
 
   const transaction = recordFailedPayment({
-    invoiceId: invoice.id ?? crypto.randomUUID(),
+    invoiceId,
     customerId: customer.id,
     customerName: customer.name,
     customerEmail: customer.email,
@@ -50,7 +57,12 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     amount: invoice.amount_due,
     currency: invoice.currency,
     reason,
+    paymentLinkToken,
   });
+
+  console.log(
+    `[stripe-webhook] invoice.payment_failed ricevuto per fattura ${invoiceId} (cliente ${customer.id}): token di recupero generato su Supabase, valido 7 giorni.`
+  );
 
   await startDunningSequence(transaction);
 }

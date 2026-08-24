@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, CreditCard, Lock, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,12 @@ const STATS = [
   { value: "70%", label: "pagamenti falliti recuperati" },
   { value: "3", label: "canali: WhatsApp, SMS, Email" },
   { value: "14gg", label: "di prova gratuita" },
+];
+
+const TRUST_BADGES = [
+  { icon: Lock, label: "Crittografia SSL a 256-bit" },
+  { icon: ShieldCheck, label: "GDPR Compliant" },
+  { icon: CreditCard, label: "Stripe Compatible" },
 ];
 
 export function Hero() {
@@ -41,8 +47,8 @@ export function Hero() {
         </h1>
 
         <p className="mt-8 max-w-2xl text-lg leading-relaxed text-zinc-400 sm:text-xl">
-          Smart Dunning multi-canale via WhatsApp, SMS ed Email con portale di
-          aggiornamento carta 1-Click senza login.
+          Recupera i ricavi persi da carte scadute senza inseguire i clienti
+          manualmente. Attivazione in meno di 5 minuti.
         </p>
 
         <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -62,6 +68,15 @@ export function Hero() {
           >
             Accedi
           </Button>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {TRUST_BADGES.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
+              <Icon className="size-3.5 text-emerald-500/80" />
+              {label}
+            </div>
+          ))}
         </div>
 
         <p className="mt-5 text-xs text-zinc-500">

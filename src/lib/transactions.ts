@@ -40,6 +40,8 @@ export function recordFailedPayment(input: {
   amount: number;
   currency: string;
   reason: string;
+  /** Token monouso (in chiaro) generato su Supabase da `createPaymentToken` per il link del portale. */
+  paymentLinkToken: string;
 }): FailedTransaction {
   const existing = transactions.get(input.invoiceId);
 
@@ -55,7 +57,7 @@ export function recordFailedPayment(input: {
     currency: input.currency,
     reason: input.reason,
     status: "in_corso",
-    paymentLinkToken: existing?.paymentLinkToken ?? getOrCreatePaymentLinkToken(input.invoiceId),
+    paymentLinkToken: input.paymentLinkToken,
     createdAt: existing?.createdAt ?? new Date().toISOString(),
     recoveredAt: null,
   };
@@ -80,6 +82,21 @@ export function markInvoiceRecovered(invoiceId: string): FailedTransaction | nul
 
 export function getTransaction(invoiceId: string) {
   return transactions.get(invoiceId) ?? null;
+}
+
+/**
+ * Risolve la transazione di pagamento fallito più recente non ancora recuperata
+ * per uno Stripe Customer ID. Usata da `/pay/[token]`: il token del portale
+ * (validato su Supabase) porta con sé solo il `customerId`, non l'invoiceId.
+ */
+export function getTransactionByCustomerId(customerId: string): FailedTransaction | null {
+  const candidates = Array.from(transactions.values()).filter((t) => t.customerId === customerId);
+  if (candidates.length === 0) return null;
+
+  const active = candidates.find((t) => t.status === "in_corso");
+  if (active) return active;
+
+  return candidates.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
 }
 
 export function listTransactions() {

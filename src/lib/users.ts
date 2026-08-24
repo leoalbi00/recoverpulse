@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs";
 
+import { supabaseAdmin } from "@/lib/supabase-admin";
+
 export type User = {
   id: string;
   name: string;
@@ -7,28 +9,36 @@ export type User = {
   passwordHash: string;
 };
 
-declare global {
-  var __recoverpulseUsers: Map<string, User> | undefined;
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string;
+};
+
+export class DuplicateEmailError extends Error {
+  constructor() {
+    super("Un utente con questa email esiste già.");
+    this.name = "DuplicateEmailError";
+  }
 }
 
-// In-memory demo store — sopravvive ai reload del dev server grazie a `globalThis`,
-// ma va sostituito con un database vero (es. Prisma + Postgres) prima della produzione.
-const users = globalThis.__recoverpulseUsers ?? new Map<string, User>();
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__recoverpulseUsers = users;
+function fromRow(row: UserRow): User {
+  return { id: row.id, name: row.name, email: row.email, passwordHash: row.password_hash };
 }
 
-if (!users.has("demo@recoverpulse.app")) {
-  users.set("demo@recoverpulse.app", {
-    id: "demo-user",
-    name: "Admin Demo",
-    email: "demo@recoverpulse.app",
-    passwordHash: bcrypt.hashSync("demo1234", 10),
-  });
-}
+export async function findUserByEmail(email: string): Promise<User | null> {
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select("id, name, email, password_hash")
+    .eq("email", email.toLowerCase())
+    .maybeSingle();
 
-export function findUserByEmail(email: string) {
-  return users.get(email.toLowerCase());
+  if (error) {
+    throw new Error(`Errore nel recupero dell'utente da Supabase: ${error.message}`);
+  }
+
+  return data ? fromRow(data) : null;
 }
 
 export async function createUser({
@@ -39,19 +49,24 @@ export async function createUser({
   name: string;
   email: string;
   password: string;
-}) {
+}): Promise<User> {
   const normalizedEmail = email.toLowerCase();
-  if (users.has(normalizedEmail)) {
-    throw new Error("Un utente con questa email esiste già.");
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .insert({ name, email: normalizedEmail, password_hash: passwordHash })
+    .select("id, name, email, password_hash")
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      throw new DuplicateEmailError();
+    }
+    throw new Error(`Errore durante la creazione dell'utente su Supabase: ${error.message}`);
   }
-  const user: User = {
-    id: crypto.randomUUID(),
-    name,
-    email: normalizedEmail,
-    passwordHash: await bcrypt.hash(password, 10),
-  };
-  users.set(normalizedEmail, user);
-  return user;
+
+  return fromRow(data);
 }
 
 export function verifyPassword(user: User, password: string) {

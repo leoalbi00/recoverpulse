@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { stripe } from "@/lib/stripe";
-import { resolveInvoiceIdFromToken } from "@/lib/payment-links";
-import { getTransaction, markInvoiceRecovered } from "@/lib/transactions";
+import { validatePaymentToken, markPaymentTokenUsed } from "@/lib/tokens";
+import { getTransactionByCustomerId, markInvoiceRecovered } from "@/lib/transactions";
 import { stopDunningSequence } from "@/lib/dunning";
 
 const confirmSchema = z.object({
@@ -13,8 +13,8 @@ const confirmSchema = z.object({
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
 
-  const invoiceId = resolveInvoiceIdFromToken(token);
-  const transaction = invoiceId ? getTransaction(invoiceId) : null;
+  const paymentToken = await validatePaymentToken(token);
+  const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
     return NextResponse.json({ error: "Link non valido o scaduto." }, { status: 404 });
@@ -67,6 +67,10 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
       { status: 402 }
     );
   }
+
+  // Invalida il token subito dopo il successo: impedisce che lo stesso link
+  // monouso venga riutilizzato per un secondo aggiornamento carta.
+  await markPaymentTokenUsed(token);
 
   const updated = markInvoiceRecovered(transaction.invoiceId);
   if (updated) {

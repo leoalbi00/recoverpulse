@@ -1,8 +1,8 @@
 import { Activity, ShieldCheck, XCircle } from "lucide-react";
 
 import { stripe } from "@/lib/stripe";
-import { resolveInvoiceIdFromToken } from "@/lib/payment-links";
-import { getTransaction, type FailedTransaction } from "@/lib/transactions";
+import { validatePaymentToken } from "@/lib/tokens";
+import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
 
@@ -130,8 +130,10 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     );
   }
 
-  const invoiceId = resolveInvoiceIdFromToken(token);
-  const transaction = invoiceId ? getTransaction(invoiceId) : null;
+  // Il token deve esistere su Supabase, non essere già stato usato e non essere
+  // scaduto: `validatePaymentToken` applica tutte e tre le condizioni nella query.
+  const paymentToken = await validatePaymentToken(token);
+  const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
     return <InvalidLink />;
