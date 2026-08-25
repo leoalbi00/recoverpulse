@@ -4,8 +4,10 @@ import { sendDunningEmail } from "@/lib/email";
 
 export type { DunningChannel };
 
+// I link inviati via email devono sempre puntare al dominio di produzione,
+// indipendentemente dall'ambiente in cui gira il webhook (anche in locale).
 function getAppBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || "https://recoverpulse-three.vercel.app";
+  return "https://recoverpulse-three.vercel.app";
 }
 
 function formatAmount(amount: number, currency: string): string {
