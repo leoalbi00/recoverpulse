@@ -13,6 +13,6 @@ export async function POST() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  const transactions = seedDemoTransactions();
+  const transactions = await seedDemoTransactions();
   return NextResponse.json({ success: true, count: transactions.length });
 }

@@ -5,14 +5,15 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
 import { DemoDataBanner } from "@/components/dashboard/demo-data-banner";
-import { getDashboardStats, getRecoveryChartData, listTransactions } from "@/lib/transactions";
+import { computeDashboardStats, computeRecoveryChartData, listTransactions } from "@/lib/transactions";
 
 export default async function DashboardPage() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Utente";
-  const recentTransactions = listTransactions().slice(0, 5);
-  const stats = getDashboardStats();
-  const chartData = getRecoveryChartData();
+  const allTransactions = await listTransactions();
+  const recentTransactions = allTransactions.slice(0, 5);
+  const stats = computeDashboardStats(allTransactions);
+  const chartData = computeRecoveryChartData(allTransactions);
 
   const recoveredAmountLabel = new Intl.NumberFormat("it-IT", {
     style: "currency",

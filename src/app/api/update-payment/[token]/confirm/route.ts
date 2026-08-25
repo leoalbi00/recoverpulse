@@ -13,9 +13,10 @@ const confirmSchema = z.object({
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
 
-  let paymentToken;
+  let transaction;
   try {
-    paymentToken = await validatePaymentToken(token);
+    const paymentToken = await validatePaymentToken(token);
+    transaction = paymentToken ? await getTransactionByCustomerId(paymentToken.customerId) : null;
   } catch (error) {
     console.error(`[update-payment-confirm] errore nella verifica del token "${token}" su Supabase:`, error);
     return NextResponse.json(
@@ -23,8 +24,6 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
       { status: 503 }
     );
   }
-
-  const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
     return NextResponse.json({ error: "Link non valido o scaduto." }, { status: 404 });
@@ -82,7 +81,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   // monouso venga riutilizzato per un secondo aggiornamento carta.
   await markPaymentTokenUsed(token);
 
-  const updated = markInvoiceRecovered(transaction.invoiceId);
+  const updated = await markInvoiceRecovered(transaction.invoiceId);
   if (updated) {
     await stopDunningSequence(updated);
   }

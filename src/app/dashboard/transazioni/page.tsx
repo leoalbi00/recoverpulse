@@ -1,8 +1,8 @@
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
 import { listTransactions } from "@/lib/transactions";
 
-export default function TransazioniPage() {
-  const transactions = listTransactions();
+export default async function TransazioniPage() {
+  const transactions = await listTransactions();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">

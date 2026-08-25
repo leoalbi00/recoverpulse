@@ -151,17 +151,17 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
 
   // Il token deve esistere su Supabase, non essere già stato usato e non essere
   // scaduto: `validatePaymentToken` applica tutte e tre le condizioni nella query.
-  // Un errore qui (es. Supabase irraggiungibile o mal configurato in produzione)
-  // non deve far crashare la pagina con un 500: mostriamo una schermata dedicata.
-  let paymentToken;
+  // Un errore qui o nella lettura della transazione (es. Supabase irraggiungibile
+  // o mal configurato in produzione) non deve far crashare la pagina con un 500:
+  // mostriamo una schermata dedicata.
+  let transaction: FailedTransaction | null;
   try {
-    paymentToken = await validatePaymentToken(token);
+    const paymentToken = await validatePaymentToken(token);
+    transaction = paymentToken ? await getTransactionByCustomerId(paymentToken.customerId) : null;
   } catch (error) {
     console.error(`[pay-portal] errore nella verifica del token "${token}" su Supabase:`, error);
     return <ConnectionError />;
   }
-
-  const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
     return <InvalidLink />;

@@ -69,7 +69,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   // il link inviato nella sequenza di dunning è sempre nuovo e verificabile lato server.
   const paymentLinkToken = await createPaymentToken({ customerId: customer.id });
 
-  const transaction = recordFailedPayment({
+  const transaction = await recordFailedPayment({
     invoiceId,
     customerId: customer.id,
     customerName: customer.name,
@@ -95,7 +95,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.id) return;
 
-  const transaction = markInvoiceRecovered(invoice.id);
+  const transaction = await markInvoiceRecovered(invoice.id);
   if (transaction) {
     await stopDunningSequence(transaction);
   }
