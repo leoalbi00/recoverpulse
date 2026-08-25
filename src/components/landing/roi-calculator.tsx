@@ -35,6 +35,8 @@ export function RoiCalculator() {
     return { atRisk: risk, recoverableMonthly: monthly, recoverableYearly: monthly * 12 };
   }, [mrr]);
 
+  const progress = ((mrr - MIN_MRR) / (MAX_MRR - MIN_MRR)) * 100;
+
   return (
     <section id="roi-calculator" className="relative scroll-mt-16 py-28 sm:py-32">
       <div className="mx-auto max-w-4xl px-6">
@@ -73,7 +75,8 @@ export function RoiCalculator() {
             step={STEP}
             value={mrr}
             onChange={(event) => setMrr(Number(event.target.value))}
-            className="mt-6 h-2 w-full cursor-pointer appearance-none rounded-full bg-zinc-800 accent-emerald-500"
+            style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
+            className="roi-slider mt-6 w-full"
           />
           <div className="mt-1.5 flex justify-between text-xs text-zinc-600">
             <span>{formatCurrency(MIN_MRR)}</span>

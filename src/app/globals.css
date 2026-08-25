@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -136,5 +136,78 @@
   }
   button:disabled {
     cursor: not-allowed;
+  }
+}
+
+@layer components {
+  /*
+   * Slider stilizzato a mano per il calcolatore ROI. `accent-color` da solo
+   * non basta: Safari/iOS lo ignora sul thumb in molti casi e il fallback
+   * nativo (spesso un pallino blu di sistema) resta visibile e disallineato
+   * rispetto al binario disegnato con Tailwind. Qui rimuoviamo l'aspetto
+   * nativo su tutti i browser e ridisegniamo binario + thumb in modo
+   * identico ovunque, con l'avanzamento (`--range-progress`, impostato
+   * inline dal componente) a colorare la parte già selezionata del binario.
+   */
+  .roi-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .roi-slider::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      #10b981 var(--range-progress, 50%),
+      #27272a var(--range-progress, 50%)
+    );
+  }
+
+  .roi-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -6px;
+    height: 20px;
+    width: 20px;
+    border-radius: 9999px;
+    background: #10b981;
+    border: 3px solid #052e21;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .roi-slider::-moz-range-track {
+    height: 8px;
+    border-radius: 9999px;
+    background: #27272a;
+  }
+
+  .roi-slider::-moz-range-progress {
+    height: 8px;
+    border-radius: 9999px;
+    background: #10b981;
+  }
+
+  .roi-slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 9999px;
+    background: #10b981;
+    border: 3px solid #052e21;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .roi-slider:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #34d399;
+    outline-offset: 2px;
+  }
+
+  .roi-slider:focus-visible::-moz-range-thumb {
+    outline: 2px solid #34d399;
+    outline-offset: 2px;
   }
 }

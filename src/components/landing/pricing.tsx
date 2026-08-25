@@ -102,7 +102,7 @@ export function Pricing() {
             size="lg"
             variant="outline"
             render={<a href="#pilot" />}
-            className="h-11 shrink-0 rounded-full px-6 text-sm font-semibold"
+            className="h-11 shrink-0 rounded-full border-emerald-500/40 bg-zinc-950 px-6 text-sm font-semibold text-emerald-400 hover:bg-zinc-900 hover:text-emerald-300"
           >
             Richiedi Info
           </Button>
