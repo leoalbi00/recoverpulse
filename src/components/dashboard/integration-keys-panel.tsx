@@ -1,49 +1,120 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Check, KeyRound } from "lucide-react";
+import { Check, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { IntegrationSettings } from "@/lib/integration-settings";
 
 type FieldStatus = { configured: boolean; masked: string };
 type KeysStatus = Record<keyof IntegrationSettings, FieldStatus>;
+type Service = "stripe" | "resend" | "twilio";
+type ConnectionState = "idle" | "testing" | "success" | "error";
 
-const FIELDS: { id: keyof IntegrationSettings; label: string; helper: string }[] = [
+type FieldConfig = { id: keyof IntegrationSettings; label: string; placeholder: string; helper: string };
+
+const EMPTY_VALUES: Record<keyof IntegrationSettings, string> = {
+  stripePublishableKey: "",
+  stripeSecretKey: "",
+  resendApiKey: "",
+  twilioAccountSid: "",
+  twilioAuthToken: "",
+};
+
+const SERVICES: { id: Service; name: string; fields: FieldConfig[] }[] = [
   {
-    id: "stripeSecretKey",
-    label: "Stripe Secret Key",
-    helper: "Usata per leggere fatture ed eventi dal tuo account Stripe.",
+    id: "stripe",
+    name: "Stripe",
+    fields: [
+      {
+        id: "stripePublishableKey",
+        label: "Stripe Public Key",
+        placeholder: "pk_live_...",
+        helper: "Usata dal browser per inizializzare Stripe.js nel portale di pagamento.",
+      },
+      {
+        id: "stripeSecretKey",
+        label: "Stripe Secret Key",
+        placeholder: "sk_live_...",
+        helper: "Usata dal server per creare checkout, fatture e leggere gli eventi Stripe.",
+      },
+    ],
   },
   {
-    id: "resendApiKey",
-    label: "Resend API Key",
-    helper: "Usata per inviare le email della sequenza dunning.",
+    id: "resend",
+    name: "Resend",
+    fields: [
+      {
+        id: "resendApiKey",
+        label: "Resend API Key",
+        placeholder: "re_...",
+        helper: "Usata per inviare le email della sequenza dunning.",
+      },
+    ],
   },
   {
-    id: "twilioAccountSid",
-    label: "Twilio Account SID",
-    helper: "Usato per inviare i solleciti via SMS e WhatsApp Business.",
-  },
-  {
-    id: "twilioAuthToken",
-    label: "Twilio Auth Token",
-    helper: "Token di autenticazione associato al tuo Account SID Twilio.",
+    id: "twilio",
+    name: "Twilio",
+    fields: [
+      {
+        id: "twilioAccountSid",
+        label: "Twilio Account SID",
+        placeholder: "AC...",
+        helper: "Usato per inviare i solleciti via SMS e WhatsApp Business.",
+      },
+      {
+        id: "twilioAuthToken",
+        label: "Twilio Auth Token",
+        placeholder: "",
+        helper: "Token di autenticazione associato al tuo Account SID Twilio.",
+      },
+    ],
   },
 ];
 
+function ConnectionBadge({ state, message }: { state: ConnectionState; message?: string }) {
+  if (state === "idle") return null;
+
+  if (state === "testing") {
+    return (
+      <Badge variant="outline" className="h-auto border-zinc-700 bg-zinc-900 px-2 py-0.5 text-zinc-400">
+        <Loader2 className="size-3 animate-spin" />
+        Verifica…
+      </Badge>
+    );
+  }
+
+  const isSuccess = state === "success";
+  return (
+    <Badge
+      variant="outline"
+      title={message}
+      className={cn(
+        "h-auto px-2 py-0.5",
+        isSuccess ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-rose-500/30 bg-rose-500/10 text-rose-500"
+      )}
+    >
+      {isSuccess ? "🟢 Connesso" : "🔴 Errore"}
+    </Badge>
+  );
+}
+
 export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysStatus }) {
   const [status, setStatus] = useState(initialStatus);
-  const [values, setValues] = useState<Record<keyof IntegrationSettings, string>>({
-    stripeSecretKey: "",
-    resendApiKey: "",
-    twilioAccountSid: "",
-    twilioAuthToken: "",
-  });
+  const [values, setValues] = useState<Record<keyof IntegrationSettings, string>>(EMPTY_VALUES);
+  const [visible, setVisible] = useState<Partial<Record<keyof IntegrationSettings, boolean>>>({});
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const [connectionState, setConnectionState] = useState<Record<Service, ConnectionState>>({
+    stripe: "idle",
+    resend: "idle",
+    twilio: "idle",
+  });
+  const [connectionMessage, setConnectionMessage] = useState<Partial<Record<Service, string>>>({});
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
@@ -64,12 +135,33 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
 
       const refreshed = await fetch("/api/dashboard/integration-settings");
       setStatus(await refreshed.json());
-      setValues({ stripeSecretKey: "", resendApiKey: "", twilioAccountSid: "", twilioAuthToken: "" });
+      setValues(EMPTY_VALUES);
       setSavedAt(Date.now());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore durante il salvataggio.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function testConnection(service: Service) {
+    setConnectionState((prev) => ({ ...prev, [service]: "testing" }));
+    setConnectionMessage((prev) => ({ ...prev, [service]: undefined }));
+
+    try {
+      const response = await fetch("/api/dashboard/integration-settings/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service, ...values }),
+      });
+      const data = await response.json().catch(() => null);
+      const ok = Boolean(data?.ok);
+
+      setConnectionState((prev) => ({ ...prev, [service]: ok ? "success" : "error" }));
+      setConnectionMessage((prev) => ({ ...prev, [service]: data?.message ?? "Errore durante la verifica." }));
+    } catch {
+      setConnectionState((prev) => ({ ...prev, [service]: "error" }));
+      setConnectionMessage((prev) => ({ ...prev, [service]: "Impossibile contattare RecoverPulse. Riprova." }));
     }
   }
 
@@ -86,7 +178,7 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
           <div>
             <p className="text-sm font-medium text-zinc-100">Chiavi API</p>
             <p className="mt-0.5 text-xs text-zinc-500">
-              Le tue credenziali restano private e vengono usate solo per il tuo account.
+              Salvate su Supabase e usate subito nelle chiamate API, senza toccare i file .env.
             </p>
           </div>
         </div>
@@ -98,31 +190,73 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
         )}
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-        {FIELDS.map((field) => (
-          <div key={field.id} className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <label htmlFor={field.id} className="text-sm font-medium text-zinc-300">
-                {field.label}
-              </label>
-              {status[field.id].configured && (
-                <Badge variant="outline" className="h-auto border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-emerald-500">
-                  Configurata
-                </Badge>
-              )}
+      <div className="mt-6 flex flex-col gap-6">
+        {SERVICES.map((service) => (
+          <div key={service.id} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-zinc-200">{service.name}</p>
+              <div className="flex items-center gap-2">
+                <ConnectionBadge state={connectionState[service.id]} message={connectionMessage[service.id]} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={connectionState[service.id] === "testing"}
+                  onClick={() => testConnection(service.id)}
+                >
+                  {connectionState[service.id] === "testing" ? "Verifica…" : "Testa Connessione"}
+                </Button>
+              </div>
             </div>
-            <input
-              id={field.id}
-              type="password"
-              autoComplete="off"
-              value={values[field.id]}
-              onChange={(event) =>
-                setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
-              }
-              placeholder={status[field.id].configured ? status[field.id].masked : "Non configurata"}
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-            />
-            <p className="text-xs text-zinc-500">{field.helper}</p>
+
+            {connectionMessage[service.id] && connectionState[service.id] === "error" && (
+              <p className="mt-2 text-xs text-rose-500">{connectionMessage[service.id]}</p>
+            )}
+
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {service.fields.map((field) => {
+                const isVisible = visible[field.id] ?? false;
+                return (
+                  <div key={field.id} className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <label htmlFor={field.id} className="text-sm font-medium text-zinc-300">
+                        {field.label}
+                      </label>
+                      {status[field.id].configured && (
+                        <Badge
+                          variant="outline"
+                          className="h-auto border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-emerald-500"
+                        >
+                          Configurata
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <input
+                        id={field.id}
+                        type={isVisible ? "text" : "password"}
+                        autoComplete="off"
+                        value={values[field.id]}
+                        onChange={(event) =>
+                          setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
+                        }
+                        placeholder={status[field.id].configured ? status[field.id].masked : field.placeholder}
+                        className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 pr-10 font-mono text-sm text-zinc-100 placeholder:font-sans placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setVisible((prev) => ({ ...prev, [field.id]: !isVisible }))}
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                        aria-label={isVisible ? "Nascondi chiave" : "Mostra chiave"}
+                      >
+                        {isVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-zinc-500">{field.helper}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
       </div>

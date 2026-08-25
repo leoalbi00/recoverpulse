@@ -10,6 +10,7 @@ import {
 } from "@/lib/integration-settings";
 
 const settingsSchema = z.object({
+  stripePublishableKey: z.string().optional(),
   stripeSecretKey: z.string().optional(),
   resendApiKey: z.string().optional(),
   twilioAccountSid: z.string().optional(),
@@ -22,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  const settings = getIntegrationSettings();
+  const settings = await getIntegrationSettings();
   const fields = Object.keys(settings) as (keyof IntegrationSettings)[];
 
   return NextResponse.json(
@@ -56,6 +57,11 @@ export async function PATCH(request: Request) {
     }
   }
 
-  updateIntegrationSettings(updates);
-  return NextResponse.json({ success: true });
+  try {
+    await updateIntegrationSettings(updates);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[integration-settings] errore nel salvataggio:", error);
+    return NextResponse.json({ error: "Errore durante il salvataggio su Supabase." }, { status: 500 });
+  }
 }

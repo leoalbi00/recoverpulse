@@ -1,6 +1,6 @@
 import { Activity, ShieldCheck, XCircle } from "lucide-react";
 
-import { stripe } from "@/lib/stripe";
+import { getStripeClient, getStripePublishableKey } from "@/lib/stripe";
 import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
 import { getMerchantSettings, type MerchantSettings } from "@/lib/merchant-settings";
@@ -205,6 +205,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
 
   let clientSecret: string | null;
   try {
+    const stripe = await getStripeClient();
     const setupIntent = await stripe.setupIntents.create({
       customer: transaction.customerId,
       payment_method_types: ["card"],
@@ -221,6 +222,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   }
 
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
+  const stripePublishableKey = await getStripePublishableKey();
 
   return (
     <Shell merchant={merchant}>
@@ -251,6 +253,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
         planName={transaction.planName}
         amountFormatted={amountFormatted}
         primaryColor={merchant.primaryColor}
+        stripePublishableKey={stripePublishableKey}
       />
     </Shell>
   );

@@ -2,12 +2,17 @@ import "server-only";
 import { Resend } from "resend";
 
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
+import { getIntegrationSettings } from "@/lib/integration-settings";
 import { getReadableTextColor } from "@/lib/color";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "RecoverPulse <onboarding@resend.dev>";
 
-function getResendClient(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY;
+// Usa la Resend API Key salvata da /dashboard/impostazioni su Supabase se
+// presente, altrimenti RESEND_API_KEY da env: una chiave salvata dalla
+// dashboard ha così effetto immediato sull'invio, senza toccare .env.
+async function getResendClient(): Promise<Resend | null> {
+  const settings = await getIntegrationSettings();
+  const apiKey = settings.resendApiKey || process.env.RESEND_API_KEY;
   if (!apiKey) return null;
   return new Resend(apiKey);
 }
@@ -253,9 +258,9 @@ export async function sendDunningEmail({
     return;
   }
 
-  const resend = getResendClient();
+  const resend = await getResendClient();
   if (!resend) {
-    console.warn("[email] RESEND_API_KEY non configurata: invio email di dunning saltato.");
+    console.warn("[email] Resend API Key non configurata: invio email di dunning saltato.");
     return;
   }
 

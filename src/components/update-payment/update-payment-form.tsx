@@ -19,6 +19,7 @@ type UpdatePaymentFormProps = {
   planName: string;
   amountFormatted: string;
   primaryColor: string;
+  stripePublishableKey: string;
 };
 
 function CardStep({
@@ -119,6 +120,7 @@ export function UpdatePaymentForm({
   planName,
   amountFormatted,
   primaryColor,
+  stripePublishableKey,
 }: UpdatePaymentFormProps) {
   const [success, setSuccess] = useState(false);
 
@@ -128,7 +130,7 @@ export function UpdatePaymentForm({
 
   return (
     <Elements
-      stripe={getStripe()}
+      stripe={getStripe(stripePublishableKey)}
       options={{
         clientSecret,
         appearance: {

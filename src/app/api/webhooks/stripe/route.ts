@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import { markInvoiceRecovered, recordFailedPayment } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser } from "@/lib/billing";
@@ -12,7 +12,10 @@ import { createPaymentToken } from "@/lib/tokens";
 // dunning parte comunque verso questo indirizzo di test.
 const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
 
-async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null) {
+async function resolveCustomer(
+  stripe: Stripe,
+  customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null
+) {
   if (!customerId) {
     return { id: "", name: "Gentile cliente", email: "" };
   }
@@ -44,12 +47,12 @@ function resolveSubscriptionId(invoice: Stripe.Invoice): string | null {
   return typeof subscription === "string" ? subscription : subscription.id;
 }
 
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoice) {
   console.log(
     `[stripe-webhook] invoice.payment_failed: invoice.customer_email (raw dall'evento) = "${invoice.customer_email ?? ""}"`
   );
 
-  const customer = await resolveCustomer(invoice.customer);
+  const customer = await resolveCustomer(stripe, invoice.customer);
 
   if (!customer.email) {
     console.warn(
@@ -123,6 +126,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Header stripe-signature mancante." }, { status: 400 });
   }
 
+  const stripe = await getStripeClient();
+
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
@@ -134,7 +139,7 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case "invoice.payment_failed":
-        await handleInvoicePaymentFailed(event.data.object);
+        await handleInvoicePaymentFailed(stripe, event.data.object);
         break;
       case "invoice.payment_succeeded":
         await handleInvoicePaymentSucceeded(event.data.object);

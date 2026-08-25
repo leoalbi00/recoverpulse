@@ -23,9 +23,13 @@ export default async function ImpostazioniPage() {
   const protocol = host.startsWith("localhost") ? "http" : "https";
   const webhookUrl = `${protocol}://${host}/api/webhooks/stripe`;
 
-  const settings = getIntegrationSettings();
+  const settings = await getIntegrationSettings();
   const merchantSettings = await getMerchantSettings();
   const keysStatus = {
+    stripePublishableKey: {
+      configured: settings.stripePublishableKey.length > 0,
+      masked: maskSecret(settings.stripePublishableKey),
+    },
     stripeSecretKey: {
       configured: settings.stripeSecretKey.length > 0,
       masked: maskSecret(settings.stripeSecretKey),

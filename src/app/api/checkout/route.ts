@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import { PLANS, type PlanId } from "@/lib/plans";
 
 // Se in produzione preferisci Price ID pre-creati su Stripe (per reportistica,
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
   const referer = request.headers.get("referer");
 
   try {
+    const stripe = await getStripeClient();
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 import { validatePaymentToken, markPaymentTokenUsed } from "@/lib/tokens";
 import { getTransactionByCustomerId, markInvoiceRecovered } from "@/lib/transactions";
 import { stopDunningSequence } from "@/lib/dunning";
@@ -39,6 +39,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     return NextResponse.json({ error: "setupIntentId mancante." }, { status: 400 });
   }
 
+  const stripe = await getStripeClient();
   const setupIntent = await stripe.setupIntents.retrieve(parsed.data.setupIntentId);
 
   const setupCustomerId =
