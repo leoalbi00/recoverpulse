@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { Check, Palette } from "lucide-react";
+import { useRef, useState, type DragEvent, type FormEvent } from "react";
+import { Check, Loader2, Palette, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getReadableTextColor } from "@/lib/color";
 import type { MerchantSettings } from "@/lib/merchant-settings";
+
+const ACCEPTED_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
 export function MerchantSettingsPanel({ initialSettings }: { initialSettings: MerchantSettings }) {
   const [companyName, setCompanyName] = useState(initialSettings.companyName);
@@ -17,9 +20,32 @@ export function MerchantSettingsPanel({ initialSettings }: { initialSettings: Me
   const [savedAt, setSavedAt] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const isValidColor = /^#[0-9a-fA-F]{6}$/.test(primaryColor);
   const previewColor = isValidColor ? primaryColor : "#10b981";
   const previewTextColor = getReadableTextColor(previewColor);
+
+  async function persistSettings(overrides: { logoUrl?: string } = {}) {
+    const response = await fetch("/api/dashboard/merchant-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName,
+        supportEmail,
+        primaryColor,
+        logoUrl: overrides.logoUrl ?? logoUrl,
+      }),
+    });
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(data?.error ?? "Errore durante il salvataggio.");
+    }
+  }
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
@@ -27,23 +53,63 @@ export function MerchantSettingsPanel({ initialSettings }: { initialSettings: Me
     setSaving(true);
 
     try {
-      const response = await fetch("/api/dashboard/merchant-settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyName, supportEmail, logoUrl, primaryColor }),
-      });
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.error ?? "Errore durante il salvataggio.");
-      }
-
+      await persistSettings();
       setSavedAt(Date.now());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore durante il salvataggio.");
     } finally {
       setSaving(false);
     }
+  }
+
+  async function uploadLogoFile(file: File) {
+    setUploadError(null);
+
+    if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
+      setUploadError("Formato non supportato. Usa PNG, JPG, WebP o SVG.");
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      setUploadError("Il file supera i 5MB consentiti.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/dashboard/upload-logo", { method: "POST", body: formData });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error ?? "Errore durante il caricamento del logo.");
+      }
+
+      setLogoUrl(data.url);
+      setLogoError(false);
+
+      // Il logo è già un file permanente su Supabase Storage: salviamo subito
+      // anche l'URL in merchant_settings, così l'upload ha effetto immediato
+      // senza dover per forza toccare gli altri campi del form.
+      try {
+        await persistSettings({ logoUrl: data.url });
+        setSavedAt(Date.now());
+      } catch {
+        setError("Logo caricato. Completa gli altri campi e premi \"Salva\" per applicarlo.");
+      }
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Errore durante il caricamento del logo.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) void uploadLogoFile(file);
   }
 
   return (
@@ -105,22 +171,73 @@ export function MerchantSettingsPanel({ initialSettings }: { initialSettings: Me
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label htmlFor="logoUrl" className="text-sm font-medium text-zinc-300">
-              URL Logo
-            </label>
+            <label className="text-sm font-medium text-zinc-300">Logo</label>
+
             <input
-              id="logoUrl"
-              type="url"
-              value={logoUrl}
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_LOGO_TYPES.join(",")}
+              className="hidden"
               onChange={(event) => {
-                setLogoUrl(event.target.value);
-                setLogoError(false);
+                const file = event.target.files?.[0];
+                if (file) void uploadLogoFile(file);
+                event.target.value = "";
               }}
-              placeholder="https://tuaazienda.com/logo.png"
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
+
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") fileInputRef.current?.click();
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+                isDragging
+                  ? "border-emerald-500 bg-emerald-500/5"
+                  : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
+              }`}
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="size-5 animate-spin text-emerald-500" />
+                  <p className="text-xs text-zinc-400">Caricamento in corso…</p>
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="size-5 text-zinc-500" />
+                  <p className="text-xs text-zinc-400">
+                    Trascina qui il logo o <span className="font-medium text-emerald-500">sfoglia i file</span>
+                  </p>
+                  <p className="text-[11px] text-zinc-600">PNG, JPG, WebP o SVG · max 5MB</p>
+                </>
+              )}
+            </div>
+
+            {uploadError && <p className="text-xs text-rose-500">{uploadError}</p>}
+
+            <div className="mt-1 flex items-center gap-2">
+              <span className="shrink-0 text-xs text-zinc-500">oppure URL:</span>
+              <input
+                id="logoUrl"
+                type="url"
+                value={logoUrl}
+                onChange={(event) => {
+                  setLogoUrl(event.target.value);
+                  setLogoError(false);
+                }}
+                placeholder="https://tuaazienda.com/logo.png"
+                className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
             <p className="text-xs text-zinc-500">
-              Lascia vuoto per usare il logo predefinito di RecoverPulse. Consigliato: PNG/SVG quadrato su sfondo trasparente.
+              Lascia vuoto per usare il logo predefinito di RecoverPulse. Consigliato: quadrato su sfondo trasparente.
             </p>
           </div>
 
@@ -151,7 +268,7 @@ export function MerchantSettingsPanel({ initialSettings }: { initialSettings: Me
           </div>
         </div>
 
-        {/* Live preview: aggiornata a ogni digitazione, prima ancora di salvare */}
+        {/* Live preview: aggiornata a ogni digitazione/upload, prima ancora di salvare */}
         <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
           <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">Anteprima live</p>
           <div className="mt-3 flex items-center gap-2">
