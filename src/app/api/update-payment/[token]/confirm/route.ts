@@ -13,7 +13,17 @@ const confirmSchema = z.object({
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
 
-  const paymentToken = await validatePaymentToken(token);
+  let paymentToken;
+  try {
+    paymentToken = await validatePaymentToken(token);
+  } catch (error) {
+    console.error(`[update-payment-confirm] errore nella verifica del token "${token}" su Supabase:`, error);
+    return NextResponse.json(
+      { error: "Servizio temporaneamente non disponibile. Riprova tra qualche minuto." },
+      { status: 503 }
+    );
+  }
+
   const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
