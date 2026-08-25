@@ -59,6 +59,25 @@ function InvalidLink() {
   );
 }
 
+function ConnectionError() {
+  return (
+    <Shell>
+      <div className="flex flex-col items-center gap-4 py-4 text-center">
+        <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
+          <XCircle className="size-7 text-red-400" />
+        </span>
+        <div>
+          <p className="text-lg font-semibold text-white">Servizio temporaneamente non disponibile</p>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            Non siamo riusciti a verificare questo link in questo momento. Riprova tra qualche minuto o contatta il
+            tuo fornitore se il problema persiste.
+          </p>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
 function SetupError() {
   return (
     <Shell>
@@ -132,7 +151,16 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
 
   // Il token deve esistere su Supabase, non essere già stato usato e non essere
   // scaduto: `validatePaymentToken` applica tutte e tre le condizioni nella query.
-  const paymentToken = await validatePaymentToken(token);
+  // Un errore qui (es. Supabase irraggiungibile o mal configurato in produzione)
+  // non deve far crashare la pagina con un 500: mostriamo una schermata dedicata.
+  let paymentToken;
+  try {
+    paymentToken = await validatePaymentToken(token);
+  } catch (error) {
+    console.error(`[pay-portal] errore nella verifica del token "${token}" su Supabase:`, error);
+    return <ConnectionError />;
+  }
+
   const transaction = paymentToken ? getTransactionByCustomerId(paymentToken.customerId) : null;
 
   if (!transaction) {
