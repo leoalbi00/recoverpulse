@@ -35,7 +35,7 @@ export default async function DashboardPage() {
           icon={DollarSign}
           label="Fatturato Recuperato"
           value={recoveredAmountLabel}
-          delta={`${stats.recoveredCount} di ${stats.totalCount} fatture`}
+          delta={stats.totalCount > 0 ? `${stats.recoveredCount} di ${stats.totalCount} fatture` : "Nessun dato"}
           trend={stats.recoveredAmount > 0 ? "up" : "neutral"}
         />
         <StatCard
