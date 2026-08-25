@@ -103,11 +103,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-400">
-          Demo: <span className="text-zinc-300">demo@recoverpulse.app</span> /{" "}
-          <span className="text-zinc-300">demo1234</span>
-        </p>
-
         <p className="mt-6 text-center text-sm text-zinc-400">
           Non hai un account?{" "}
           <Link href="/register" className="font-medium text-zinc-100 hover:underline">

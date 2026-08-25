@@ -1,10 +1,9 @@
-import { AlertTriangle, CreditCard, DollarSign, TrendingUp } from "lucide-react";
+import { AlertTriangle, DollarSign, TrendingUp, XCircle } from "lucide-react";
 
 import { auth } from "@/auth";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
-import { DemoDataBanner } from "@/components/dashboard/demo-data-banner";
 import { computeDashboardStats, computeRecoveryChartData, listTransactions } from "@/lib/transactions";
 
 export default async function DashboardPage() {
@@ -22,8 +21,6 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
-      {process.env.NODE_ENV !== "production" && <DemoDataBanner />}
-
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
           Bentornato, {firstName}
@@ -49,11 +46,11 @@ export default async function DashboardPage() {
           trend={stats.recoveryRate >= 50 ? "up" : stats.totalCount > 0 ? "down" : "neutral"}
         />
         <StatCard
-          icon={CreditCard}
-          label="Carte in Scadenza"
-          value="23"
-          delta="Prossimi 30 giorni"
-          trend="neutral"
+          icon={XCircle}
+          label="Pagamenti Persi"
+          value={String(stats.lostCount)}
+          delta={stats.totalCount > 0 ? `${stats.lostCount}/${stats.totalCount} fatture` : "Nessun dato"}
+          trend={stats.lostCount > 0 ? "down" : "neutral"}
         />
         <StatCard
           icon={AlertTriangle}
