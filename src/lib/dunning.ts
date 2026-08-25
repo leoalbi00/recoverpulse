@@ -1,14 +1,9 @@
 import type { FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
 import { sendDunningEmail } from "@/lib/email";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 export type { DunningChannel };
-
-// I link inviati via email devono sempre puntare al dominio di produzione,
-// indipendentemente dall'ambiente in cui gira il webhook (anche in locale).
-function getAppBaseUrl(): string {
-  return "https://recoverpulse-three.vercel.app";
-}
 
 function formatAmount(amount: number, currency: string): string {
   return new Intl.NumberFormat("it-IT", { style: "currency", currency: currency.toUpperCase() }).format(

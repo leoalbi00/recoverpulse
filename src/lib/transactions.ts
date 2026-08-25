@@ -169,6 +169,25 @@ export async function listTransactions(): Promise<FailedTransaction[]> {
   return (data ?? []).map(mapRow);
 }
 
+/**
+ * Fatture ancora in corso di recupero, usata dal cron dei solleciti
+ * (src/app/api/cron/dunning/route.ts) per valutare, fattura per fattura, se è
+ * il momento di inviare il prossimo sollecito della sequenza.
+ */
+export async function listActiveFailedTransactions(): Promise<FailedTransaction[]> {
+  const { data, error } = await supabaseAdmin
+    .from("failed_transactions")
+    .select("*")
+    .eq("status", "in_corso")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Errore nel recupero delle transazioni in corso su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapRow);
+}
+
 export type DashboardStats = {
   totalCount: number;
   recoveredCount: number;
