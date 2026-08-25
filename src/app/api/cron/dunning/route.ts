@@ -39,6 +39,7 @@ async function sendStepReminder(transaction: FailedTransaction, stepDays: number
       planName: transaction.planName,
       amountFormatted: formatAmount(transaction.amount, transaction.currency),
       recoveryLink,
+      isFinalNotice: stepDays === DUNNING_STEP_DAYS[DUNNING_STEP_DAYS.length - 1],
     });
     emailSent = true;
 

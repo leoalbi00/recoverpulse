@@ -5,6 +5,7 @@ import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
+import { SecurityBadges } from "@/components/update-payment/security-badges";
 
 const DEMO_TOKENS = ["test-token-123", "demo"];
 
@@ -25,7 +26,12 @@ function formatAmount(amount: number, currency: string) {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black px-4 py-12">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]"
+      />
+
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2">
           <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500">
@@ -33,9 +39,13 @@ function Shell({ children }: { children: React.ReactNode }) {
           </span>
           <span className="text-base font-semibold tracking-tight text-white">RecoverPulse</span>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-8">
-          {children}
+
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm">
+          <div className="h-1 w-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-500" aria-hidden />
+          <div className="p-6 sm:p-8">{children}</div>
         </div>
+
+        <SecurityBadges />
       </div>
     </main>
   );

@@ -1,29 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
+
+import { PaymentSuccessStep } from "@/components/update-payment/payment-success-step";
 
 type DemoCardFormProps = {
   planName: string;
   amountFormatted: string;
 };
-
-function SuccessStep({ planName }: { planName: string }) {
-  return (
-    <div className="flex flex-col items-center gap-4 py-6 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-emerald-400/10 ring-1 ring-emerald-400/30">
-        <CheckCircle2 className="size-7 text-emerald-400" />
-      </span>
-      <div>
-        <p className="text-lg font-semibold text-white">Carta aggiornata con successo</p>
-        <p className="mt-1.5 text-sm text-zinc-400">
-          Il pagamento è stato riaddebitato e l&apos;abbonamento <span className="text-white">{planName}</span>{" "}
-          è di nuovo attivo. Riceverai una conferma via email.
-        </p>
-      </div>
-    </div>
-  );
-}
 
 // Modulo carta interamente simulato: nessuna chiamata a Stripe.js o alle API,
 // pensato per demo/anteprima del portale 1-click senza dipendenze esterne.
@@ -35,7 +20,7 @@ export function DemoCardForm({ planName, amountFormatted }: DemoCardFormProps) {
   const [success, setSuccess] = useState(false);
 
   if (success) {
-    return <SuccessStep planName={planName} />;
+    return <PaymentSuccessStep planName={planName} amountFormatted={amountFormatted} />;
   }
 
   function handleSubmit(event: React.FormEvent) {
