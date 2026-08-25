@@ -14,13 +14,13 @@ const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.el
 
 async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null) {
   if (!customerId) {
-    return { id: "", name: "Cliente sconosciuto", email: "" };
+    return { id: "", name: "Gentile cliente", email: "" };
   }
 
   if (typeof customerId !== "string") {
     return {
       id: customerId.id,
-      name: "deleted" in customerId ? "Cliente eliminato" : (customerId.name ?? "Cliente sconosciuto"),
+      name: "deleted" in customerId ? "Cliente eliminato" : (customerId.name ?? "Gentile cliente"),
       email: "deleted" in customerId ? "" : (customerId.email ?? ""),
     };
   }
@@ -35,7 +35,7 @@ async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.Del
     `[stripe-webhook] cliente ${customer.id} risolto da Stripe: email="${customer.email ?? ""}" name="${customer.name ?? ""}"`
   );
 
-  return { id: customer.id, name: customer.name ?? "Cliente sconosciuto", email: customer.email ?? "" };
+  return { id: customer.id, name: customer.name ?? "Gentile cliente", email: customer.email ?? "" };
 }
 
 function resolveSubscriptionId(invoice: Stripe.Invoice): string | null {

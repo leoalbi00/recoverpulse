@@ -41,7 +41,7 @@ function buildDunningEmailHtml({
               <td style="padding:0 32px;">
                 <h1 style="margin:0 0 16px 0; font-size:20px; line-height:1.4; color:#18181b;">Il pagamento non è andato a buon fine</h1>
                 <p style="margin:0 0 16px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
-                  Ciao${customerName ? ` ${customerName}` : ""}, non siamo riusciti ad addebitare
+                  ${customerName && customerName !== "Gentile cliente" ? `Ciao ${customerName}` : "Gentile cliente"}, non siamo riusciti ad addebitare
                   <strong>${amountFormatted}</strong> per il piano <strong>${planName}</strong>.
                   Aggiorna il tuo metodo di pagamento per evitare l'interruzione del servizio.
                 </p>

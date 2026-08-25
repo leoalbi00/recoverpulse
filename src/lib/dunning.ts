@@ -5,7 +5,7 @@ import { sendDunningEmail } from "@/lib/email";
 export type { DunningChannel };
 
 function getAppBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  return process.env.NEXT_PUBLIC_APP_URL || "https://recoverpulse-three.vercel.app";
 }
 
 function formatAmount(amount: number, currency: string): string {
