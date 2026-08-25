@@ -7,6 +7,11 @@ import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser } from "@/lib/billing";
 import { createPaymentToken } from "@/lib/tokens";
 
+// Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
+// test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
+// dunning parte comunque verso questo indirizzo di test.
+const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
+
 async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.DeletedCustomer | null) {
   if (!customerId) {
     return { id: "", name: "Cliente sconosciuto", email: "" };
@@ -22,8 +27,13 @@ async function resolveCustomer(customerId: string | Stripe.Customer | Stripe.Del
 
   const customer = await stripe.customers.retrieve(customerId);
   if (customer.deleted) {
+    console.log(`[stripe-webhook] cliente ${customerId} risulta eliminato su Stripe: email non disponibile.`);
     return { id: customer.id, name: "Cliente eliminato", email: "" };
   }
+
+  console.log(
+    `[stripe-webhook] cliente ${customer.id} risolto da Stripe: email="${customer.email ?? ""}" name="${customer.name ?? ""}"`
+  );
 
   return { id: customer.id, name: customer.name ?? "Cliente sconosciuto", email: customer.email ?? "" };
 }
@@ -35,7 +45,19 @@ function resolveSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  console.log(
+    `[stripe-webhook] invoice.payment_failed: invoice.customer_email (raw dall'evento) = "${invoice.customer_email ?? ""}"`
+  );
+
   const customer = await resolveCustomer(invoice.customer);
+
+  if (!customer.email) {
+    console.warn(
+      `[stripe-webhook] ATTENZIONE: nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (probabile evento di test da Stripe CLI). Uso l'email di fallback "${FALLBACK_TEST_EMAIL}" invece di saltare l'invio.`
+    );
+    customer.email = FALLBACK_TEST_EMAIL;
+  }
+
   const reason =
     invoice.last_finalization_error?.message ??
     "Pagamento rifiutato dall'istituto emittente della carta.";
@@ -62,6 +84,9 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   console.log(
     `[stripe-webhook] invoice.payment_failed ricevuto per fattura ${invoiceId} (cliente ${customer.id}): token di recupero generato su Supabase, valido 7 giorni.`
+  );
+  console.log(
+    `[stripe-webhook] avvio dunning per fattura ${invoiceId}: customerEmail="${transaction.customerEmail}" paymentLinkToken=${paymentLinkToken ? "presente" : "assente"}`
   );
 
   await startDunningSequence(transaction);

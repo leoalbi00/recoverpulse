@@ -110,15 +110,40 @@ export async function sendDunningEmail({
   }
 
   const html = buildDunningEmailHtml({ customerName, planName, amountFormatted, recoveryLink });
+  const subject = `Azione richiesta: aggiorna il metodo di pagamento per ${planName}`;
 
-  const { error } = await resend.emails.send({
-    from: FROM_ADDRESS,
-    to,
-    subject: `Azione richiesta: aggiorna il metodo di pagamento per ${planName}`,
-    html,
-  });
+  console.log(
+    `[email] invio email di dunning tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+  );
 
-  if (error) {
-    throw new Error(`Errore nell'invio dell'email di dunning tramite Resend: ${error.message}`);
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error(
+        `[email] Resend ha risposto con un errore per l'invio a "${to}":`,
+        JSON.stringify(error)
+      );
+      throw new Error(`Errore nell'invio dell'email di dunning tramite Resend: ${error.message}`);
+    }
+
+    console.log(
+      `[email] email di dunning inviata con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`
+    );
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Errore nell'invio dell'email di dunning tramite Resend")) {
+      throw error;
+    }
+    console.error(`[email] eccezione imprevista durante la chiamata a Resend per "${to}":`, error);
+    throw new Error(
+      `Errore imprevisto nell'invio dell'email di dunning tramite Resend: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
