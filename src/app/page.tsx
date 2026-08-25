@@ -11,7 +11,7 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-950">
+    <div className="flex flex-1 flex-col bg-zinc-950 font-sans">
       <Navbar user={session?.user} />
       <main className="flex-1">
         <Hero />

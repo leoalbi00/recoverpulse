@@ -33,24 +33,11 @@ const STATUS_LABEL = {
 
 function DashboardMockup() {
   return (
-    <div className="relative mt-8 w-full max-w-md sm:mt-10 lg:max-w-none">
+    <div className="relative w-full max-w-md lg:max-w-none">
       <div
         aria-hidden
         className="absolute -inset-4 -z-10 rounded-[2rem] bg-emerald-500/10 blur-2xl"
       />
-
-      {/* Badge fluttuante: ancorato SOPRA la card (non sovrapposto alla lista
-          transazioni in fondo) e con una larghezza fissa così non rischia mai
-          di allargarsi fino a coprire altro contenuto a nessuna larghezza. */}
-      <div className="absolute -top-6 right-4 z-10 flex w-max max-w-[80%] items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 shadow-xl sm:-top-7 sm:right-8">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-          <TrendingUp className="size-4 text-emerald-400" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-[10px] text-zinc-500">Questo mese</p>
-          <p className="truncate text-sm font-semibold text-zinc-100">+€3.240 recuperati</p>
-        </div>
-      </div>
 
       <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-2xl shadow-black/50 backdrop-blur-sm">
         <div className="flex items-center gap-1.5 border-b border-zinc-800 bg-zinc-950/60 px-4 py-3">
@@ -106,6 +93,19 @@ function DashboardMockup() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Footer interno, nel normale flusso del documento: non è più un
+            elemento "absolute" fluttuante, quindi non può mai sovrapporsi
+            alla lista transazioni qui sopra a nessuna larghezza di schermo. */}
+        <div className="flex items-center gap-3 border-t border-zinc-800 bg-zinc-950/60 px-5 py-4">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+            <TrendingUp className="size-4 text-emerald-400" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[10px] text-zinc-500">Questo mese</p>
+            <p className="truncate text-sm font-semibold text-zinc-100">+€3.240 recuperati</p>
           </div>
         </div>
       </div>

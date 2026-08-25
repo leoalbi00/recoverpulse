@@ -39,7 +39,7 @@ export function ProblemSolution() {
           </p>
         </div>
 
-        <div className="relative mt-16 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="relative mt-16 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-16">
           <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] p-8">
             <div className="flex items-center gap-3">
               <span className="flex size-11 items-center justify-center rounded-xl bg-rose-500/10 ring-1 ring-rose-500/20">
@@ -60,11 +60,22 @@ export function ProblemSolution() {
             </ul>
           </div>
 
+          {/* Divisore "VS": in flusso normale tra le due card su mobile (dove
+              sono impilate, zero rischio di sovrapposizione), assoluto e
+              centrato via flexbox sull'intero riquadro della griglia su
+              desktop — il gap tra le colonne (lg:gap-16) è più largo del
+              cerchio (size-12) apposta, così il cerchio resta sempre
+              interamente nello spazio vuoto tra le due card, senza mai
+              invadere spunte, icone o testo di nessuna delle due. */}
           <div
             aria-hidden
-            className="absolute top-1/2 left-1/2 z-10 hidden size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-xs font-semibold text-zinc-500 lg:flex"
+            className="flex items-center gap-3 lg:absolute lg:inset-0 lg:z-10 lg:justify-center lg:gap-0"
           >
-            VS
+            <span className="h-px flex-1 bg-zinc-800 lg:hidden" />
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950 text-xs font-semibold text-zinc-500">
+              VS
+            </span>
+            <span className="h-px flex-1 bg-zinc-800 lg:hidden" />
           </div>
 
           <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-8">
