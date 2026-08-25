@@ -4,15 +4,17 @@ import { useState } from "react";
 import { Loader2, ShieldCheck } from "lucide-react";
 
 import { PaymentSuccessStep } from "@/components/update-payment/payment-success-step";
+import { getReadableTextColor } from "@/lib/color";
 
 type DemoCardFormProps = {
   planName: string;
   amountFormatted: string;
+  primaryColor: string;
 };
 
 // Modulo carta interamente simulato: nessuna chiamata a Stripe.js o alle API,
 // pensato per demo/anteprima del portale 1-click senza dipendenze esterne.
-export function DemoCardForm({ planName, amountFormatted }: DemoCardFormProps) {
+export function DemoCardForm({ planName, amountFormatted, primaryColor }: DemoCardFormProps) {
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
@@ -86,7 +88,8 @@ export function DemoCardForm({ planName, amountFormatted }: DemoCardFormProps) {
       <button
         type="submit"
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-black shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+        style={{ backgroundColor: primaryColor, color: getReadableTextColor(primaryColor) }}
+        className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? "Verifica in corso…" : `Aggiorna carta e sblocca ${planName}`}

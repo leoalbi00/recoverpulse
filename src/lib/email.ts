@@ -1,6 +1,9 @@
 import "server-only";
 import { Resend } from "resend";
 
+import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
+import { getReadableTextColor } from "@/lib/color";
+
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "RecoverPulse <onboarding@resend.dev>";
 
 function getResendClient(): Resend | null {
@@ -12,12 +15,24 @@ function getResendClient(): Resend | null {
 const FONT_STACK =
   "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
-// Marchio RecoverPulse in SVG inline (stesso tracciato dell'icona "Activity" di
-// lucide-react usata nell'app): niente immagini esterne da caricare, così il
-// logo è visibile anche con il blocco immagini attivo di default nei client email.
-const LOGO_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#052e21" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
-const SHIELD_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:5px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>`;
+// Marchio di fallback (nessun logo caricato dal merchant): stesso tracciato
+// dell'icona "Activity" di lucide-react usata nell'app, in SVG inline così è
+// visibile anche con il blocco immagini attivo di default nei client email.
+function buildLogoMarkSvg(textColor: string): string {
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${textColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+}
+
+function buildShieldSvg(color: string): string {
+  return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:5px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>`;
+}
 
 const LOCK_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:5px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 
@@ -27,17 +42,36 @@ function buildDunningEmailHtml({
   amountFormatted,
   recoveryLink,
   isFinalNotice = false,
+  companyName,
+  logoUrl,
+  primaryColor,
+  supportEmail,
 }: {
   customerName: string;
   planName: string;
   amountFormatted: string;
   recoveryLink: string;
   isFinalNotice?: boolean;
+  companyName: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  supportEmail: string;
 }): string {
   const greeting = customerName && customerName !== "Gentile cliente" ? `Ciao ${customerName}` : "Gentile cliente";
   const preheader = isFinalNotice
     ? `Ultimo avviso: rischi l'interruzione del piano ${planName}. Aggiorna la carta in 1 click.`
     : `${greeting}, aggiorna il metodo di pagamento per ${planName} in meno di un minuto.`;
+
+  const safeCompanyName = escapeHtml(companyName);
+  const ctaTextColor = getReadableTextColor(primaryColor);
+  const logoMark = logoUrl
+    ? `<img src="${escapeHtml(logoUrl)}" alt="${safeCompanyName}" width="28" height="28" style="display:block; border-radius:8px; object-fit:contain;" />`
+    : `<table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${primaryColor}; border-radius:8px;">
+                        <tr><td align="center" valign="middle">${buildLogoMarkSvg(ctaTextColor)}</td></tr>
+                      </table>`;
+  const supportLine = supportEmail
+    ? `Domande? Scrivi a <a href="mailto:${escapeHtml(supportEmail)}" style="color:#71717a;">${escapeHtml(supportEmail)}</a>.`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="it">
@@ -64,12 +98,10 @@ function buildDunningEmailHtml({
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:#34d399; border-radius:8px;">
-                        <tr><td align="center" valign="middle">${LOGO_SVG}</td></tr>
-                      </table>
+                      ${logoMark}
                     </td>
                     <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
-                      RecoverPulse
+                      ${safeCompanyName}
                     </td>
                   </tr>
                 </table>
@@ -83,7 +115,7 @@ function buildDunningEmailHtml({
 
                   <!-- Accent top bar -->
                   <tr>
-                    <td height="4" style="background-color:#10b981; background-image:linear-gradient(90deg,#34d399,#06b6d4);line-height:4px;font-size:4px;">&nbsp;</td>
+                    <td height="4" style="background-color:${primaryColor}; line-height:4px; font-size:4px;">&nbsp;</td>
                   </tr>
 
                   ${
@@ -132,10 +164,10 @@ function buildDunningEmailHtml({
                     <td style="padding:24px 32px 8px 32px;" align="center">
                       <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
-                          <td align="center" style="border-radius:10px; background-color:#10b981;">
+                          <td align="center" style="border-radius:10px; background-color:${primaryColor};">
                             <a
                               href="${recoveryLink}"
-                              style="display:block; width:100%; box-sizing:border-box; color:#022c22; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
+                              style="display:block; width:100%; box-sizing:border-box; color:${ctaTextColor}; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
                             >
                               Aggiorna metodo di pagamento →
                             </a>
@@ -150,7 +182,7 @@ function buildDunningEmailHtml({
                     <td style="padding:14px 32px 28px 32px;" align="center">
                       <table role="presentation" cellpadding="0" cellspacing="0">
                         <tr>
-                          <td style="font-size:12px; color:#71717a; padding-right:16px;">${SHIELD_SVG}Pagamento sicuro Stripe</td>
+                          <td style="font-size:12px; color:#71717a; padding-right:16px;">${buildShieldSvg(primaryColor)}Pagamento sicuro Stripe</td>
                           <td style="font-size:12px; color:#71717a;">${LOCK_SVG}Crittografia SSL 256-bit</td>
                         </tr>
                       </table>
@@ -182,7 +214,7 @@ function buildDunningEmailHtml({
             <tr>
               <td align="center" style="padding:24px 16px 0 16px;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
-                  Inviato da RecoverPulse per conto del fornitore del servizio ${planName}.
+                  Inviato da ${safeCompanyName} per conto del fornitore del servizio ${planName}.${supportLine ? ` ${supportLine}` : ""}
                 </p>
               </td>
             </tr>
@@ -227,7 +259,18 @@ export async function sendDunningEmail({
     return;
   }
 
-  const html = buildDunningEmailHtml({ customerName, planName, amountFormatted, recoveryLink, isFinalNotice });
+  const merchant = await getMerchantSettings();
+  const html = buildDunningEmailHtml({
+    customerName,
+    planName,
+    amountFormatted,
+    recoveryLink,
+    isFinalNotice,
+    companyName: merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName,
+    logoUrl: merchant.logoUrl,
+    primaryColor: merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor,
+    supportEmail: merchant.supportEmail,
+  });
   const subject = isFinalNotice
     ? `Ultimo avviso: il tuo abbonamento a ${planName} sta per essere sospeso`
     : `Azione richiesta: aggiorna il metodo di pagamento per ${planName}`;

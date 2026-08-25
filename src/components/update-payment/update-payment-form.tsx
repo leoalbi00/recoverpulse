@@ -10,6 +10,7 @@ import {
 import { Loader2, ShieldCheck, XCircle } from "lucide-react";
 
 import { getStripe } from "@/lib/stripe-client";
+import { getReadableTextColor } from "@/lib/color";
 import { PaymentSuccessStep } from "@/components/update-payment/payment-success-step";
 
 type UpdatePaymentFormProps = {
@@ -17,17 +18,20 @@ type UpdatePaymentFormProps = {
   clientSecret: string;
   planName: string;
   amountFormatted: string;
+  primaryColor: string;
 };
 
 function CardStep({
   token,
   planName,
   amountFormatted,
+  primaryColor,
   onSuccess,
 }: {
   token: string;
   planName: string;
   amountFormatted: string;
+  primaryColor: string;
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
@@ -94,7 +98,8 @@ function CardStep({
       <button
         type="submit"
         disabled={!stripe || !elementReady || submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-4 py-3.5 text-sm font-semibold text-black shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:brightness-[1.03] focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+        style={{ backgroundColor: primaryColor, color: getReadableTextColor(primaryColor) }}
+        className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? "Verifica in corso…" : `Aggiorna carta e sblocca ${planName}`}
@@ -113,6 +118,7 @@ export function UpdatePaymentForm({
   clientSecret,
   planName,
   amountFormatted,
+  primaryColor,
 }: UpdatePaymentFormProps) {
   const [success, setSuccess] = useState(false);
 
@@ -128,7 +134,7 @@ export function UpdatePaymentForm({
         appearance: {
           theme: "night",
           variables: {
-            colorPrimary: "#34d399",
+            colorPrimary: primaryColor,
             colorBackground: "#09090b",
             colorText: "#f4f4f5",
             colorTextSecondary: "#a1a1aa",
@@ -149,9 +155,8 @@ export function UpdatePaymentForm({
               backgroundColor: "rgba(255,255,255,0.05)",
             },
             ".Tab--selected": {
-              borderColor: "#34d399",
-              backgroundColor: "rgba(52,211,153,0.08)",
-              boxShadow: "0 0 0 1px #34d399",
+              borderColor: primaryColor,
+              boxShadow: `0 0 0 1px ${primaryColor}`,
             },
             ".Input": {
               border: "1px solid rgba(255,255,255,0.08)",
@@ -159,8 +164,8 @@ export function UpdatePaymentForm({
               boxShadow: "none",
             },
             ".Input:focus": {
-              border: "1px solid #34d399",
-              boxShadow: "0 0 0 1px #34d399",
+              border: `1px solid ${primaryColor}`,
+              boxShadow: `0 0 0 1px ${primaryColor}`,
             },
             ".Label": {
               color: "#a1a1aa",
@@ -174,6 +179,7 @@ export function UpdatePaymentForm({
         token={token}
         planName={planName}
         amountFormatted={amountFormatted}
+        primaryColor={primaryColor}
         onSuccess={() => setSuccess(true)}
       />
     </Elements>

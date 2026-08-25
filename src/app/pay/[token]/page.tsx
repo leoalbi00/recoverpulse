@@ -3,6 +3,8 @@ import { Activity, ShieldCheck, XCircle } from "lucide-react";
 import { stripe } from "@/lib/stripe";
 import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
+import { getMerchantSettings, type MerchantSettings } from "@/lib/merchant-settings";
+import { getReadableTextColor } from "@/lib/color";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
 import { SecurityBadges } from "@/components/update-payment/security-badges";
@@ -24,24 +26,39 @@ function formatAmount(amount: number, currency: string) {
   }).format(amount / 100);
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, merchant }: { children: React.ReactNode; merchant: MerchantSettings }) {
+  const accentTextColor = getReadableTextColor(merchant.primaryColor);
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]"
+        className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full opacity-10 blur-[120px]"
+        style={{ backgroundColor: merchant.primaryColor }}
       />
 
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500">
-            <Activity className="size-4 text-black" strokeWidth={2.5} />
-          </span>
-          <span className="text-base font-semibold tracking-tight text-white">RecoverPulse</span>
+          {merchant.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- URL arbitrario del merchant, non ottimizzabile da next/image
+            <img
+              src={merchant.logoUrl}
+              alt={merchant.companyName}
+              className="size-8 shrink-0 rounded-lg object-contain"
+            />
+          ) : (
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg"
+              style={{ backgroundColor: merchant.primaryColor }}
+            >
+              <Activity className="size-4" style={{ color: accentTextColor }} strokeWidth={2.5} />
+            </span>
+          )}
+          <span className="text-base font-semibold tracking-tight text-white">{merchant.companyName}</span>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm">
-          <div className="h-1 w-full bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-500" aria-hidden />
+          <div className="h-1 w-full" style={{ backgroundColor: merchant.primaryColor }} aria-hidden />
           <div className="p-6 sm:p-8">{children}</div>
         </div>
 
@@ -51,9 +68,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function InvalidLink() {
+function InvalidLink({ merchant }: { merchant: MerchantSettings }) {
   return (
-    <Shell>
+    <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
           <XCircle className="size-7 text-red-400" />
@@ -69,9 +86,9 @@ function InvalidLink() {
   );
 }
 
-function ConnectionError() {
+function ConnectionError({ merchant }: { merchant: MerchantSettings }) {
   return (
-    <Shell>
+    <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
           <XCircle className="size-7 text-red-400" />
@@ -88,9 +105,9 @@ function ConnectionError() {
   );
 }
 
-function SetupError() {
+function SetupError({ merchant }: { merchant: MerchantSettings }) {
   return (
-    <Shell>
+    <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
           <XCircle className="size-7 text-red-400" />
@@ -106,9 +123,9 @@ function SetupError() {
   );
 }
 
-function AlreadyRecovered({ transaction }: { transaction: FailedTransaction }) {
+function AlreadyRecovered({ transaction, merchant }: { transaction: FailedTransaction; merchant: MerchantSettings }) {
   return (
-    <Shell>
+    <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
         <span className="flex size-14 items-center justify-center rounded-full bg-emerald-400/10 ring-1 ring-emerald-400/30">
           <ShieldCheck className="size-7 text-emerald-400" />
@@ -127,12 +144,13 @@ function AlreadyRecovered({ transaction }: { transaction: FailedTransaction }) {
 
 export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[token]">) {
   const { token } = await params;
+  const merchant = await getMerchantSettings();
 
   if (DEMO_TOKENS.includes(token)) {
     const amountFormatted = formatAmount(DEMO_TRANSACTION.amount, DEMO_TRANSACTION.currency);
 
     return (
-      <Shell>
+      <Shell merchant={merchant}>
         <div className="mb-6 text-center">
           <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
             Demo · Portale 1-Click
@@ -154,7 +172,11 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
           <p className="mt-1 text-xs text-zinc-500">{DEMO_TRANSACTION.reason}</p>
         </div>
 
-        <DemoCardForm planName={DEMO_TRANSACTION.planName} amountFormatted={amountFormatted} />
+        <DemoCardForm
+          planName={DEMO_TRANSACTION.planName}
+          amountFormatted={amountFormatted}
+          primaryColor={merchant.primaryColor}
+        />
       </Shell>
     );
   }
@@ -170,15 +192,15 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     transaction = paymentToken ? await getTransactionByCustomerId(paymentToken.customerId) : null;
   } catch (error) {
     console.error(`[pay-portal] errore nella verifica del token "${token}" su Supabase:`, error);
-    return <ConnectionError />;
+    return <ConnectionError merchant={merchant} />;
   }
 
   if (!transaction) {
-    return <InvalidLink />;
+    return <InvalidLink merchant={merchant} />;
   }
 
   if (transaction.status === "recuperato") {
-    return <AlreadyRecovered transaction={transaction} />;
+    return <AlreadyRecovered transaction={transaction} merchant={merchant} />;
   }
 
   let clientSecret: string | null;
@@ -195,13 +217,13 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   }
 
   if (!clientSecret) {
-    return <SetupError />;
+    return <SetupError merchant={merchant} />;
   }
 
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
 
   return (
-    <Shell>
+    <Shell merchant={merchant}>
       <div className="mb-6 text-center">
         <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
           Aggiornamento metodo di pagamento
@@ -228,6 +250,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
         clientSecret={clientSecret}
         planName={transaction.planName}
         amountFormatted={amountFormatted}
+        primaryColor={merchant.primaryColor}
       />
     </Shell>
   );

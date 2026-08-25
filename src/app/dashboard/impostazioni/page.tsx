@@ -5,9 +5,11 @@ import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
 import { CopyField } from "@/components/dashboard/copy-field";
 import { IntegrationKeysPanel } from "@/components/dashboard/integration-keys-panel";
+import { MerchantSettingsPanel } from "@/components/dashboard/merchant-settings-panel";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { PlanButton } from "@/components/billing/plan-button";
 import { getIntegrationSettings, maskSecret } from "@/lib/integration-settings";
+import { getMerchantSettings } from "@/lib/merchant-settings";
 import { getStripeCustomerForUser } from "@/lib/billing";
 import { PLANS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,7 @@ export default async function ImpostazioniPage() {
   const webhookUrl = `${protocol}://${host}/api/webhooks/stripe`;
 
   const settings = getIntegrationSettings();
+  const merchantSettings = await getMerchantSettings();
   const keysStatus = {
     stripeSecretKey: {
       configured: settings.stripeSecretKey.length > 0,
@@ -55,6 +58,16 @@ export default async function ImpostazioniPage() {
       </div>
 
       <section className="mt-8">
+        <h2 className="text-sm font-medium text-zinc-300">Brand &amp; Personalizzazione</h2>
+        <p className="mt-1 text-xs text-zinc-500">
+          Nome azienda, logo e colore mostrati nelle email di sollecito e nel portale di aggiornamento carta.
+        </p>
+        <div className="mt-3">
+          <MerchantSettingsPanel initialSettings={merchantSettings} />
+        </div>
+      </section>
+
+      <section className="mt-10">
         <h2 className="text-sm font-medium text-zinc-300">Webhook Stripe</h2>
         <p className="mt-1 text-xs text-zinc-500">
           Incolla questo URL in Stripe (Sviluppatori → Webhook) e seleziona gli eventi elencati sotto.
