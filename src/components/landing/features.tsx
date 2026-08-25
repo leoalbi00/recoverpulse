@@ -1,4 +1,4 @@
-import { Link2, MessageCircle, TrendingUp, type LucideIcon } from "lucide-react";
+import { BarChart3, Palette, Workflow, Zap, type LucideIcon } from "lucide-react";
 
 import {
   Card,
@@ -18,35 +18,46 @@ type Feature = {
 
 const FEATURES: Feature[] = [
   {
-    icon: MessageCircle,
-    title: "Notifiche WhatsApp Business",
+    icon: Workflow,
+    title: "Sequenze Automatizzate",
     description:
-      "Raggiungi i tuoi clienti dove rispondono davvero: solleciti automatici su WhatsApp Business non appena un pagamento fallisce, con tassi di apertura molto più alti dell'email.",
+      "Ogni pagamento fallito attiva in automatico una sequenza dunning multi-canale su WhatsApp, SMS ed Email, con i tempi di invio che decidi tu.",
     points: [
       "Invio automatico su fattura fallita",
-      "Modelli di messaggio pre-approvati",
-      "Fallback automatico su SMS ed Email",
+      "Fallback tra i canali configurabile",
+      "Nessun intervento manuale richiesto",
     ],
   },
   {
-    icon: Link2,
-    title: "Link 1-Click tokenizzati",
+    icon: Palette,
+    title: "Portale White-Label",
     description:
-      "Ogni sollecito include un link sicuro e monouso al portale di aggiornamento carta: nessun login, nessun attrito, carta aggiornata in pochi secondi.",
+      "Il portale 1-click di aggiornamento carta e le email di sollecito mostrano il tuo logo, il nome della tua azienda e il tuo colore di brand, non il nostro.",
     points: [
-      "Token univoco per ogni fattura",
-      "Nessun login richiesto al cliente",
-      "Pagamento elaborato in sicurezza da Stripe",
+      "Logo e colori personalizzabili in dashboard",
+      "Upload diretto del logo via drag & drop",
+      "Anteprima live prima di pubblicare",
     ],
   },
   {
-    icon: TrendingUp,
-    title: "Analytics MRR in tempo reale",
+    icon: Zap,
+    title: "Integrazione Stripe No-Code",
     description:
-      "Fatturato recuperato, tasso di recupero e MRR salvato in un'unica dashboard aggiornata in tempo reale via webhook Stripe, senza fogli di calcolo.",
+      "Incolla le tue chiavi API da Impostazioni e sei operativo: nessun deploy, nessuna riga di codice, nessun file .env da modificare.",
+    points: [
+      "Chiavi salvate in modo sicuro su Supabase",
+      "Test di connessione in tempo reale",
+      "Attivo su tutte le chiamate in pochi secondi",
+    ],
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics in Tempo Reale",
+    description:
+      "Fatturato recuperato, tasso di recupero e pagamenti in corso in un'unica dashboard aggiornata via webhook Stripe, senza fogli di calcolo.",
     points: [
       "Fatturato recuperato in tempo reale",
-      "Tasso di recupero per canale",
+      "Tasso di recupero e pagamenti attivi",
       "Aggiornata automaticamente via webhook",
     ],
   },
@@ -72,7 +83,7 @@ export function Features() {
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2">
           {FEATURES.map((feature) => (
             <Card
               key={feature.title}

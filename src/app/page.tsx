@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { Navbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
+import { ProblemSolution } from "@/components/landing/problem-solution";
 import { Features } from "@/components/landing/features";
+import { RoiCalculator } from "@/components/landing/roi-calculator";
 import { Pricing } from "@/components/landing/pricing";
 import { Footer } from "@/components/landing/footer";
 
@@ -13,7 +15,9 @@ export default async function Home() {
       <Navbar user={session?.user} />
       <main className="flex-1">
         <Hero />
+        <ProblemSolution />
         <Features />
+        <RoiCalculator />
         <Pricing />
       </main>
       <Footer />

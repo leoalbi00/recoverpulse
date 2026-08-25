@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { label: "Caratteristiche", href: "#features" },
+  { label: "Calcola ROI", href: "#roi-calculator" },
   { label: "Prezzi", href: "#pricing" },
 ];
 
