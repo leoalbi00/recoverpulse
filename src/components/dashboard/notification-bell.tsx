@@ -109,11 +109,16 @@ export function NotificationBell() {
         className="relative flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
-        {unreadCount > 0 && <span className="absolute top-1 right-1 size-2.5 animate-pulse rounded-full bg-red-500" />}
+        {unreadCount > 0 && (
+          <span
+            className="absolute top-1 right-1 size-2.5 animate-pulse rounded-full bg-rose-500"
+            style={{ boxShadow: "0 0 8px rgba(244,63,94,0.8)" }}
+          />
+        )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-800 bg-[#0c0c0e] opacity-100 shadow-xl shadow-black/60 sm:w-96">
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-700/60 bg-[#0c0c0e] opacity-100 shadow-2xl shadow-black/90 sm:w-96">
           <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
             <p className="text-sm font-semibold text-zinc-100">Notifiche</p>
             {unreadCount > 0 && (
@@ -141,17 +146,22 @@ export function NotificationBell() {
                     type="button"
                     onClick={() => !notification.read && markAsRead(notification.id)}
                     className={cn(
-                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-800/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-800/40",
+                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-800/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-800/50",
                       notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
                     )}
                   >
                     <NotificationTypeIcon type={notification.type} />
                     <div className="min-w-0 flex-1">
                       <span className="text-xs font-medium text-zinc-400">{style.label}</span>
-                      <p className={cn("mt-0.5 text-sm", notification.read ? "text-zinc-400" : "text-zinc-100")}>
+                      <p
+                        className={cn(
+                          "mt-0.5 text-sm",
+                          notification.read ? "text-zinc-400" : "font-semibold text-white"
+                        )}
+                      >
                         {notification.message}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">{formatRelativeTime(notification.createdAt)}</p>
+                      <p className="mt-1 text-xs text-zinc-400">{formatRelativeTime(notification.createdAt)}</p>
                     </div>
                   </button>
                 );

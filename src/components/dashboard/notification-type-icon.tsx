@@ -15,10 +15,8 @@ export function NotificationTypeIcon({
   const Icon = style.Icon;
 
   return (
-    <span
-      className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", style.iconBoxClass, className)}
-    >
-      <Icon className={cn("size-3.5", style.iconClass, iconClassName)} />
+    <span className={cn("flex shrink-0 items-center justify-center rounded-lg p-2", style.iconBoxClass, className)}>
+      <Icon className={cn("size-4", style.iconClass, iconClassName)} />
     </span>
   );
 }

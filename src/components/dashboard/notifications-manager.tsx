@@ -248,7 +248,7 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
                 <li
                   key={notification.id}
                   className={cn(
-                    "flex items-start gap-4 border-l-4 px-5 py-4",
+                    "flex items-start gap-4 border-l-4 px-5 py-4 transition-colors hover:bg-zinc-800/50",
                     notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
                   )}
                 >
@@ -275,10 +275,15 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
                       </Badge>
                       {isLead && <span className="text-[11px] text-indigo-400">Vedi dettagli →</span>}
                     </div>
-                    <p className={cn("mt-1 text-sm", notification.read ? "text-zinc-400" : "text-zinc-100")}>
+                    <p
+                      className={cn(
+                        "mt-1 text-sm",
+                        notification.read ? "text-zinc-400" : "font-semibold text-white"
+                      )}
+                    >
                       {notification.message}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-500">{formatDateTime(notification.createdAt)}</p>
+                    <p className="mt-1 text-xs text-zinc-400">{formatDateTime(notification.createdAt)}</p>
                   </button>
 
                   <div className="flex shrink-0 items-center gap-1">
@@ -339,7 +344,7 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6 shadow-2xl shadow-black/60"
+        className="relative w-full max-w-md rounded-xl border border-zinc-700/60 bg-[#0c0c0e] p-6 shadow-2xl shadow-black/90"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -352,7 +357,7 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-200"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-800/80 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
             aria-label="Chiudi"
           >
             <X className="size-4" />

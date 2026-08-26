@@ -16,23 +16,23 @@ export type NotificationStyle = {
   dotClass: string;
 };
 
-// Avvisi/pagamenti falliti -> rosso, recuperi -> verde, lead -> indaco:
+// Sistema/pagamenti falliti -> rosa acceso, recuperi -> verde, lead -> indaco:
 // stesso codice colore ovunque una notifica compaia (campanella, pagina
 // /dashboard/notifiche, modale di dettaglio lead).
 export const NOTIFICATION_STYLES: Record<NotificationType, NotificationStyle> = {
   warning: {
     label: "Avviso",
     Icon: AlertTriangle,
-    iconBoxClass: "bg-red-500/15 ring-1 ring-red-500/30",
-    iconClass: "text-red-400",
-    borderClass: "border-l-red-500",
-    tintClass: "bg-red-950/30",
-    dotClass: "bg-red-500",
+    iconBoxClass: "bg-rose-500/20 ring-1 ring-rose-500/40",
+    iconClass: "text-rose-400",
+    borderClass: "border-l-rose-500",
+    tintClass: "bg-rose-950/20",
+    dotClass: "bg-rose-500",
   },
   recovery: {
     label: "Recupero",
     Icon: CheckCircle2,
-    iconBoxClass: "bg-emerald-500/15 ring-1 ring-emerald-500/30",
+    iconBoxClass: "bg-emerald-500/20 ring-1 ring-emerald-500/40",
     iconClass: "text-emerald-400",
     borderClass: "border-l-emerald-500",
     tintClass: "bg-emerald-950/20",
@@ -41,7 +41,7 @@ export const NOTIFICATION_STYLES: Record<NotificationType, NotificationStyle> = 
   lead: {
     label: "Nuovo Lead",
     Icon: UserPlus,
-    iconBoxClass: "bg-indigo-500/15 ring-1 ring-indigo-500/30",
+    iconBoxClass: "bg-indigo-500/20 ring-1 ring-indigo-500/40",
     iconClass: "text-indigo-400",
     borderClass: "border-l-indigo-500",
     tintClass: "bg-indigo-950/20",
