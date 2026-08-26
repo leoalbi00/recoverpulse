@@ -100,6 +100,13 @@ export function NotificationBell() {
     }
   }
 
+  // Il tipo Notification espone solo `read` (l'unica colonna DB è `is_read`,
+  // già normalizzata in `read` da src/lib/notifications.ts). Il controllo su
+  // `n.is_read` è quindi sempre un no-op innocuo (mai vero), mantenuto come
+  // fallback ridondante esplicitamente richiesto senza cast a `any`.
+  const hasUnread =
+    unreadCount > 0 || notifications.some((n) => n.read === false || (n as { is_read?: boolean }).is_read === false);
+
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -109,7 +116,7 @@ export function NotificationBell() {
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
-        {(unreadCount > 0 || notifications.some((n) => !n.read)) && (
+        {hasUnread && (
           <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-zinc-950" />
         )}
       </button>
