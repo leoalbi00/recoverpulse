@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, UserPlus, type LucideIcon } from "lucide-react";
+import { AlertTriangle, CheckCircle2, UserPlus, type LucideIcon } from "lucide-react";
 
 import type { NotificationType } from "@/lib/notifications";
 
@@ -31,7 +31,7 @@ export const NOTIFICATION_STYLES: Record<NotificationType, NotificationStyle> = 
   },
   recovery: {
     label: "Recupero",
-    Icon: CheckCircle,
+    Icon: CheckCircle2,
     iconBoxClass: "bg-emerald-500/15 ring-1 ring-emerald-500/30",
     iconClass: "text-emerald-400",
     borderClass: "border-l-emerald-500",

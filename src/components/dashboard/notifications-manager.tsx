@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, Trash2, X, Zap } from "lucide-react";
+import { Check, Layers, Loader2, Trash2, X, Zap, type LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,21 @@ import type { Notification, NotificationType } from "@/lib/notifications";
 
 type CategoryFilter = "all" | NotificationType;
 
-const CATEGORIES: { value: CategoryFilter; label: string; dotClass?: string }[] = [
-  { value: "all", label: "Tutte" },
-  { value: "lead", label: "Lead", dotClass: NOTIFICATION_STYLES.lead.dotClass },
-  { value: "recovery", label: "Recuperi", dotClass: NOTIFICATION_STYLES.recovery.dotClass },
-  { value: "warning", label: "Sistema", dotClass: NOTIFICATION_STYLES.warning.dotClass },
+const CATEGORIES: { value: CategoryFilter; label: string; Icon: LucideIcon; iconClass: string }[] = [
+  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-400" },
+  { value: "lead", label: "Lead", Icon: NOTIFICATION_STYLES.lead.Icon, iconClass: NOTIFICATION_STYLES.lead.iconClass },
+  {
+    value: "recovery",
+    label: "Recuperi",
+    Icon: NOTIFICATION_STYLES.recovery.Icon,
+    iconClass: NOTIFICATION_STYLES.recovery.iconClass,
+  },
+  {
+    value: "warning",
+    label: "Sistema",
+    Icon: NOTIFICATION_STYLES.warning.Icon,
+    iconClass: NOTIFICATION_STYLES.warning.iconClass,
+  },
 ];
 
 type LeadMetadata = {
@@ -202,13 +212,13 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
               type="button"
               onClick={() => setCategory(item.value)}
               className={cn(
-                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-                  : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100"
+                  ? "border-zinc-700 bg-zinc-800/80 text-zinc-100"
+                  : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-100"
               )}
             >
-              {item.dotClass && <span className={cn("size-2 shrink-0 rounded-full", item.dotClass)} />}
+              <item.Icon className={cn("size-3.5 shrink-0", item.iconClass)} />
               {item.label}
             </button>
           ))}
@@ -324,12 +334,12 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-black/40"
+        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl shadow-black/60"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
