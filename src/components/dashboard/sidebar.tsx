@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -113,14 +114,17 @@ export function DashboardSidebar({ user }: SidebarProps) {
             RecoverPulse
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
-          aria-label="Apri menu"
-        >
-          <Menu className="size-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
+            aria-label="Apri menu"
+          >
+            <Menu className="size-5" />
+          </button>
+        </div>
       </header>
 
       {open && (

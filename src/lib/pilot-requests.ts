@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createNotification } from "@/lib/notifications";
 
 export async function createPilotRequest(input: {
   name: string;
@@ -19,5 +20,17 @@ export async function createPilotRequest(input: {
 
   if (error) {
     throw new Error(`Errore nel salvataggio della richiesta pilota su Supabase: ${error.message}`);
+  }
+
+  // La notifica in-app è un effetto collaterale: se fallisce non deve far
+  // fallire la richiesta pilota, già salvata con successo qui sopra.
+  try {
+    await createNotification({
+      type: "lead",
+      title: "Nuovo lead pilota",
+      message: `Nuova richiesta pilota da ${input.company}`,
+    });
+  } catch (notificationError) {
+    console.error("[pilot-requests] errore nella creazione della notifica:", notificationError);
   }
 }
