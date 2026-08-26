@@ -20,7 +20,7 @@ export function PaymentSuccessStep({ planName, amountFormatted }: PaymentSuccess
       </span>
 
       <div>
-        <p className="text-xl font-semibold tracking-tight text-white">Carta aggiornata con successo</p>
+        <p className="text-xl font-semibold tracking-tight text-white">Pagamento effettuato con successo!</p>
         <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-zinc-400">
           Il pagamento{amountFormatted ? ` di ${amountFormatted}` : ""} è stato riaddebitato e l&apos;abbonamento{" "}
           <span className="font-medium text-white">{planName}</span> è di nuovo attivo.

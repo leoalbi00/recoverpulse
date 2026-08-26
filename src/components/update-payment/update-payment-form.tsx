@@ -24,13 +24,11 @@ type UpdatePaymentFormProps = {
 
 function CardStep({
   token,
-  planName,
   amountFormatted,
   primaryColor,
   onSuccess,
 }: {
   token: string;
-  planName: string;
   amountFormatted: string;
   primaryColor: string;
   onSuccess: () => void;
@@ -103,12 +101,12 @@ function CardStep({
         className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
-        {submitting ? "Verifica in corso…" : `Aggiorna carta e sblocca ${planName}`}
+        {submitting ? "Verifica in corso…" : `Paga e Aggiorna Carta (${amountFormatted})`}
       </button>
 
       <p className="flex items-center justify-center gap-1.5 text-xs text-zinc-500">
         <ShieldCheck className="size-3.5" />
-        Pagamento elaborato in modo sicuro da Stripe · {amountFormatted}
+        I tuoi dati sono elaborati in modo sicuro da Stripe
       </p>
     </form>
   );
@@ -179,7 +177,6 @@ export function UpdatePaymentForm({
     >
       <CardStep
         token={token}
-        planName={planName}
         amountFormatted={amountFormatted}
         primaryColor={primaryColor}
         onSuccess={() => setSuccess(true)}
