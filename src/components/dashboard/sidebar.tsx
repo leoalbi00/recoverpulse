@@ -9,6 +9,7 @@ import {
   Bell,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   MessagesSquare,
   Receipt,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Notifiche", href: "/dashboard/notifiche", icon: Bell },
   { label: "Sequenze Dunning", href: "/dashboard/sequenze", icon: MessagesSquare },
+  { label: "Modelli Email", href: "/dashboard/dunning", icon: Mail },
   { label: "Transazioni", href: "/dashboard/transazioni", icon: Receipt },
   { label: "Impostazioni", href: "/dashboard/impostazioni", icon: Settings },
 ];
