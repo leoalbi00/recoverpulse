@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 import { getStripeClient } from "@/lib/stripe";
-import { markInvoiceRecovered, recordFailedPayment, type FailedTransaction } from "@/lib/transactions";
+import { markInvoiceRecovered, recordFailedPayment } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser } from "@/lib/billing";
 import { createPaymentToken } from "@/lib/tokens";
-import { createNotification } from "@/lib/notifications";
+import { notifyPaymentRecovered } from "@/lib/notifications";
 
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
@@ -94,23 +94,6 @@ async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoic
   );
 
   await startDunningSequence(transaction);
-}
-
-async function notifyPaymentRecovered(transaction: FailedTransaction) {
-  const amountLabel = new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: transaction.currency.toUpperCase(),
-  }).format(transaction.amount / 100);
-
-  try {
-    await createNotification({
-      type: "recovery",
-      title: "Pagamento recuperato",
-      message: `Recuperati ${amountLabel} da ${transaction.customerName}`,
-    });
-  } catch (error) {
-    console.error("[stripe-webhook] errore nella creazione della notifica di recupero:", error);
-  }
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {

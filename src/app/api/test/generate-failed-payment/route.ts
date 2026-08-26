@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { recordFailedPayment } from "@/lib/transactions";
 import { createPaymentToken } from "@/lib/tokens";
 import { getAppBaseUrl } from "@/lib/app-url";
+import { createNotification } from "@/lib/notifications";
 
 // Endpoint temporaneo per generare rapidamente un pagamento fallito di prova
 // (cliente "TechCorp", €199, status "in_corso") e il relativo link del
@@ -38,6 +39,26 @@ export async function POST() {
     });
 
     const portalUrl = `${getAppBaseUrl()}/pay/${paymentLinkToken}`;
+
+    const amountLabel = new Intl.NumberFormat("it-IT", {
+      style: "currency",
+      currency: transaction.currency.toUpperCase(),
+    }).format(transaction.amount / 100);
+
+    // La notifica in-app è un effetto collaterale: se fallisce non deve far
+    // fallire la generazione della transazione di test, già salvata sopra.
+    try {
+      await createNotification({
+        type: "warning",
+        title: "Nuovo pagamento fallito",
+        message: `Nuovo pagamento fallito intercettato: ${transaction.customerName} - ${amountLabel}`,
+      });
+    } catch (notificationError) {
+      console.error(
+        "[test/generate-failed-payment] errore nella creazione della notifica di avviso:",
+        notificationError
+      );
+    }
 
     return NextResponse.json({ success: true, transaction, portalUrl });
   } catch (error) {

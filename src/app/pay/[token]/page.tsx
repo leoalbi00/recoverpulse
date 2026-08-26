@@ -1,12 +1,14 @@
 import { Activity, ShieldCheck, XCircle } from "lucide-react";
 
-import { getStripeClient, getStripePublishableKey } from "@/lib/stripe";
+import { getStripePublishableKey } from "@/lib/stripe";
 import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
 import { getMerchantSettings, type MerchantSettings } from "@/lib/merchant-settings";
 import { getReadableTextColor } from "@/lib/color";
+import { tryCreateSetupIntent } from "@/lib/payment-portal";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
+import { SimulatedPaymentForm } from "@/components/update-payment/simulated-payment-form";
 import { SecurityBadges } from "@/components/update-payment/security-badges";
 
 const DEMO_TOKENS = ["test-token-123", "demo"];
@@ -105,24 +107,6 @@ function ConnectionError({ merchant }: { merchant: MerchantSettings }) {
   );
 }
 
-function SetupError({ merchant }: { merchant: MerchantSettings }) {
-  return (
-    <Shell merchant={merchant}>
-      <div className="flex flex-col items-center gap-4 py-4 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
-          <XCircle className="size-7 text-red-400" />
-        </span>
-        <div>
-          <p className="text-lg font-semibold text-white">Impossibile avviare l&apos;aggiornamento</p>
-          <p className="mt-1.5 text-sm text-zinc-400">
-            Si è verificato un problema nel comunicare con Stripe. Riprova più tardi o contatta il tuo fornitore.
-          </p>
-        </div>
-      </div>
-    </Shell>
-  );
-}
-
 function AlreadyRecovered({ transaction, merchant }: { transaction: FailedTransaction; merchant: MerchantSettings }) {
   return (
     <Shell merchant={merchant}>
@@ -203,25 +187,47 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return <AlreadyRecovered transaction={transaction} merchant={merchant} />;
   }
 
-  let clientSecret: string | null;
-  try {
-    const stripe = await getStripeClient();
-    const setupIntent = await stripe.setupIntents.create({
-      customer: transaction.customerId,
-      payment_method_types: ["card"],
-      usage: "off_session",
-    });
-    clientSecret = setupIntent.client_secret;
-  } catch (error) {
-    console.error("Errore creazione SetupIntent Stripe:", error);
-    clientSecret = null;
-  }
-
-  if (!clientSecret) {
-    return <SetupError merchant={merchant} />;
-  }
-
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
+  const clientSecret = await tryCreateSetupIntent(transaction);
+
+  // Nessun vero SetupIntent Stripe ottenibile: transazione di test generata
+  // da /api/test/generate-failed-payment (customer Stripe inesistente) o
+  // chiavi Stripe mancanti/non valide. Invece di bloccare l'utente su un
+  // errore Stripe, il portale entra in modalità "Simulazione".
+  if (!clientSecret) {
+    return (
+      <Shell merchant={merchant}>
+        <div className="mb-6 text-center">
+          <p className="text-xs font-medium tracking-wide text-amber-400 uppercase">
+            Modalità Simulazione
+          </p>
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            Riattiva il tuo abbonamento
+          </h1>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            Ciao {transaction.customerName}, per questa transazione non è disponibile un vero addebito Stripe: usa
+            la conferma simulata per proseguire il test del flusso di recupero.
+          </p>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-zinc-400">{transaction.planName}</p>
+            <p className="text-sm font-semibold text-white">{amountFormatted}</p>
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">{transaction.reason}</p>
+        </div>
+
+        <SimulatedPaymentForm
+          token={token}
+          planName={transaction.planName}
+          amountFormatted={amountFormatted}
+          primaryColor={merchant.primaryColor}
+        />
+      </Shell>
+    );
+  }
+
   const stripePublishableKey = await getStripePublishableKey();
 
   return (

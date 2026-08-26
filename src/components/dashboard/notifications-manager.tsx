@@ -324,9 +324,14 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-zinc-950/70" onClick={onClose} aria-hidden />
-      <div className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-black/40">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-black/40"
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium text-blue-400">🔵 Nuovo Lead</p>

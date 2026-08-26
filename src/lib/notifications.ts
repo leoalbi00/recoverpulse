@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { FailedTransaction } from "@/lib/transactions";
 
 export type NotificationType = "lead" | "recovery" | "warning";
 
@@ -103,5 +104,29 @@ export async function deleteNotification(id: string): Promise<void> {
 
   if (error) {
     throw new Error(`Errore nell'eliminazione della notifica su Supabase: ${error.message}`);
+  }
+}
+
+/**
+ * Notifica 'recovery' condivisa dai due percorsi che possono segnare una
+ * fattura come recuperata: il webhook Stripe (invoice.payment_succeeded) e la
+ * conferma simulata del portale /pay/[token] per le transazioni di test.
+ * Non propaga errori: una notifica mancante non deve far fallire il flusso
+ * di recupero, già andato a buon fine quando questa funzione viene chiamata.
+ */
+export async function notifyPaymentRecovered(transaction: FailedTransaction): Promise<void> {
+  const amountLabel = new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: transaction.currency.toUpperCase(),
+  }).format(transaction.amount / 100);
+
+  try {
+    await createNotification({
+      type: "recovery",
+      title: "Pagamento recuperato",
+      message: `Recuperati ${amountLabel} da ${transaction.customerName}`,
+    });
+  } catch (error) {
+    console.error("[notifications] errore nella creazione della notifica di recupero:", error);
   }
 }

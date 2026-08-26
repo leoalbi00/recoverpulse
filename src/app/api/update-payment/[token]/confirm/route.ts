@@ -5,10 +5,13 @@ import { getStripeClient } from "@/lib/stripe";
 import { validatePaymentToken, markPaymentTokenUsed } from "@/lib/tokens";
 import { getTransactionByCustomerId, markInvoiceRecovered } from "@/lib/transactions";
 import { stopDunningSequence } from "@/lib/dunning";
+import { notifyPaymentRecovered } from "@/lib/notifications";
+import { tryCreateSetupIntent } from "@/lib/payment-portal";
 
-const confirmSchema = z.object({
-  setupIntentId: z.string().min(1),
-});
+const confirmSchema = z.union([
+  z.object({ setupIntentId: z.string().min(1) }),
+  z.object({ simulate: z.literal(true) }),
+]);
 
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
@@ -36,7 +39,32 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   const body = await request.json().catch(() => null);
   const parsed = confirmSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "setupIntentId mancante." }, { status: 400 });
+    return NextResponse.json({ error: "Dati mancanti." }, { status: 400 });
+  }
+
+  if ("simulate" in parsed.data) {
+    // Consentita solo se un vero SetupIntent Stripe non è comunque ottenibile
+    // per questa transazione (stessa verifica che la pagina /pay/[token] fa
+    // per decidere se mostrare il form reale o quello simulato): impedisce di
+    // usare la conferma simulata per saltare la verifica reale della carta su
+    // una transazione per cui Stripe funziona correttamente.
+    const realClientSecret = await tryCreateSetupIntent(transaction);
+    if (realClientSecret) {
+      return NextResponse.json(
+        { error: "Stripe è disponibile per questa transazione: usa il modulo di pagamento reale." },
+        { status: 409 }
+      );
+    }
+
+    await markPaymentTokenUsed(token);
+
+    const updated = await markInvoiceRecovered(transaction.invoiceId);
+    if (updated) {
+      await stopDunningSequence(updated);
+      await notifyPaymentRecovered(updated);
+    }
+
+    return NextResponse.json({ success: true, planName: transaction.planName, simulated: true });
   }
 
   const stripe = await getStripeClient();
