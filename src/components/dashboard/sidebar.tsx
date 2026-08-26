@@ -132,7 +132,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-zinc-950/70"
+            className="absolute inset-0 bg-black/90"
             onClick={() => setOpen(false)}
             aria-hidden
           />
