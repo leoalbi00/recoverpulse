@@ -12,11 +12,11 @@ import type { Notification, NotificationType } from "@/lib/notifications";
 
 type CategoryFilter = "all" | NotificationType;
 
-const CATEGORIES: { value: CategoryFilter; label: string; emoji?: string }[] = [
+const CATEGORIES: { value: CategoryFilter; label: string; dotClass?: string }[] = [
   { value: "all", label: "Tutte" },
-  { value: "lead", label: "Lead", emoji: "🔵" },
-  { value: "recovery", label: "Recuperi", emoji: "🟢" },
-  { value: "warning", label: "Sistema", emoji: "⚠️" },
+  { value: "lead", label: "Lead", dotClass: "bg-blue-500" },
+  { value: "recovery", label: "Recuperi", dotClass: "bg-emerald-500" },
+  { value: "warning", label: "Sistema", dotClass: "bg-amber-400" },
 ];
 
 const TYPE_CONFIG: Record<NotificationType, { emoji: string; label: string }> = {
@@ -156,42 +156,49 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-5 shadow-xl shadow-black/20 backdrop-blur-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-col gap-8">
+      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">
               <Zap className="size-4 text-amber-400" />
             </span>
             <div>
               <p className="text-sm font-medium text-zinc-100">Simula Pagamento Fallito</p>
-              <p className="text-xs text-zinc-500">
+              <p className="mt-0.5 text-xs text-zinc-500">
                 Genera una fattura di test (TechCorp, €199) e il link al portale di recupero.
               </p>
             </div>
           </div>
-          <Button type="button" variant="outline" size="sm" disabled={simulating} onClick={simulateFailedPayment}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={simulating}
+            onClick={simulateFailedPayment}
+            className="w-full shrink-0 sm:w-auto"
+          >
             {simulating ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
             {simulating ? "Generazione…" : "Simula Pagamento Fallito"}
           </Button>
         </div>
 
-        {simulateError && <p className="mt-3 text-xs text-rose-500">{simulateError}</p>}
+        {simulateError && <p className="mt-4 text-xs text-rose-500">{simulateError}</p>}
 
         {simulateResult && (
-          <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
+          <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
             <p className="text-xs text-zinc-400">
               Transazione creata per <span className="text-zinc-200">{simulateResult.customerName}</span> ·{" "}
               {simulateResult.amountLabel}
             </p>
-            <div className="mt-2">
+            <div className="mt-2.5">
               <CopyField value={simulateResult.portalUrl} />
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((item) => (
             <button
@@ -199,20 +206,20 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
               type="button"
               onClick={() => setCategory(item.value)}
               className={cn(
-                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
                   : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-100"
               )}
             >
-              {item.emoji && <span>{item.emoji}</span>}
+              {item.dotClass && <span className={cn("size-2 shrink-0 rounded-full", item.dotClass)} />}
               {item.label}
             </button>
           ))}
         </div>
 
         {unreadCount > 0 && (
-          <Button type="button" variant="ghost" size="sm" onClick={markAllAsRead}>
+          <Button type="button" variant="ghost" size="sm" onClick={markAllAsRead} className="self-start sm:self-auto">
             <Check className="size-3.5" />
             Segna tutte come lette
           </Button>

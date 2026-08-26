@@ -15,7 +15,7 @@ export default async function NotifichePage() {
         </p>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-10">
         <NotificationsManager initialNotifications={notifications} />
       </div>
     </main>

@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 
+import { auth } from "@/auth";
 import { recordFailedPayment } from "@/lib/transactions";
 import { createPaymentToken } from "@/lib/tokens";
 import { getAppBaseUrl } from "@/lib/app-url";
 
 // Endpoint temporaneo per generare rapidamente un pagamento fallito di prova
 // (cliente "TechCorp", €199, status "in_corso") e il relativo link del
-// portale 1-click, senza dover passare da un evento Stripe reale. Disabilitato
-// in produzione: da rimuovere una volta completati i test manuali.
+// portale 1-click, senza dover passare da un evento Stripe reale. Abilitato
+// anche in produzione per il test E2E guidato del flusso di recupero, ma
+// protetto da sessione autenticata (stessa postura delle altre route
+// /api/dashboard/*): da rimuovere una volta completati i test manuali.
 export async function POST() {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "Endpoint di test non disponibile in produzione." }, { status: 404 });
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
   const invoiceId = `test_${crypto.randomUUID()}`;
