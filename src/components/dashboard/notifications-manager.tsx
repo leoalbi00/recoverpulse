@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Layers, Loader2, Trash2, X, Zap, type LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyField } from "@/components/dashboard/copy-field";
 import { NotificationTypeIcon } from "@/components/dashboard/notification-type-icon";
-import { broadcastNotificationsChanged } from "@/lib/notification-events";
+import { broadcastNotificationsChanged, onNotificationsChanged } from "@/lib/notification-events";
 import { NOTIFICATION_STYLES } from "@/lib/notification-style";
 import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/lib/notifications";
@@ -67,6 +67,22 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
     if (category === "all") return notifications;
     return notifications.filter((n) => n.type === category);
   }, [notifications, category]);
+
+  // Tiene la lista in sincronia con azioni fatte altrove nella stessa sessione
+  // (es. segna come letta dalla campanella, o una nuova notifica creata dal
+  // pulsante "Simula Pagamento Fallito" qui sotto) senza dover ricaricare la pagina.
+  const refreshNotifications = useCallback(async () => {
+    try {
+      const response = await fetch("/api/dashboard/notifications?limit=200");
+      if (!response.ok) return;
+      const data = await response.json();
+      setNotifications(data.notifications ?? []);
+    } catch {
+      // silenzioso: la lista resta quella già mostrata finché il prossimo evento non riesce
+    }
+  }, []);
+
+  useEffect(() => onNotificationsChanged(refreshNotifications), [refreshNotifications]);
 
   function setPending(id: string, pending: boolean) {
     setPendingIds((prev) => {
@@ -154,6 +170,11 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
         customerName: data.transaction?.customerName ?? "Cliente di test",
         amountLabel,
       });
+
+      // L'endpoint crea anche una notifica 'warning' per il pagamento fallito
+      // di prova: senza questo broadcast, la campanella nell'header resta
+      // spenta finché non scatta il prossimo poll (fino a 30s).
+      broadcastNotificationsChanged();
     } catch {
       setSimulateError("Impossibile contattare RecoverPulse. Riprova.");
     } finally {
