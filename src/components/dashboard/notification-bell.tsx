@@ -110,10 +110,7 @@ export function NotificationBell() {
       >
         <Bell className="size-4.5" />
         {unreadCount > 0 && (
-          <span
-            className="absolute top-1 right-1 size-2.5 animate-pulse rounded-full bg-rose-500"
-            style={{ boxShadow: "0 0 8px rgba(244,63,94,0.8)" }}
-          />
+          <span className="absolute -top-0.5 -right-0.5 z-20 h-3 w-3 animate-pulse rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,1)] ring-2 ring-[#0c0c0e]" />
         )}
       </button>
 
