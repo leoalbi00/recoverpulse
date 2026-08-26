@@ -339,7 +339,7 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl shadow-black/60"
+        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-[#0c0c0e] p-6 shadow-2xl shadow-black/60"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
