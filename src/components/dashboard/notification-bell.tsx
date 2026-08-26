@@ -6,15 +6,11 @@ import { Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { broadcastNotificationsChanged, onNotificationsChanged } from "@/lib/notification-events";
-import type { Notification, NotificationType } from "@/lib/notifications";
+import { NOTIFICATION_STYLES } from "@/lib/notification-style";
+import { NotificationTypeIcon } from "@/components/dashboard/notification-type-icon";
+import type { Notification } from "@/lib/notifications";
 
 const BELL_PREVIEW_LIMIT = 8;
-
-const TYPE_CONFIG: Record<NotificationType, { emoji: string; label: string }> = {
-  recovery: { emoji: "🟢", label: "Recupero" },
-  lead: { emoji: "🔵", label: "Nuovo Lead" },
-  warning: { emoji: "⚠️", label: "Avviso" },
-};
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -113,15 +109,11 @@ export function NotificationBell() {
         className="relative flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
-        {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex min-w-[1.1rem] items-center justify-center rounded-full border-2 border-zinc-950 bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
+        {unreadCount > 0 && <span className="absolute top-1 right-1 size-2.5 animate-pulse rounded-full bg-red-500" />}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-black/40 sm:w-96">
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-xl shadow-black/60 sm:w-96">
           <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
             <p className="text-sm font-semibold text-zinc-100">Notifiche</p>
             {unreadCount > 0 && (
@@ -142,23 +134,20 @@ export function NotificationBell() {
               <p className="px-4 py-6 text-center text-sm text-zinc-500">Nessuna notifica.</p>
             ) : (
               notifications.map((notification) => {
-                const config = TYPE_CONFIG[notification.type];
+                const style = NOTIFICATION_STYLES[notification.type];
                 return (
                   <button
                     key={notification.id}
                     type="button"
                     onClick={() => !notification.read && markAsRead(notification.id)}
                     className={cn(
-                      "flex w-full items-start gap-3 border-b border-zinc-800/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-800/40",
-                      !notification.read && "bg-emerald-500/[0.03]"
+                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-800/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-800/40",
+                      notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
                     )}
                   >
-                    <span className="mt-0.5 text-base leading-none">{config.emoji}</span>
+                    <NotificationTypeIcon type={notification.type} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-zinc-400">{config.label}</span>
-                        {!notification.read && <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />}
-                      </div>
+                      <span className="text-xs font-medium text-zinc-400">{style.label}</span>
                       <p className={cn("mt-0.5 text-sm", notification.read ? "text-zinc-400" : "text-zinc-100")}>
                         {notification.message}
                       </p>

@@ -6,7 +6,9 @@ import { Check, Loader2, Trash2, X, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyField } from "@/components/dashboard/copy-field";
+import { NotificationTypeIcon } from "@/components/dashboard/notification-type-icon";
 import { broadcastNotificationsChanged } from "@/lib/notification-events";
+import { NOTIFICATION_STYLES } from "@/lib/notification-style";
 import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/lib/notifications";
 
@@ -14,16 +16,10 @@ type CategoryFilter = "all" | NotificationType;
 
 const CATEGORIES: { value: CategoryFilter; label: string; dotClass?: string }[] = [
   { value: "all", label: "Tutte" },
-  { value: "lead", label: "Lead", dotClass: "bg-blue-500" },
-  { value: "recovery", label: "Recuperi", dotClass: "bg-emerald-500" },
-  { value: "warning", label: "Sistema", dotClass: "bg-amber-400" },
+  { value: "lead", label: "Lead", dotClass: NOTIFICATION_STYLES.lead.dotClass },
+  { value: "recovery", label: "Recuperi", dotClass: NOTIFICATION_STYLES.recovery.dotClass },
+  { value: "warning", label: "Sistema", dotClass: NOTIFICATION_STYLES.warning.dotClass },
 ];
-
-const TYPE_CONFIG: Record<NotificationType, { emoji: string; label: string }> = {
-  recovery: { emoji: "🟢", label: "Recupero" },
-  lead: { emoji: "🔵", label: "Nuovo Lead" },
-  warning: { emoji: "⚠️", label: "Avviso" },
-};
 
 type LeadMetadata = {
   name?: string;
@@ -234,16 +230,19 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
         ) : (
           <ul className="divide-y divide-zinc-800/60">
             {filtered.map((notification) => {
-              const config = TYPE_CONFIG[notification.type];
+              const style = NOTIFICATION_STYLES[notification.type];
               const isLead = notification.type === "lead";
               const isPending = pendingIds.has(notification.id);
 
               return (
                 <li
                   key={notification.id}
-                  className={cn("flex items-start gap-4 px-5 py-4", !notification.read && "bg-emerald-500/[0.03]")}
+                  className={cn(
+                    "flex items-start gap-4 border-l-4 px-5 py-4",
+                    notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
+                  )}
                 >
-                  <span className="mt-0.5 text-lg leading-none">{config.emoji}</span>
+                  <NotificationTypeIcon type={notification.type} className="mt-0.5" />
 
                   <button
                     type="button"
@@ -252,7 +251,7 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
                     className={cn("min-w-0 flex-1 text-left", isLead && "cursor-pointer")}
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-medium text-zinc-400">{config.label}</span>
+                      <span className="text-xs font-medium text-zinc-400">{style.label}</span>
                       <Badge
                         variant="outline"
                         className={cn(
@@ -264,7 +263,7 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
                       >
                         {notification.read ? "Letta" : "Non letta"}
                       </Badge>
-                      {isLead && <span className="text-[11px] text-emerald-500">Vedi dettagli →</span>}
+                      {isLead && <span className="text-[11px] text-indigo-400">Vedi dettagli →</span>}
                     </div>
                     <p className={cn("mt-1 text-sm", notification.read ? "text-zinc-400" : "text-zinc-100")}>
                       {notification.message}
@@ -333,9 +332,12 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
         className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-black/40"
       >
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium text-blue-400">🔵 Nuovo Lead</p>
-            <h3 className="mt-1 text-lg font-semibold text-zinc-100">Richiesta pilota</h3>
+          <div className="flex items-center gap-2.5">
+            <NotificationTypeIcon type="lead" />
+            <div>
+              <p className="text-xs font-medium text-indigo-400">Nuovo Lead</p>
+              <h3 className="mt-0.5 text-lg font-semibold text-zinc-100">Richiesta pilota</h3>
+            </div>
           </div>
           <button
             type="button"
