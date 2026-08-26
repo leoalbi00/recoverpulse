@@ -75,7 +75,7 @@ function CardStep({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="relative min-h-[220px] rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+      <div className="relative w-full min-w-0 box-border min-h-[220px] rounded-xl border border-white/10 bg-zinc-950/60 p-4">
         {!elementReady && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 text-xs text-zinc-500">
             <Loader2 className="size-5 animate-spin text-emerald-400" />

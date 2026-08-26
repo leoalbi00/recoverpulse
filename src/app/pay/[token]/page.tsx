@@ -68,9 +68,9 @@ function Shell({ children, merchant }: { children: React.ReactNode; merchant: Me
           <span className="text-base font-semibold tracking-tight text-white">{merchant.companyName}</span>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm">
           <div className="h-1 w-full" style={{ backgroundColor: merchant.primaryColor }} aria-hidden />
-          <div className="p-6 sm:p-8">{children}</div>
+          <div className="min-w-0 p-6 sm:p-8">{children}</div>
         </div>
 
         <SecurityBadges />

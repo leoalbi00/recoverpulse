@@ -50,7 +50,7 @@ export function DemoCardForm({ planName, amountFormatted, primaryColor }: DemoCa
             placeholder="Mario Rossi"
             value={cardholderName}
             onChange={(event) => setCardholderName(event.target.value)}
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="box-border h-10 w-full min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -65,11 +65,11 @@ export function DemoCardForm({ planName, amountFormatted, primaryColor }: DemoCa
             placeholder="4242 4242 4242 4242"
             value={cardNumber}
             onChange={(event) => setCardNumber(event.target.value)}
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="box-border h-10 w-full min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
-        <div className="flex gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
+        <div className="grid w-full min-w-0 grid-cols-2 gap-3">
+          <div className="flex min-w-0 flex-col gap-1.5">
             <label htmlFor="demo-card-expiry" className="text-xs font-medium text-zinc-400">
               Scadenza
             </label>
@@ -80,10 +80,10 @@ export function DemoCardForm({ planName, amountFormatted, primaryColor }: DemoCa
               placeholder="MM/AA"
               value={expiry}
               onChange={(event) => setExpiry(event.target.value)}
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="box-border h-10 w-full min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex min-w-0 flex-col gap-1.5">
             <label htmlFor="demo-card-cvc" className="text-xs font-medium text-zinc-400">
               CVC
             </label>
@@ -95,7 +95,7 @@ export function DemoCardForm({ planName, amountFormatted, primaryColor }: DemoCa
               placeholder="123"
               value={cvc}
               onChange={(event) => setCvc(event.target.value)}
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="box-border h-10 w-full min-w-0 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
         </div>
