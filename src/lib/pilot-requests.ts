@@ -29,6 +29,13 @@ export async function createPilotRequest(input: {
       type: "lead",
       title: "Nuovo lead pilota",
       message: `Nuova richiesta pilota da ${input.company}`,
+      metadata: {
+        name: input.name,
+        email: input.email,
+        company: input.company,
+        estimatedMrr: input.estimatedMrr ?? null,
+        message: input.message ?? null,
+      },
     });
   } catch (notificationError) {
     console.error("[pilot-requests] errore nella creazione della notifica:", notificationError);

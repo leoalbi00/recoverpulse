@@ -1,10 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { broadcastNotificationsChanged, onNotificationsChanged } from "@/lib/notification-events";
 import type { Notification, NotificationType } from "@/lib/notifications";
+
+const BELL_PREVIEW_LIMIT = 8;
 
 const TYPE_CONFIG: Record<NotificationType, { emoji: string; label: string }> = {
   recovery: { emoji: "🟢", label: "Recupero" },
@@ -35,7 +39,7 @@ export function NotificationBell() {
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch("/api/dashboard/notifications");
+      const response = await fetch(`/api/dashboard/notifications?limit=${BELL_PREVIEW_LIMIT}`);
       if (!response.ok) return;
       const data = await response.json();
       setNotifications(data.notifications ?? []);
@@ -52,6 +56,8 @@ export function NotificationBell() {
     const interval = setInterval(load, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [load]);
+
+  useEffect(() => onNotificationsChanged(load), [load]);
 
   useEffect(() => {
     if (!open) return;
@@ -76,6 +82,7 @@ export function NotificationBell() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
+      broadcastNotificationsChanged();
     } catch {
       load();
     }
@@ -91,6 +98,7 @@ export function NotificationBell() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ all: true }),
       });
+      broadcastNotificationsChanged();
     } catch {
       load();
     }
@@ -106,7 +114,7 @@ export function NotificationBell() {
       >
         <Bell className="size-4.5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex min-w-[1.1rem] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white">
+          <span className="absolute top-0.5 right-0.5 flex min-w-[1.1rem] items-center justify-center rounded-full border-2 border-zinc-950 bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -161,6 +169,14 @@ export function NotificationBell() {
               })
             )}
           </div>
+
+          <Link
+            href="/dashboard/notifiche"
+            onClick={() => setOpen(false)}
+            className="block border-t border-zinc-800 px-4 py-2.5 text-center text-xs font-medium text-emerald-500 hover:bg-zinc-800/40 hover:text-emerald-400"
+          >
+            Vedi tutte
+          </Link>
         </div>
       )}
     </div>

@@ -11,6 +11,7 @@ export type Notification = {
   message: string;
   read: boolean;
   createdAt: string;
+  metadata: Record<string, unknown> | null;
 };
 
 type NotificationRow = {
@@ -20,6 +21,7 @@ type NotificationRow = {
   message: string;
   is_read: boolean;
   created_at: string;
+  metadata: Record<string, unknown> | null;
 };
 
 function mapRow(row: NotificationRow): Notification {
@@ -30,6 +32,7 @@ function mapRow(row: NotificationRow): Notification {
     message: row.message,
     read: row.is_read,
     createdAt: row.created_at,
+    metadata: row.metadata ?? null,
   };
 }
 
@@ -37,11 +40,14 @@ export async function createNotification(input: {
   type: NotificationType;
   title: string;
   message: string;
+  /** Dettagli grezzi legati all'evento (es. i campi del modulo pilota per un lead). */
+  metadata?: Record<string, unknown>;
 }): Promise<void> {
   const { error } = await supabaseAdmin.from("notifications").insert({
     type: input.type,
     title: input.title,
     message: input.message,
+    metadata: input.metadata ?? null,
   });
 
   if (error) {
@@ -49,7 +55,7 @@ export async function createNotification(input: {
   }
 }
 
-export async function listNotifications(limit = 50): Promise<Notification[]> {
+export async function listNotifications(limit = 100): Promise<Notification[]> {
   const { data, error } = await supabaseAdmin
     .from("notifications")
     .select("*")
@@ -89,5 +95,13 @@ export async function markAllNotificationsAsRead(): Promise<void> {
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento delle notifiche su Supabase: ${error.message}`);
+  }
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("notifications").delete().eq("id", id);
+
+  if (error) {
+    throw new Error(`Errore nell'eliminazione della notifica su Supabase: ${error.message}`);
   }
 }
