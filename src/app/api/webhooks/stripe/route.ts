@@ -2,11 +2,16 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
 import { getStripeClient } from "@/lib/stripe";
-import { markInvoiceRecovered, recordFailedPayment } from "@/lib/transactions";
+import {
+  getTransactionByCustomerId,
+  markInvoiceRecovered,
+  markSubscriptionLost,
+  recordFailedPayment,
+} from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser } from "@/lib/billing";
 import { createPaymentToken } from "@/lib/tokens";
-import { notifyPaymentRecovered } from "@/lib/notifications";
+import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications";
 
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
@@ -93,16 +98,46 @@ async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoic
     `[stripe-webhook] avvio dunning per fattura ${invoiceId}: customerEmail="${transaction.customerEmail}" paymentLinkToken=${paymentLinkToken ? "presente" : "assente"}`
   );
 
+  await notifyPaymentFailed(transaction);
   await startDunningSequence(transaction);
+}
+
+async function handlePaymentSucceededForInvoiceId(invoiceId: string) {
+  const transaction = await markInvoiceRecovered(invoiceId);
+  if (transaction) {
+    await stopDunningSequence(transaction);
+    await notifyPaymentRecovered(transaction);
+  }
 }
 
 async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   if (!invoice.id) return;
+  await handlePaymentSucceededForInvoiceId(invoice.id);
+}
 
-  const transaction = await markInvoiceRecovered(invoice.id);
-  if (transaction) {
-    await stopDunningSequence(transaction);
-    await notifyPaymentRecovered(transaction);
+/**
+ * payment_intent.succeeded non porta un invoice_id diretto in questa versione
+ * dell'API Stripe (l'oggetto Invoice non espone più `payment_intent` né
+ * viceversa): risolviamo quindi la fattura da recuperare tramite lo Stripe
+ * Customer ID, con lo stesso approccio già usato dal portale /pay/[token]
+ * (src/lib/transactions.ts, getTransactionByCustomerId).
+ */
+async function handlePaymentIntentSucceeded(stripe: Stripe, paymentIntent: Stripe.PaymentIntent) {
+  const customer = await resolveCustomer(stripe, paymentIntent.customer);
+  if (!customer.id) return;
+
+  const transaction = await getTransactionByCustomerId(customer.id);
+  if (!transaction || transaction.status !== "in_corso") return;
+
+  await handlePaymentSucceededForInvoiceId(transaction.invoiceId);
+}
+
+async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+  const lost = await markSubscriptionLost(subscription.id);
+  for (const transaction of lost) {
+    console.log(
+      `[stripe-webhook] fattura ${transaction.invoiceId} segnata come "perso": abbonamento ${subscription.id} cancellato.`
+    );
   }
 }
 
@@ -116,26 +151,38 @@ function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.error("Missing STRIPE_WEBHOOK_SECRET environment variable");
-    return NextResponse.json({ error: "Webhook Stripe non configurato." }, { status: 500 });
-  }
-
   const signature = request.headers.get("stripe-signature");
   const payload = await request.text();
-
-  if (!signature) {
-    return NextResponse.json({ error: "Header stripe-signature mancante." }, { status: 400 });
-  }
 
   const stripe = await getStripeClient();
 
   let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
-  } catch (error) {
-    console.error("Stripe webhook signature verification failed:", error);
-    return NextResponse.json({ error: "Firma webhook non valida." }, { status: 400 });
+
+  if (webhookSecret && signature) {
+    try {
+      event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    } catch (error) {
+      console.error("Stripe webhook signature verification failed:", error);
+      return NextResponse.json({ error: "Firma webhook non valida." }, { status: 400 });
+    }
+  } else if (process.env.NODE_ENV !== "production") {
+    // Fallback dev/test: se STRIPE_WEBHOOK_SECRET non è ancora stato configurato
+    // in .env (o la richiesta arriva senza firma, es. da un test locale con
+    // curl/Postman), accettiamo il payload senza verificarne l'autenticità
+    // invece di bloccare lo sviluppo. Disattivato in produzione (NODE_ENV
+    // sempre "production" su Vercel), dove firma e secret restano obbligatori.
+    console.warn(
+      "[stripe-webhook] STRIPE_WEBHOOK_SECRET assente o firma mancante: payload accettato senza verifica (solo dev/test)."
+    );
+    try {
+      event = JSON.parse(payload) as Stripe.Event;
+    } catch (error) {
+      console.error("Payload webhook Stripe non valido (JSON malformato):", error);
+      return NextResponse.json({ error: "Payload non valido." }, { status: 400 });
+    }
+  } else {
+    console.error("Missing STRIPE_WEBHOOK_SECRET environment variable");
+    return NextResponse.json({ error: "Webhook Stripe non configurato." }, { status: 500 });
   }
 
   try {
@@ -145,6 +192,12 @@ export async function POST(request: Request) {
         break;
       case "invoice.payment_succeeded":
         await handleInvoicePaymentSucceeded(event.data.object);
+        break;
+      case "payment_intent.succeeded":
+        await handlePaymentIntentSucceeded(stripe, event.data.object);
+        break;
+      case "customer.subscription.deleted":
+        await handleSubscriptionDeleted(event.data.object);
         break;
       case "checkout.session.completed":
         handleCheckoutSessionCompleted(event.data.object);

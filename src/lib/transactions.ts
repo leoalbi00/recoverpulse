@@ -120,6 +120,27 @@ export async function markInvoiceRecovered(invoiceId: string): Promise<FailedTra
   return data ? mapRow(data) : null;
 }
 
+/**
+ * Segna come "perso" ogni recupero ancora in corso legato a uno Stripe
+ * Subscription ID, tipicamente in risposta a customer.subscription.deleted:
+ * una volta cancellato l'abbonamento non ha più senso proseguire la
+ * sequenza di dunning sulle sue fatture non pagate.
+ */
+export async function markSubscriptionLost(subscriptionId: string): Promise<FailedTransaction[]> {
+  const { data, error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ status: "perso" satisfies TransactionStatus })
+    .eq("subscription_id", subscriptionId)
+    .eq("status", "in_corso")
+    .select();
+
+  if (error) {
+    throw new Error(`Errore nell'aggiornamento delle transazioni perse su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapRow);
+}
+
 export async function getTransaction(invoiceId: string): Promise<FailedTransaction | null> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")

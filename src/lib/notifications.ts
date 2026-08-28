@@ -130,3 +130,26 @@ export async function notifyPaymentRecovered(transaction: FailedTransaction): Pr
     console.error("[notifications] errore nella creazione della notifica di recupero:", error);
   }
 }
+
+/**
+ * Notifica 'warning' creata dal webhook Stripe su invoice.payment_failed, non
+ * appena la transazione fallita è registrata su Supabase. Come
+ * notifyPaymentRecovered, non propaga errori: la registrazione del pagamento
+ * fallito e l'avvio della sequenza di dunning non devono dipendere da questa.
+ */
+export async function notifyPaymentFailed(transaction: FailedTransaction): Promise<void> {
+  const amountLabel = new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: transaction.currency.toUpperCase(),
+  }).format(transaction.amount / 100);
+
+  try {
+    await createNotification({
+      type: "warning",
+      title: "Pagamento fallito",
+      message: `${transaction.customerName} non ha pagato ${amountLabel} per ${transaction.planName}`,
+    });
+  } catch (error) {
+    console.error("[notifications] errore nella creazione della notifica di pagamento fallito:", error);
+  }
+}
