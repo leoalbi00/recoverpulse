@@ -49,3 +49,48 @@ export async function recordDunningLog(input: {
     throw new Error(`Errore nella registrazione del sollecito su Supabase: ${error.message}`);
   }
 }
+
+export type DunningLogSummary = {
+  /** Numero di solleciti registrati (step del cron di dunning) per la fattura. */
+  attempts: number;
+  lastChannel: DunningLogChannel;
+  lastStatus: DunningLogStatus;
+  lastSentAt: string;
+};
+
+/**
+ * Riepiloga i solleciti già inviati per un gruppo di fatture (usata dalla
+ * pagina /dashboard/transazioni per le colonne "Tentativi Dunning" e "Ultima
+ * Azione"). Una sola query per tutte le fatture visualizzate, invece di una
+ * query per riga.
+ */
+export async function getDunningLogSummaries(
+  invoiceIds: string[]
+): Promise<Map<string, DunningLogSummary>> {
+  const summaries = new Map<string, DunningLogSummary>();
+  if (invoiceIds.length === 0) return summaries;
+
+  const { data, error } = await supabaseAdmin
+    .from("dunning_logs")
+    .select("invoice_id, channel, status, sent_at")
+    .in("invoice_id", invoiceIds)
+    .order("sent_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Errore nel recupero dello storico solleciti su Supabase: ${error.message}`);
+  }
+
+  for (const row of data ?? []) {
+    const invoiceId: string | null = row.invoice_id;
+    if (!invoiceId) continue;
+
+    summaries.set(invoiceId, {
+      attempts: (summaries.get(invoiceId)?.attempts ?? 0) + 1,
+      lastChannel: row.channel,
+      lastStatus: row.status,
+      lastSentAt: row.sent_at,
+    });
+  }
+
+  return summaries;
+}
