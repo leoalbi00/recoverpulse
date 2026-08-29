@@ -58,7 +58,7 @@ export default async function TransazioniPage() {
         </p>
       </div>
 
-      <div className="mt-8 rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
+      <div className="mt-8 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md">
         <TransactionsExplorer
           transactions={transactions}
           dunningByInvoice={dunningByInvoice}

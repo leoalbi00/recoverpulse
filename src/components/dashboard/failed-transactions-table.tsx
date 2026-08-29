@@ -81,7 +81,7 @@ export function FailedTransactionsTable({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Cerca per cliente o email…"
-              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white text-zinc-900 pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
@@ -89,13 +89,13 @@ export function FailedTransactionsTable({
             onChange={(event) =>
               setStatusFilter(event.target.value as TransactionStatus | "tutti")
             }
-            className="relative z-10 h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
+            className="relative z-10 h-9 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
           >
             {STATUS_FILTERS.map((option) => (
               <option
                 key={option.value}
                 value={option.value}
-                className="bg-white"
+                className="bg-white text-zinc-900"
               >
                 {option.label}
               </option>

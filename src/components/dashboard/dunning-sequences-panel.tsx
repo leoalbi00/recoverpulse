@@ -94,11 +94,11 @@ export function DunningSequencesPanel({
             return (
               <div
                 key={channel.id}
-                className="h-full rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md"
+                className="h-full rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-                    <channel.icon className="size-5 text-emerald-500" />
+                  <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-100">
+                    <channel.icon className="size-5 text-emerald-700" />
                   </span>
                   <Switch
                     checked={enabled}
@@ -142,7 +142,7 @@ export function DunningSequencesPanel({
           )}
         </div>
 
-        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
+        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md">
           <div className="divide-y divide-zinc-200">
             {STEPS.map((step, index) => {
               const minutes = settings.timing[step.id];
@@ -173,7 +173,7 @@ export function DunningSequencesPanel({
                           step.unit,
                         )
                       }
-                      className="h-9 w-20 rounded-lg border border-zinc-200/80 bg-white px-2 text-center text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                      className="h-9 w-20 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-2 text-center text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                     />
                     {step.unit}
                   </label>

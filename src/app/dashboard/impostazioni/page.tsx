@@ -87,10 +87,10 @@ export default async function ImpostazioniPage() {
           Incolla questo URL in Stripe (Sviluppatori → Webhook) e seleziona gli
           eventi elencati sotto.
         </p>
-        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
+        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <Webhook className="size-4 text-emerald-500" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+              <Webhook className="size-4 text-emerald-700" />
             </span>
             <p className="text-sm font-medium text-zinc-900">URL Endpoint</p>
           </div>
@@ -138,7 +138,7 @@ export default async function ImpostazioniPage() {
             <div
               key={plan.id}
               className={cn(
-                "flex h-full flex-col rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md",
+                "flex h-full flex-col rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md",
                 plan.popular && "ring-2 ring-emerald-500/50",
               )}
             >

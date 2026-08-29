@@ -141,12 +141,12 @@ export function MerchantSettingsPanel({
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md"
+      className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <Palette className="size-4 text-emerald-500" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+            <Palette className="size-4 text-emerald-700" />
           </span>
           <div>
             <p className="text-sm font-medium text-zinc-900">
@@ -351,7 +351,7 @@ export function MerchantSettingsPanel({
             </span>
           </div>
 
-          <div className="mt-4 rounded-lg border border-zinc-200/80 bg-white p-3">
+          <div className="mt-4 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 p-3">
             <p className="text-[11px] text-zinc-500">Email di sollecito</p>
             <p className="mt-1 text-xs text-zinc-700">
               Aggiorna il metodo di pagamento per continuare il servizio.

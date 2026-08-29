@@ -24,7 +24,7 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-zinc-200/80 bg-white px-3 py-2 text-xs shadow-md">
+    <div className="rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 py-2 text-xs shadow-md">
       <p className="mb-1.5 font-medium text-zinc-900">{label}</p>
       {payload.map((entry) => (
         <p

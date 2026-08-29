@@ -224,7 +224,7 @@ export function NotificationsManager({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
+      <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-sm hover:shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">
@@ -288,7 +288,7 @@ export function NotificationsManager({
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
                   ? "border-zinc-300 bg-zinc-100 text-zinc-900"
-                  : "border-zinc-200/80 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900",
+                  : "border-zinc-200/80 bg-white text-zinc-900 text-zinc-500 hover:border-zinc-300 hover:text-zinc-900",
               )}
             >
               <item.Icon className={cn("size-3.5 shrink-0", item.iconClass)} />
@@ -328,7 +328,7 @@ export function NotificationsManager({
               <li
                 key={notification.id}
                 className={cn(
-                  "flex items-start gap-4 rounded-xl border border-zinc-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
+                  "flex items-start gap-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-4 shadow-sm transition-shadow hover:shadow-md",
                   !notification.read && cn("border-l-4", style.borderClass),
                 )}
               >
@@ -451,7 +451,7 @@ function LeadDetailModal({
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-zinc-200/80 bg-white p-6 shadow-lg"
+        className="relative w-full max-w-md rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-lg"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
