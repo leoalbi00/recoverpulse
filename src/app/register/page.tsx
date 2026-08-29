@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ export default function RegisterPage() {
     const response = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, inviteCode }),
     });
     const data = await response.json();
 
@@ -74,10 +75,25 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
         <h1 className="text-xl font-semibold text-zinc-100">Crea il tuo account</h1>
         <p className="mt-1.5 text-sm text-zinc-400">
-          14 giorni di prova gratuita, nessuna carta richiesta.
+          Accesso su invito: richiedi il pilota dalla home page per ricevere il tuo codice.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="inviteCode" className="text-sm font-medium text-zinc-300">
+              Codice invito
+            </label>
+            <input
+              id="inviteCode"
+              type="text"
+              required
+              value={inviteCode}
+              onChange={(event) => setInviteCode(event.target.value)}
+              placeholder="Ricevuto via email dopo la richiesta pilota"
+              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <label htmlFor="name" className="text-sm font-medium text-zinc-300">
               Nome

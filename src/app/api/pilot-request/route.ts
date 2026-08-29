@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createPilotRequest } from "@/lib/pilot-requests";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const pilotRequestSchema = z.object({
   name: z.string().trim().min(1, "Inserisci il tuo nome.").max(120),
@@ -16,6 +17,15 @@ const pilotRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const { allowed, retryAfterSeconds } = checkRateLimit(`pilot-request:${ip}`, 5, 15 * 60);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Troppe richieste. Riprova più tardi." },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds) } }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = pilotRequestSchema.safeParse(body);
 

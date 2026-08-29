@@ -62,10 +62,20 @@ function buildDunningEmailHtml({
   primaryColor: string;
   supportEmail: string;
 }): string {
-  const greeting = customerName && customerName !== "Gentile cliente" ? `Ciao ${customerName}` : "Gentile cliente";
+  // customerName e planName arrivano da Stripe (nome del Customer / descrizione
+  // riga fattura): un cliente può impostarli liberamente sul proprio account,
+  // quindi vanno trattati come input non fidato ed escapati prima di finire
+  // nell'HTML dell'email, esattamente come companyName/supportEmail qui sotto.
+  const safeCustomerName = escapeHtml(customerName);
+  const safePlanName = escapeHtml(planName);
+  const safeAmountFormatted = escapeHtml(amountFormatted);
+  const safeRecoveryLink = escapeHtml(recoveryLink);
+
+  const greeting =
+    customerName && customerName !== "Gentile cliente" ? `Ciao ${safeCustomerName}` : "Gentile cliente";
   const preheader = isFinalNotice
-    ? `Ultimo avviso: rischi l'interruzione del piano ${planName}. Aggiorna la carta in 1 click.`
-    : `${greeting}, aggiorna il metodo di pagamento per ${planName} in meno di un minuto.`;
+    ? `Ultimo avviso: rischi l'interruzione del piano ${safePlanName}. Aggiorna la carta in 1 click.`
+    : `${greeting}, aggiorna il metodo di pagamento per ${safePlanName} in meno di un minuto.`;
 
   const safeCompanyName = escapeHtml(companyName);
   const ctaTextColor = getReadableTextColor(primaryColor);
@@ -141,8 +151,8 @@ function buildDunningEmailHtml({
                         ${isFinalNotice ? "Il tuo abbonamento sta per essere sospeso" : "Il pagamento non è andato a buon fine"}
                       </h1>
                       <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
-                        ${greeting}, non siamo riusciti ad addebitare <strong>${amountFormatted}</strong> per il piano
-                        <strong>${planName}</strong>. Aggiorna il metodo di pagamento adesso: bastano meno di 60 secondi
+                        ${greeting}, non siamo riusciti ad addebitare <strong>${safeAmountFormatted}</strong> per il piano
+                        <strong>${safePlanName}</strong>. Aggiorna il metodo di pagamento adesso: bastano meno di 60 secondi
                         e il servizio riparte subito, senza interruzioni.
                       </p>
                     </td>
@@ -154,10 +164,10 @@ function buildDunningEmailHtml({
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border:1px solid #e4e4e7; border-radius:10px;">
                         <tr>
                           <td style="padding:14px 16px;">
-                            <p style="margin:0; font-size:12px; color:#71717a; text-transform:uppercase; letter-spacing:0.04em;">${planName}</p>
+                            <p style="margin:0; font-size:12px; color:#71717a; text-transform:uppercase; letter-spacing:0.04em;">${safePlanName}</p>
                           </td>
                           <td align="right" style="padding:14px 16px;">
-                            <p style="margin:0; font-size:16px; font-weight:700; color:#18181b;">${amountFormatted}</p>
+                            <p style="margin:0; font-size:16px; font-weight:700; color:#18181b;">${safeAmountFormatted}</p>
                           </td>
                         </tr>
                       </table>
@@ -171,7 +181,7 @@ function buildDunningEmailHtml({
                         <tr>
                           <td align="center" style="border-radius:10px; background-color:${primaryColor};">
                             <a
-                              href="${recoveryLink}"
+                              href="${safeRecoveryLink}"
                               style="display:block; width:100%; box-sizing:border-box; color:${ctaTextColor}; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
                             >
                               Aggiorna metodo di pagamento →
@@ -198,7 +208,7 @@ function buildDunningEmailHtml({
                     <td style="padding:0 32px 32px 32px;">
                       <p style="margin:0; font-size:12.5px; line-height:1.6; color:#a1a1aa;">
                         Se il pulsante non funziona, copia e incolla questo link nel browser:<br />
-                        <a href="${recoveryLink}" style="color:#71717a; word-break:break-all;">${recoveryLink}</a>
+                        <a href="${safeRecoveryLink}" style="color:#71717a; word-break:break-all;">${safeRecoveryLink}</a>
                       </p>
                     </td>
                   </tr>
@@ -219,7 +229,7 @@ function buildDunningEmailHtml({
             <tr>
               <td align="center" style="padding:24px 16px 0 16px;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
-                  Inviato da ${safeCompanyName} per conto del fornitore del servizio ${planName}.${supportLine ? ` ${supportLine}` : ""}
+                  Inviato da ${safeCompanyName} per conto del fornitore del servizio ${safePlanName}.${supportLine ? ` ${supportLine}` : ""}
                 </p>
               </td>
             </tr>
