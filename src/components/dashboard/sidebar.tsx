@@ -62,10 +62,10 @@ function SidebarContent({
               onClick={onNavigate}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "border-emerald-500 bg-zinc-800/60 text-zinc-100"
-                  : "text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-100"
+                  ? "border-l-2 border-emerald-500 bg-zinc-800/60 text-zinc-100"
+                  : "border-l-2 border-transparent border-y-transparent border-r-transparent text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-100"
               )}
             >
               <item.icon className={cn("size-4", isActive && "text-emerald-500")} />
