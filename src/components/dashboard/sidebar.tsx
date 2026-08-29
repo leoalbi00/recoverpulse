@@ -19,6 +19,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { ThemeToggle } from "@/components/dashboard/theme-toggle";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -45,7 +46,7 @@ function SidebarContent({
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-semibold tracking-tight text-zinc-100">
+        <span className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
           RecoverPulse
         </span>
       </Link>
@@ -64,8 +65,8 @@ function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "border-l-2 border-emerald-500 bg-zinc-800/60 text-zinc-100"
-                  : "border-l-2 border-transparent border-y-transparent border-r-transparent text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-100"
+                  ? "border-l-2 border-emerald-500 bg-zinc-100 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100"
+                  : "border-l-2 border-transparent border-y-transparent border-r-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
               )}
             >
               <item.icon className={cn("size-4", isActive && "text-emerald-500")} />
@@ -75,22 +76,23 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="border-t border-zinc-800 p-4">
+      <div className="border-t border-zinc-200 dark:border-zinc-800 p-4">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-medium text-emerald-500 ring-1 ring-emerald-500/20">
             {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-zinc-100">
+            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
               {user.name ?? "Utente"}
             </p>
             <p className="truncate text-xs text-zinc-500">{user.email}</p>
           </div>
+          <ThemeToggle className="size-8" />
         </div>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800/40 hover:text-zinc-100"
+          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/40 hover:text-zinc-900 dark:hover:text-zinc-100"
         >
           <LogOut className="size-4" />
           Esci
@@ -105,25 +107,26 @@ export function DashboardSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      <div className="hidden border-r border-zinc-800 bg-zinc-900 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
+      <div className="hidden border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
         <SidebarContent user={user} />
       </div>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 md:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-4 md:hidden">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
             <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
           </span>
-          <span className="text-base font-semibold tracking-tight text-zinc-100">
+          <span className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
             RecoverPulse
           </span>
         </Link>
         <div className="flex items-center gap-1">
+          <ThemeToggle />
           <NotificationBell />
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
+            className="flex size-9 items-center justify-center rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
             aria-label="Apri menu"
           >
             <Menu className="size-5" />
@@ -138,11 +141,11 @@ export function DashboardSidebar({ user }: SidebarProps) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-800 bg-zinc-950">
+          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
+              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
               aria-label="Chiudi menu"
             >
               <X className="size-4" />

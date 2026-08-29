@@ -15,9 +15,12 @@ const STATUS_LABEL: Record<TransactionStatus, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<TransactionStatus, string> = {
-  in_corso: "bg-amber-400/10 text-amber-400 ring-1 ring-inset ring-amber-400/20",
-  recuperato: "bg-emerald-500/10 text-emerald-500 ring-1 ring-inset ring-emerald-500/20",
-  perso: "bg-rose-500/10 text-rose-500 ring-1 ring-inset ring-rose-500/20",
+  in_corso:
+    "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-400/10 dark:text-amber-400 dark:ring-amber-400/20",
+  recuperato:
+    "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-500 dark:ring-emerald-500/20",
+  perso:
+    "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-500 dark:ring-rose-500/20",
 };
 
 const STATUS_FILTERS: { value: TransactionStatus | "tutti"; label: string }[] = [
@@ -172,16 +175,16 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
               value={search}
               onChange={(event) => updateSearch(event.target.value)}
               placeholder="Cerca per cliente, email o ID fattura…"
-              className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-9 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-9 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-9 pr-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(event) => updateStatusFilter(event.target.value as TransactionStatus | "tutti")}
-            className="h-9 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
+            className="h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
           >
             {STATUS_FILTERS.map((option) => (
-              <option key={option.value} value={option.value} className="bg-zinc-900">
+              <option key={option.value} value={option.value} className="bg-white dark:bg-zinc-900">
                 {option.label}
               </option>
             ))}
@@ -211,7 +214,7 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-xs uppercase tracking-wide text-zinc-400">
+                <tr className="border-b border-zinc-200 dark:border-zinc-800 text-xs uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
                   <th className="px-3 pb-3 font-medium first:pl-0">Cliente</th>
                   <th className="px-3 pb-3 font-medium">Importo</th>
                   <th className="px-3 pb-3 font-medium">Data Fallimento</th>
@@ -221,7 +224,7 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
                   <th className="px-3 pb-3 text-right font-medium last:pr-0">Azioni</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800/60">
                 {paginated.map((tx) => (
                   <TransactionRow key={tx.id} transaction={tx} dunning={dunningByInvoice[tx.invoiceId]} />
                 ))}
@@ -230,7 +233,7 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
           </div>
 
           {pageCount > 1 && (
-            <div className="mt-5 flex items-center justify-between text-sm text-zinc-400">
+            <div className="mt-5 flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
               <p>
                 Pagina {currentPage + 1} di {pageCount} · {filtered.length} transazioni
               </p>
@@ -287,20 +290,20 @@ function TransactionRow({
   }
 
   return (
-    <tr className="transition-colors hover:bg-zinc-800/30">
+    <tr className="transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/30">
       <td className="px-3 py-3 first:pl-0">
-        <p className="font-medium text-zinc-100">{transaction.customerName}</p>
+        <p className="font-medium text-zinc-900 dark:text-zinc-100">{transaction.customerName}</p>
         <p className="text-xs text-zinc-500">{transaction.customerEmail}</p>
       </td>
-      <td className="px-3 py-3 font-medium text-zinc-100">
+      <td className="px-3 py-3 font-medium text-zinc-900 dark:text-zinc-100">
         {formatAmount(transaction.amount, transaction.currency)}
       </td>
-      <td className="px-3 py-3 text-zinc-400">{formatDate(transaction.createdAt)}</td>
+      <td className="px-3 py-3 text-zinc-600 dark:text-zinc-400">{formatDate(transaction.createdAt)}</td>
       <td className="px-3 py-3">
         <Badge className={STATUS_BADGE_CLASS[transaction.status]}>{STATUS_LABEL[transaction.status]}</Badge>
       </td>
-      <td className="px-3 py-3 text-zinc-400">{dunning?.attempts ?? 0}</td>
-      <td className="px-3 py-3 text-zinc-400">{lastActionLabel(transaction, dunning)}</td>
+      <td className="px-3 py-3 text-zinc-600 dark:text-zinc-400">{dunning?.attempts ?? 0}</td>
+      <td className="px-3 py-3 text-zinc-600 dark:text-zinc-400">{lastActionLabel(transaction, dunning)}</td>
       <td className="px-3 py-3 text-right last:pr-0">
         <Button
           type="button"

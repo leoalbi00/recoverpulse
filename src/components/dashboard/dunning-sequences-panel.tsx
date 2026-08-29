@@ -66,14 +66,14 @@ export function DunningSequencesPanel({ initialSettings }: { initialSettings: Du
   return (
     <div className="mt-8 space-y-8">
       <section>
-        <h2 className="text-sm font-medium text-zinc-300">Canali attivi</h2>
+        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Canali attivi</h2>
         <div className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {CHANNELS.map((channel) => {
             const enabled = settings.channels[channel.id];
             return (
               <div
                 key={channel.id}
-                className="h-full rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm"
+                className="h-full rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm"
               >
                 <div className="flex items-center justify-between">
                   <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -85,8 +85,8 @@ export function DunningSequencesPanel({ initialSettings }: { initialSettings: Du
                     aria-label={`Attiva/disattiva canale ${channel.label}`}
                   />
                 </div>
-                <p className="mt-4 text-lg font-semibold text-zinc-100">{channel.label}</p>
-                <p className="mt-1 text-sm text-zinc-400">{channel.description}</p>
+                <p className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{channel.label}</p>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{channel.description}</p>
                 <p className="mt-4 text-xs text-zinc-500">{enabled ? "Canale attivo" : "Canale disattivato"}</p>
               </div>
             );
@@ -97,21 +97,21 @@ export function DunningSequencesPanel({ initialSettings }: { initialSettings: Du
       <section>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-medium text-zinc-300">Tempi di attesa sequenza automatica</h2>
+            <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Tempi di attesa sequenza automatica</h2>
             <p className="mt-1 text-xs text-zinc-500">
               Ogni passaggio viene inviato sui canali attivi, a partire dal momento del pagamento fallito.
             </p>
           </div>
           {savedAt > 0 && (
-            <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-500">
+            <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600 dark:text-emerald-500">
               <Check className="size-3.5" />
               {saving ? "Salvataggio…" : "Salvato"}
             </span>
           )}
         </div>
 
-        <div className="mt-3 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
-          <div className="divide-y divide-zinc-800/60">
+        <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm">
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800/60">
             {STEPS.map((step, index) => {
               const minutes = settings.timing[step.id];
               const displayValue = step.unit === "h" ? minutes / 60 : minutes;
@@ -121,17 +121,17 @@ export function DunningSequencesPanel({ initialSettings }: { initialSettings: Du
                   className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
                 >
                   <div>
-                    <p className="text-sm font-medium text-zinc-100">{step.label}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{step.label}</p>
                     <p className="text-xs text-zinc-500">Passaggio {index + 1} della sequenza</p>
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-zinc-400">
+                  <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
                     T+
                     <input
                       type="number"
                       min={1}
                       value={displayValue}
                       onChange={(event) => updateTiming(step.id, Number(event.target.value), step.unit)}
-                      className="h-9 w-20 rounded-lg border border-zinc-800 bg-zinc-900/60 px-2 text-center text-sm text-zinc-100 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                      className="h-9 w-20 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 px-2 text-center text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                     />
                     {step.unit}
                   </label>

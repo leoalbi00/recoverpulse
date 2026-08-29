@@ -79,7 +79,7 @@ function ConnectionBadge({ state, message }: { state: ConnectionState; message?:
 
   if (state === "testing") {
     return (
-      <Badge variant="outline" className="h-auto border-zinc-700 bg-zinc-900 px-2 py-0.5 text-zinc-400">
+      <Badge variant="outline" className="h-auto border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-0.5 text-zinc-600 dark:text-zinc-400">
         <Loader2 className="size-3 animate-spin" />
         Verifica…
       </Badge>
@@ -168,7 +168,7 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm"
+      className="rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -176,14 +176,14 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
             <KeyRound className="size-4 text-emerald-500" />
           </span>
           <div>
-            <p className="text-sm font-medium text-zinc-100">Chiavi API</p>
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Chiavi API</p>
             <p className="mt-0.5 text-xs text-zinc-500">
               Salvate su Supabase e usate subito nelle chiamate API, senza toccare i file .env.
             </p>
           </div>
         </div>
         {savedAt > 0 && (
-          <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-500">
+          <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600 dark:text-emerald-500">
             <Check className="size-3.5" />
             Salvato
           </span>
@@ -192,9 +192,9 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
 
       <div className="mt-6 flex flex-col gap-6">
         {SERVICES.map((service) => (
-          <div key={service.id} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
+          <div key={service.id} className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950/40 p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-zinc-200">{service.name}</p>
+              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{service.name}</p>
               <div className="flex items-center gap-2">
                 <ConnectionBadge state={connectionState[service.id]} message={connectionMessage[service.id]} />
                 <Button
@@ -219,7 +219,7 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
                 return (
                   <div key={field.id} className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <label htmlFor={field.id} className="text-sm font-medium text-zinc-300">
+                      <label htmlFor={field.id} className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                         {field.label}
                       </label>
                       {status[field.id].configured && (
@@ -241,12 +241,12 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
                           setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
                         }
                         placeholder={status[field.id].configured ? status[field.id].masked : field.placeholder}
-                        className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 pr-10 font-mono text-sm text-zinc-100 placeholder:font-sans placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                        className="h-10 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950/60 px-3 pr-10 font-mono text-sm text-zinc-900 dark:text-zinc-100 placeholder:font-sans placeholder:text-zinc-400 dark:placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                       />
                       <button
                         type="button"
                         onClick={() => setVisible((prev) => ({ ...prev, [field.id]: !isVisible }))}
-                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                         aria-label={isVisible ? "Nascondi chiave" : "Mostra chiave"}
                       >
                         {isVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -263,7 +263,7 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
 
       {error && <p className="mt-4 text-xs text-rose-500">{error}</p>}
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-800 pt-5">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 pt-5">
         <p className="text-xs text-zinc-500">Lascia un campo vuoto per mantenere il valore già salvato.</p>
         <Button type="submit" disabled={saving} className="shrink-0">
           {saving ? "Salvataggio…" : "Salva Chiavi API"}

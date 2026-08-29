@@ -40,16 +40,16 @@ export default async function TransazioniPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-3xl">
           Transazioni
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
           Storico completo dei pagamenti falliti intercettati via webhook Stripe, con lo stato di
           recupero e i solleciti inviati per ciascuna fattura.
         </p>
       </div>
 
-      <div className="mt-8 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
+      <div className="mt-8 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm">
         <TransactionsExplorer transactions={transactions} dunningByInvoice={dunningByInvoice} />
       </div>
     </main>
