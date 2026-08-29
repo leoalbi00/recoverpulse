@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   }).format(stats.recoveredAmount / 100);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
+    <div className="mx-auto max-w-6xl">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
           Bentornato, {firstName}
@@ -142,6 +142,6 @@ export default async function DashboardPage() {
           <FailedTransactionsTable transactions={recentTransactions} />
         </div>
       </section>
-    </main>
+    </div>
   );
 }

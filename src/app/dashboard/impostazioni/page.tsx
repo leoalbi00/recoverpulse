@@ -57,7 +57,7 @@ export default async function ImpostazioniPage() {
     : false;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
+    <div className="mx-auto max-w-6xl">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
           Impostazioni
@@ -166,6 +166,6 @@ export default async function ImpostazioniPage() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
