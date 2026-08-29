@@ -256,7 +256,7 @@ export function MerchantSettingsPanel({
                       sfoglia i file
                     </span>
                   </p>
-                  <p className="text-[11px] text-zinc-400">
+                  <p className="text-[11px] text-zinc-500">
                     PNG, JPG, WebP o SVG · max 5MB
                   </p>
                 </>
@@ -366,7 +366,7 @@ export function MerchantSettingsPanel({
             </button>
           </div>
 
-          <p className="mt-3 text-[11px] text-zinc-400">
+          <p className="mt-3 text-[11px] text-zinc-500">
             Così appariranno il pulsante nelle email e nel portale /pay.
           </p>
         </div>

@@ -287,8 +287,8 @@ export function NotificationsManager({
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
-                  ? "border-zinc-300 bg-zinc-100 text-zinc-900"
-                  : "border-zinc-200/80 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900",
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200",
               )}
             >
               <item.Icon className={cn("size-3.5 shrink-0", item.iconClass)} />
