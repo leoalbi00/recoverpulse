@@ -8,12 +8,26 @@ import {
   computeDashboardStats,
   computeRecoveryChartData,
   listTransactions,
+  type FailedTransaction,
 } from "@/lib/transactions";
 
 export default async function DashboardPage() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0] ?? "Utente";
-  const allTransactions = await listTransactions();
+
+  // Stesso fallback difensivo usato in /dashboard/transazioni: se Supabase
+  // non risponde, la pagina mostra le card con valori a zero invece di
+  // rompere l'intero render del Server Component.
+  let allTransactions: FailedTransaction[] = [];
+  try {
+    allTransactions = await listTransactions();
+  } catch (error) {
+    console.error(
+      "[dashboard] errore nel recupero delle transazioni:",
+      error,
+    );
+  }
+
   const recentTransactions = allTransactions.slice(0, 5);
   const stats = computeDashboardStats(allTransactions);
   const chartData = computeRecoveryChartData(allTransactions);
