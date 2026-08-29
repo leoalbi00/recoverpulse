@@ -24,40 +24,26 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 py-2 text-xs shadow-md">
-      <p className="mb-1.5 font-medium text-zinc-900">{label}</p>
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs shadow-xl">
+      <p className="mb-1.5 font-medium text-zinc-100">{label}</p>
       {payload.map((entry) => (
-        <p
-          key={entry.name}
-          className="flex items-center gap-1.5 text-zinc-700"
-        >
+        <p key={entry.name} className="flex items-center gap-1.5 text-zinc-300">
           <span
             className="size-1.5 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          {entry.name}:{" "}
-          <span className="font-medium text-zinc-900">{entry.value}</span>
+          {entry.name}: <span className="font-medium text-zinc-100">{entry.value}</span>
         </p>
       ))}
     </div>
   );
 }
 
-// Recharts disegna su SVG: gli assi/la griglia hanno bisogno di un colore
-// reale (non di una classe Tailwind). Il grafico vive solo nella dashboard,
-// sempre in tema chiaro, quindi i colori sono fissi.
-const AXIS_STROKE = "rgba(15,23,42,0.35)";
-const GRID_STROKE = "rgba(15,23,42,0.08)";
-const CURSOR_STROKE = "rgba(15,23,42,0.15)";
-
 export function RecoveryChart({ data }: { data: RecoveryChartPoint[] }) {
   return (
     <div className="h-80 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-        >
+        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="recoveredGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
@@ -68,30 +54,23 @@ export function RecoveryChart({ data }: { data: RecoveryChartPoint[] }) {
               <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke={GRID_STROKE}
-            vertical={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
           <XAxis
             dataKey="day"
-            stroke={AXIS_STROKE}
+            stroke="rgba(255,255,255,0.3)"
             fontSize={12}
             tickLine={false}
             axisLine={false}
             interval={1}
           />
           <YAxis
-            stroke={AXIS_STROKE}
+            stroke="rgba(255,255,255,0.3)"
             fontSize={12}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value: number) => `$${value}`}
           />
-          <Tooltip
-            content={<ChartTooltip />}
-            cursor={{ stroke: CURSOR_STROKE }}
-          />
+          <Tooltip content={<ChartTooltip />} cursor={{ stroke: "rgba(255,255,255,0.15)" }} />
           <Area
             type="monotone"
             dataKey="recovered"

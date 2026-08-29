@@ -5,10 +5,7 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import {
-  broadcastNotificationsChanged,
-  onNotificationsChanged,
-} from "@/lib/notification-events";
+import { broadcastNotificationsChanged, onNotificationsChanged } from "@/lib/notification-events";
 import { NOTIFICATION_STYLES } from "@/lib/notification-style";
 import { NotificationTypeIcon } from "@/components/dashboard/notification-type-icon";
 import type { Notification } from "@/lib/notifications";
@@ -18,15 +15,12 @@ const BELL_PREVIEW_LIMIT = 8;
 const POLL_INTERVAL_MS = 30_000;
 
 function formatRelativeTime(iso: string): string {
-  const diffMinutes = Math.round(
-    (Date.now() - new Date(iso).getTime()) / 60_000,
-  );
+  const diffMinutes = Math.round((Date.now() - new Date(iso).getTime()) / 60_000);
   if (diffMinutes < 1) return "adesso";
   if (diffMinutes < 60) return `${diffMinutes} min fa`;
 
   const diffHours = Math.round(diffMinutes / 60);
-  if (diffHours < 24)
-    return `${diffHours} ${diffHours === 1 ? "ora" : "ore"} fa`;
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "ora" : "ore"} fa`;
 
   const diffDays = Math.round(diffHours / 24);
   return `${diffDays} ${diffDays === 1 ? "giorno" : "giorni"} fa`;
@@ -41,9 +35,7 @@ export function NotificationBell() {
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch(
-        `/api/dashboard/notifications?limit=${BELL_PREVIEW_LIMIT}`,
-      );
+      const response = await fetch(`/api/dashboard/notifications?limit=${BELL_PREVIEW_LIMIT}`);
       if (!response.ok) return;
       const data = await response.json();
       setNotifications(data.notifications ?? []);
@@ -67,10 +59,7 @@ export function NotificationBell() {
     if (!open) return;
 
     function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -80,9 +69,7 @@ export function NotificationBell() {
   }, [open]);
 
   async function markAsRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
     try {
@@ -118,36 +105,31 @@ export function NotificationBell() {
   // `n.is_read` è quindi sempre un no-op innocuo (mai vero), mantenuto come
   // fallback ridondante esplicitamente richiesto senza cast a `any`.
   const hasUnread =
-    unreadCount > 0 ||
-    notifications.some(
-      (n) => n.read === false || (n as { is_read?: boolean }).is_read === false,
-    );
+    unreadCount > 0 || notifications.some((n) => n.read === false || (n as { is_read?: boolean }).is_read === false);
 
   return (
     <div className="relative" ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        aria-label={
-          unreadCount > 0 ? `Notifiche (${unreadCount} non lette)` : "Notifiche"
-        }
+        aria-label={unreadCount > 0 ? `Notifiche (${unreadCount} non lette)` : "Notifiche"}
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
         {hasUnread && (
-          <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-zinc-900" />
+          <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-zinc-950" />
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-200/80 bg-white text-zinc-900 opacity-100 shadow-lg sm:w-96">
-          <div className="flex items-center justify-between border-b border-zinc-200/80 px-4 py-3">
-            <p className="text-sm font-semibold text-zinc-900">Notifiche</p>
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 opacity-100 shadow-2xl shadow-black/90 sm:w-96">
+          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+            <p className="text-sm font-semibold text-zinc-100">Notifiche</p>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                className="text-xs font-medium text-emerald-500 hover:text-emerald-400"
               >
                 Segna tutte come lette
               </button>
@@ -156,13 +138,9 @@ export function NotificationBell() {
 
           <div className="max-h-96 overflow-y-auto">
             {loading ? (
-              <p className="px-4 py-6 text-center text-sm text-zinc-600">
-                Caricamento…
-              </p>
+              <p className="px-4 py-6 text-center text-sm text-zinc-500">Caricamento…</p>
             ) : notifications.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-zinc-600">
-                Nessuna notifica.
-              </p>
+              <p className="px-4 py-6 text-center text-sm text-zinc-500">Nessuna notifica.</p>
             ) : (
               notifications.map((notification) => {
                 const style = NOTIFICATION_STYLES[notification.type];
@@ -170,34 +148,24 @@ export function NotificationBell() {
                   <button
                     key={notification.id}
                     type="button"
-                    onClick={() =>
-                      !notification.read && markAsRead(notification.id)
-                    }
+                    onClick={() => !notification.read && markAsRead(notification.id)}
                     className={cn(
-                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-200/80 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-100",
-                      notification.read
-                        ? "border-l-transparent"
-                        : cn(style.borderClass, style.tintClass),
+                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-800/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-800/50",
+                      notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
                     )}
                   >
                     <NotificationTypeIcon type={notification.type} />
                     <div className="min-w-0 flex-1">
-                      <span className="text-xs font-medium text-zinc-600">
-                        {style.label}
-                      </span>
+                      <span className="text-xs font-medium text-zinc-400">{style.label}</span>
                       <p
                         className={cn(
                           "mt-0.5 text-sm",
-                          notification.read
-                            ? "text-zinc-600"
-                            : "font-semibold text-zinc-900",
+                          notification.read ? "text-zinc-400" : "font-semibold text-white"
                         )}
                       >
                         {notification.message}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {formatRelativeTime(notification.createdAt)}
-                      </p>
+                      <p className="mt-1 text-xs text-zinc-400">{formatRelativeTime(notification.createdAt)}</p>
                     </div>
                   </button>
                 );
@@ -208,7 +176,7 @@ export function NotificationBell() {
           <Link
             href="/dashboard/notifiche"
             onClick={() => setOpen(false)}
-            className="block border-t border-zinc-200/80 px-4 py-2.5 text-center text-xs font-medium text-emerald-600 hover:bg-zinc-100 hover:text-emerald-700"
+            className="block border-t border-zinc-800 px-4 py-2.5 text-center text-xs font-medium text-emerald-500 hover:bg-zinc-800/40 hover:text-emerald-400"
           >
             Vedi tutte
           </Link>

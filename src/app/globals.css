@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -47,13 +49,11 @@
 }
 
 /*
- * L'app non ha più uno switcher di tema: la Landing Page (e login/register/
- * pay) restano sempre scure, la Dashboard è sempre chiara. `:root` resta
- * quindi il tema scuro di default (usato da tutto tranne la dashboard),
- * mentre `.theme-light` sovrascrive le stesse variabili con i toni chiari
- * ed è applicata come classe wrapper solo attorno al layout della dashboard
- * (src/app/dashboard/layout.tsx) — nessun custom-variant/JS necessario,
- * le custom property CSS fanno normale cascata sui discendenti.
+ * Un solo tema, sempre scuro, su tutta l'app (dashboard inclusa): niente
+ * più switcher né scope "chiaro" separati. `:root` porta già i valori
+ * scuri come fallback, `.dark` li ripete identici perché <html> ha la
+ * classe "dark" fissa (src/app/layout.tsx) — coerente con l'estetica
+ * sempre scura della Landing Page.
  */
 :root {
   color-scheme: dark;
@@ -91,39 +91,39 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.theme-light {
-  color-scheme: light;
-  --background: oklch(0.984 0.003 247.858); /* slate-50 */
-  --foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --card: oklch(1 0 0); /* white */
-  --card-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --popover: oklch(1 0 0); /* white */
-  --popover-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --primary: oklch(0.596 0.145 163.225); /* emerald-600 */
-  --primary-foreground: oklch(1 0 0); /* white */
-  --secondary: oklch(0.968 0.007 247.896); /* slate-100 */
-  --secondary-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --muted: oklch(0.968 0.007 247.896); /* slate-100 */
-  --muted-foreground: oklch(0.554 0.046 257.417); /* slate-500 */
-  --accent: oklch(0.968 0.007 247.896); /* slate-100 */
-  --accent-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508); /* slate-200 */
-  --input: oklch(0.929 0.013 255.508); /* slate-200 */
-  --ring: oklch(0.596 0.145 163.225 / 50%); /* emerald-600/50 */
+.dark {
+  color-scheme: dark;
+  --background: oklch(14.1% 0.005 285.823); /* zinc-950 */
+  --foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
+  --card: oklch(21% 0.006 285.885); /* zinc-900 */
+  --card-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
+  --popover: oklch(21% 0.006 285.885); /* zinc-900 */
+  --popover-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
+  --primary: oklch(69.6% 0.17 162.48); /* emerald-500 */
+  --primary-foreground: oklch(14.1% 0.005 285.823); /* zinc-950 */
+  --secondary: oklch(27.4% 0.006 286.033); /* zinc-800 */
+  --secondary-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
+  --muted: oklch(27.4% 0.006 286.033); /* zinc-800 */
+  --muted-foreground: oklch(70.5% 0.015 286.067); /* zinc-400 */
+  --accent: oklch(27.4% 0.006 286.033); /* zinc-800 */
+  --accent-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
+  --destructive: oklch(64.5% 0.246 16.439); /* rose-500 */
+  --border: oklch(27.4% 0.006 286.033 / 80%); /* zinc-800/80 */
+  --input: oklch(27.4% 0.006 286.033 / 50%); /* zinc-800/50 */
+  --ring: oklch(69.6% 0.17 162.48 / 50%); /* emerald-500/50 */
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(1 0 0); /* white */
-  --sidebar-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --sidebar-primary: oklch(0.596 0.145 163.225); /* emerald-600 */
-  --sidebar-primary-foreground: oklch(1 0 0); /* white */
-  --sidebar-accent: oklch(0.968 0.007 247.896); /* slate-100 */
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755); /* slate-900 */
-  --sidebar-border: oklch(0.929 0.013 255.508); /* slate-200 */
-  --sidebar-ring: oklch(0.596 0.145 163.225 / 50%); /* emerald-600/50 */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(27.4% 0.006 286.033 / 80%); /* zinc-800/80, come --border */
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
@@ -132,6 +132,7 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
   button:not(:disabled),
   a[href],
