@@ -52,7 +52,7 @@ function SidebarContent({
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-semibold tracking-tight text-slate-900">
+        <span className="text-base font-bold tracking-tight text-slate-900">
           RecoverPulse
         </span>
       </Link>
@@ -73,7 +73,7 @@ function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-emerald-50 text-emerald-700 font-medium"
+                  ? "bg-emerald-50 text-emerald-700 font-semibold"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
               )}
             >
@@ -92,7 +92,7 @@ function SidebarContent({
             {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-slate-900">
+            <p className="truncate text-sm font-medium text-slate-800">
               {user.name ?? "Utente"}
             </p>
             <p className="truncate text-xs text-slate-500">{user.email}</p>
@@ -116,7 +116,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      <div className="hidden border-r border-slate-200/60 bg-white md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
+      <div className="hidden border-r border-slate-200/70 bg-white md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
         <SidebarContent user={user} />
       </div>
 

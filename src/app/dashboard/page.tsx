@@ -84,7 +84,7 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
+        <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
@@ -124,7 +124,7 @@ export default async function DashboardPage() {
             Vedi tutte
           </a>
         </div>
-        <div className="mt-4 rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+        <div className="mt-4 rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
           <FailedTransactionsTable transactions={recentTransactions} />
         </div>
       </section>

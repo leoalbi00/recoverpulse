@@ -103,7 +103,7 @@ export function DunningTemplatesManager({
 
   return (
     <div className="mt-8 flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+      <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
         <div>
           <p className="text-sm font-medium text-slate-900">
             Automazione {automationEnabled ? "Attiva" : "In Pausa"}
@@ -120,7 +120,7 @@ export function DunningTemplatesManager({
         />
       </div>
 
-      <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
+      <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
         <ul className="flex flex-col">
           {steps.map((step, index) => (
             <li key={step.id} className="relative pb-8 last:pb-0">

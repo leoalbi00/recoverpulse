@@ -18,10 +18,17 @@ export function StatCard({
   trend = "neutral",
 }: StatCardProps) {
   return (
-    <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+    <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
       <div className="flex items-center justify-between">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-          <Icon className="size-5 text-emerald-500" />
+        <span
+          className={cn(
+            "flex size-10 items-center justify-center rounded-lg",
+            trend === "up" && "bg-emerald-50 text-emerald-600",
+            trend === "down" && "bg-rose-50 text-rose-600",
+            trend === "neutral" && "bg-slate-100 text-slate-600",
+          )}
+        >
+          <Icon className="size-5" />
         </span>
         {delta && (
           <span

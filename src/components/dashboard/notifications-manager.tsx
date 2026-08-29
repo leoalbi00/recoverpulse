@@ -224,7 +224,7 @@ export function NotificationsManager({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+      <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">

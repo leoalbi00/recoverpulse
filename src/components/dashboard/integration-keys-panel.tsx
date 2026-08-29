@@ -204,7 +204,7 @@ export function IntegrationKeysPanel({
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md"
+      className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

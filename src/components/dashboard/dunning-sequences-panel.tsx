@@ -94,7 +94,7 @@ export function DunningSequencesPanel({
             return (
               <div
                 key={channel.id}
-                className="h-full rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md"
+                className="h-full rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
                   <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -142,7 +142,7 @@ export function DunningSequencesPanel({
           )}
         </div>
 
-        <div className="mt-3 rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+        <div className="mt-3 rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
           <div className="divide-y divide-slate-200">
             {STEPS.map((step, index) => {
               const minutes = settings.timing[step.id];

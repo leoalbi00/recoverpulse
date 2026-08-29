@@ -39,7 +39,7 @@ export function SubscriptionCard({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
+    <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
