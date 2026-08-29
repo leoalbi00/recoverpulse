@@ -17,18 +17,22 @@ export default async function DashboardLayout({
   // testo text-zinc-100), mentre ogni card/tabella/modulo al loro interno è
   // un riquadro bianco con testo scuro (vedi i singoli componenti sotto
   // src/components/dashboard/ e le pagine sotto src/app/dashboard/).
-  // L'header desktop è "sticky" con sfondo bg-zinc-950 totalmente opaco
-  // (nessuna trasparenza/backdrop-blur): durante lo scroll il contenuto
-  // scorre correttamente dietro la fascia opaca invece di trasparire o
-  // sovrapporsi visivamente.
+  // L'header desktop è "sticky" con sfondo opaco hardcoded via style inline
+  // (oltre a bg-zinc-950 in classe) cosi' nessuno stile ereditato o classe
+  // Tailwind puo' renderlo trasparente durante lo scroll.
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <DashboardSidebar user={session.user} />
       <div className="flex flex-col md:pl-64">
-        <header className="sticky top-0 z-50 hidden w-full items-center justify-end gap-1 border-b border-zinc-800 bg-zinc-950 p-4 shadow-sm md:flex">
+        <header
+          className="sticky top-0 z-50 hidden w-full items-center justify-end border-b border-zinc-800 p-4 md:flex"
+          style={{ backgroundColor: "#09090b" }}
+        >
           <NotificationBell />
         </header>
-        <main className="flex-1 space-y-6 p-6 md:p-8">{children}</main>
+        <main className="flex-1 p-6 md:p-8 pt-8 space-y-6 bg-zinc-950">
+          {children}
+        </main>
       </div>
     </div>
   );
