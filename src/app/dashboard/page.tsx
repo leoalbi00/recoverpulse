@@ -26,10 +26,10 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
           Bentornato, {firstName}
         </h1>
-        <p className="mt-1.5 text-sm text-slate-500">
+        <p className="mt-1.5 text-sm text-zinc-400">
           Ecco lo stato del recupero abbonamenti questo mese.
         </p>
       </div>
@@ -84,18 +84,18 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-zinc-900">
                 Fatturato Recuperato vs Pagamenti Falliti
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-zinc-500">
                 Ultime due settimane, aggiornato in tempo reale via webhook
                 Stripe.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs text-slate-500">
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
               <span className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-emerald-500" />
                 Fatturato Recuperato
@@ -114,17 +114,17 @@ export default async function DashboardPage() {
 
       <section id="transazioni" className="mt-10 scroll-mt-20">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-lg font-semibold text-zinc-100">
             Transazioni Fallite Recenti
           </h2>
           <a
             href="/dashboard/transazioni"
-            className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+            className="text-sm font-medium text-emerald-500 hover:text-emerald-400"
           >
             Vedi tutte
           </a>
         </div>
-        <div className="mt-4 rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
+        <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
           <FailedTransactionsTable transactions={recentTransactions} />
         </div>
       </section>

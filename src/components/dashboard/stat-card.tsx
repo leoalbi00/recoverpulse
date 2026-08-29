@@ -18,14 +18,14 @@ export function StatCard({
   trend = "neutral",
 }: StatCardProps) {
   return (
-    <div className="flex h-full flex-col justify-between rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
+    <div className="flex h-full flex-col justify-between rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
       <div className="flex items-center justify-between">
         <span
           className={cn(
             "flex size-10 items-center justify-center rounded-lg",
             trend === "up" && "bg-emerald-50 text-emerald-600",
             trend === "down" && "bg-rose-50 text-rose-600",
-            trend === "neutral" && "bg-slate-100 text-slate-600",
+            trend === "neutral" && "bg-zinc-100 text-zinc-600",
           )}
         >
           <Icon className="size-5" />
@@ -36,7 +36,7 @@ export function StatCard({
               "text-xs font-medium",
               trend === "up" && "text-emerald-500",
               trend === "down" && "text-rose-500",
-              trend === "neutral" && "text-slate-500",
+              trend === "neutral" && "text-zinc-500",
             )}
           >
             {delta}
@@ -44,10 +44,10 @@ export function StatCard({
         )}
       </div>
       <div className="mt-4">
-        <p className="text-3xl font-semibold tracking-tight text-slate-900">
+        <p className="text-3xl font-semibold tracking-tight text-zinc-900">
           {value}
         </p>
-        <p className="mt-1 text-sm text-slate-500">{label}</p>
+        <p className="mt-1 text-sm text-zinc-500">{label}</p>
       </div>
     </div>
   );

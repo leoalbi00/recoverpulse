@@ -31,7 +31,7 @@ const CATEGORIES: {
   Icon: LucideIcon;
   iconClass: string;
 }[] = [
-  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-slate-500" },
+  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-500" },
   {
     value: "lead",
     label: "Lead",
@@ -224,17 +224,17 @@ export function NotificationsManager({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
+      <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">
               <Zap className="size-4 text-amber-600" />
             </span>
             <div>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-medium text-zinc-900">
                 Simula Pagamento Fallito
               </p>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-zinc-500">
                 Genera una fattura di test (TechCorp, €199) e il link al portale
                 di recupero.
               </p>
@@ -262,10 +262,10 @@ export function NotificationsManager({
         )}
 
         {simulateResult && (
-          <div className="mt-4 rounded-lg border border-slate-200/60 bg-slate-100 p-4">
-            <p className="text-xs text-slate-500">
+          <div className="mt-4 rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
+            <p className="text-xs text-zinc-500">
               Transazione creata per{" "}
-              <span className="text-slate-800">
+              <span className="text-zinc-800">
                 {simulateResult.customerName}
               </span>{" "}
               · {simulateResult.amountLabel}
@@ -287,8 +287,8 @@ export function NotificationsManager({
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
-                  ? "border-slate-300 bg-slate-100 text-slate-900"
-                  : "border-slate-200/60 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900",
+                  ? "border-zinc-300 bg-zinc-100 text-zinc-900"
+                  : "border-zinc-200/80 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900",
               )}
             >
               <item.Icon className={cn("size-3.5 shrink-0", item.iconClass)} />
@@ -312,7 +312,7 @@ export function NotificationsManager({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="px-6 py-10 text-center text-sm text-slate-500">
+        <p className="px-6 py-10 text-center text-sm text-zinc-400">
           {notifications.length === 0
             ? "Nessuna notifica al momento."
             : "Nessuna notifica in questa categoria."}
@@ -328,7 +328,7 @@ export function NotificationsManager({
               <li
                 key={notification.id}
                 className={cn(
-                  "flex items-start gap-4 rounded-xl border border-slate-200/50 bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
+                  "flex items-start gap-4 rounded-xl border border-zinc-200/80 bg-white p-4 shadow-sm transition-shadow hover:shadow-md",
                   !notification.read && cn("border-l-4", style.borderClass),
                 )}
               >
@@ -347,14 +347,14 @@ export function NotificationsManager({
                   )}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-zinc-500">
                       {style.label}
                     </span>
                     <Badge
                       className={cn(
                         "h-auto px-1.5 py-0 text-[10px]",
                         notification.read
-                          ? "bg-slate-100 text-slate-600"
+                          ? "bg-zinc-100 text-zinc-600"
                           : "bg-emerald-100 text-emerald-800",
                       )}
                     >
@@ -370,13 +370,13 @@ export function NotificationsManager({
                     className={cn(
                       "mt-1 text-sm",
                       notification.read
-                        ? "text-slate-500"
-                        : "font-semibold text-slate-900",
+                        ? "text-zinc-500"
+                        : "font-semibold text-zinc-900",
                     )}
                   >
                     {notification.message}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-zinc-500">
                     {formatDateTime(notification.createdAt)}
                   </p>
                 </button>
@@ -451,14 +451,14 @@ function LeadDetailModal({
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-slate-200/60 bg-white p-6 shadow-lg"
+        className="relative w-full max-w-md rounded-xl border border-zinc-200/80 bg-white p-6 shadow-lg"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <NotificationTypeIcon type="lead" />
             <div>
               <p className="text-xs font-medium text-indigo-600">Nuovo Lead</p>
-              <h3 className="mt-0.5 text-lg font-semibold text-slate-900">
+              <h3 className="mt-0.5 text-lg font-semibold text-zinc-900">
                 Richiesta pilota
               </h3>
             </div>
@@ -466,7 +466,7 @@ function LeadDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
             aria-label="Chiudi"
           >
             <X className="size-4" />
@@ -482,11 +482,11 @@ function LeadDetailModal({
             <DetailRow label="Messaggio" value={metadata.message} multiline />
           </dl>
         ) : (
-          <p className="mt-5 text-sm text-slate-500">{notification.message}</p>
+          <p className="mt-5 text-sm text-zinc-500">{notification.message}</p>
         )}
 
         {!hasDetails && (
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-zinc-500">
             Dettagli del modulo non disponibili per questa notifica (generata
             prima dell&apos;introduzione della scheda lead).
           </p>
@@ -508,10 +508,10 @@ function DetailRow({
   const displayValue = value && value.trim().length > 0 ? value : "—";
   return (
     <div>
-      <dt className="text-xs font-medium text-slate-500">{label}</dt>
+      <dt className="text-xs font-medium text-zinc-500">{label}</dt>
       <dd
         className={cn(
-          "mt-0.5 text-slate-800",
+          "mt-0.5 text-zinc-800",
           multiline && "whitespace-pre-wrap",
         )}
       >

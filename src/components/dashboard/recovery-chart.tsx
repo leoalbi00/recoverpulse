@@ -24,19 +24,19 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-lg border border-slate-200/60 bg-white px-3 py-2 text-xs shadow-md">
-      <p className="mb-1.5 font-medium text-slate-900">{label}</p>
+    <div className="rounded-lg border border-zinc-200/80 bg-white px-3 py-2 text-xs shadow-md">
+      <p className="mb-1.5 font-medium text-zinc-900">{label}</p>
       {payload.map((entry) => (
         <p
           key={entry.name}
-          className="flex items-center gap-1.5 text-slate-700"
+          className="flex items-center gap-1.5 text-zinc-700"
         >
           <span
             className="size-1.5 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
           {entry.name}:{" "}
-          <span className="font-medium text-slate-900">{entry.value}</span>
+          <span className="font-medium text-zinc-900">{entry.value}</span>
         </p>
       ))}
     </div>

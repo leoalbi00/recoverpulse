@@ -21,7 +21,7 @@ export function CopyField({ value }: { value: string }) {
         readOnly
         value={value}
         onFocus={(event) => event.currentTarget.select()}
-        className="h-10 flex-1 rounded-lg border border-slate-200/60 bg-slate-100 px-3 font-mono text-xs text-slate-700 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+        className="h-10 flex-1 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 font-mono text-xs text-zinc-700 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
       />
       <Button
         type="button"

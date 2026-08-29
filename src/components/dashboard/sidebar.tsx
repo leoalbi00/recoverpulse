@@ -52,7 +52,7 @@ function SidebarContent({
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-bold tracking-tight text-slate-900">
+        <span className="text-base font-bold tracking-tight text-zinc-100">
           RecoverPulse
         </span>
       </Link>
@@ -73,12 +73,12 @@ function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-emerald-50 text-emerald-700 font-semibold"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                  ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                  : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100",
               )}
             >
               <item.icon
-                className={cn("size-4", isActive && "text-emerald-700")}
+                className={cn("size-4", isActive && "text-emerald-400")}
               />
               {item.label}
             </a>
@@ -86,22 +86,22 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="border-t border-slate-200/60 p-4">
+      <div className="border-t border-zinc-800 p-4">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-medium text-emerald-700">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-400">
             {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-slate-800">
+            <p className="truncate text-sm font-medium text-zinc-100">
               {user.name ?? "Utente"}
             </p>
-            <p className="truncate text-xs text-slate-500">{user.email}</p>
+            <p className="truncate text-xs text-zinc-400">{user.email}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
         >
           <LogOut className="size-4" />
           Esci
@@ -116,11 +116,11 @@ export function DashboardSidebar({ user }: SidebarProps) {
 
   return (
     <>
-      <div className="hidden border-r border-slate-200/70 bg-white md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
+      <div className="hidden border-r border-zinc-800 bg-zinc-900 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
         <SidebarContent user={user} />
       </div>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200/60 bg-slate-50 px-4 md:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:hidden">
         <Link
           href="/"
           className="flex items-center gap-2 transition-opacity hover:opacity-80"
@@ -128,7 +128,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
           <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
             <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
           </span>
-          <span className="text-base font-semibold tracking-tight text-slate-900">
+          <span className="text-base font-semibold tracking-tight text-zinc-100">
             RecoverPulse
           </span>
         </Link>
@@ -137,7 +137,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex size-9 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100"
+            className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
             aria-label="Apri menu"
           >
             <Menu className="size-5" />
@@ -152,11 +152,11 @@ export function DashboardSidebar({ user }: SidebarProps) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 w-72 border-r border-slate-200/60 bg-slate-50">
+          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-800 bg-zinc-900">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100"
+              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
               aria-label="Chiudi menu"
             >
               <X className="size-4" />

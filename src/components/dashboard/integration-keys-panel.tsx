@@ -92,7 +92,7 @@ function ConnectionBadge({
 
   if (state === "testing") {
     return (
-      <Badge className="h-auto bg-slate-100 px-2 py-0.5 text-slate-600">
+      <Badge className="h-auto bg-zinc-100 px-2 py-0.5 text-zinc-600">
         <Loader2 className="size-3 animate-spin" />
         Verifica…
       </Badge>
@@ -204,7 +204,7 @@ export function IntegrationKeysPanel({
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md"
+      className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -212,8 +212,8 @@ export function IntegrationKeysPanel({
             <KeyRound className="size-4 text-emerald-500" />
           </span>
           <div>
-            <p className="text-sm font-medium text-slate-900">Chiavi API</p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="text-sm font-medium text-zinc-900">Chiavi API</p>
+            <p className="mt-0.5 text-xs text-zinc-500">
               Salvate su Supabase e usate subito nelle chiamate API, senza
               toccare i file .env.
             </p>
@@ -231,10 +231,10 @@ export function IntegrationKeysPanel({
         {SERVICES.map((service) => (
           <div
             key={service.id}
-            className="rounded-lg border border-slate-200/60 bg-slate-100 p-4"
+            className="rounded-lg border border-zinc-200/80 bg-zinc-100 p-4"
           >
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-zinc-800">
                 {service.name}
               </p>
               <div className="flex items-center gap-2">
@@ -271,15 +271,12 @@ export function IntegrationKeysPanel({
                     <div className="flex items-center justify-between">
                       <label
                         htmlFor={field.id}
-                        className="text-sm font-medium text-slate-700"
+                        className="text-sm font-medium text-zinc-700"
                       >
                         {field.label}
                       </label>
                       {status[field.id].configured && (
-                        <Badge
-                          variant="outline"
-                          className="h-auto border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-emerald-500"
-                        >
+                        <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">
                           Configurata
                         </Badge>
                       )}
@@ -301,7 +298,7 @@ export function IntegrationKeysPanel({
                             ? status[field.id].masked
                             : field.placeholder
                         }
-                        className="h-10 w-full rounded-lg border border-slate-200/60 bg-slate-100 px-3 pr-10 font-mono text-sm text-slate-900 placeholder:font-sans placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                        className="h-10 w-full rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 pr-10 font-mono text-sm text-zinc-900 placeholder:font-sans placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                       />
                       <button
                         type="button"
@@ -311,7 +308,7 @@ export function IntegrationKeysPanel({
                             [field.id]: !isVisible,
                           }))
                         }
-                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-700"
                         aria-label={
                           isVisible ? "Nascondi chiave" : "Mostra chiave"
                         }
@@ -323,7 +320,7 @@ export function IntegrationKeysPanel({
                         )}
                       </button>
                     </div>
-                    <p className="text-xs text-slate-500">{field.helper}</p>
+                    <p className="text-xs text-zinc-500">{field.helper}</p>
                   </div>
                 );
               })}
@@ -334,8 +331,8 @@ export function IntegrationKeysPanel({
 
       {error && <p className="mt-4 text-xs text-rose-500">{error}</p>}
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-slate-200/60 pt-5">
-        <p className="text-xs text-slate-500">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-200/80 pt-5">
+        <p className="text-xs text-zinc-500">
           Lascia un campo vuoto per mantenere il valore già salvato.
         </p>
         <Button type="submit" disabled={saving} className="shrink-0">

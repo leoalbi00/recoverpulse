@@ -75,13 +75,13 @@ export function FailedTransactionsTable({
       {interactive && (
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Cerca per cliente o email…"
-              className="h-9 w-full rounded-lg border border-slate-200/60 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
@@ -89,7 +89,7 @@ export function FailedTransactionsTable({
             onChange={(event) =>
               setStatusFilter(event.target.value as TransactionStatus | "tutti")
             }
-            className="relative z-10 h-9 rounded-lg border border-slate-200/60 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
+            className="relative z-10 h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
           >
             {STATUS_FILTERS.map((option) => (
               <option
@@ -105,7 +105,7 @@ export function FailedTransactionsTable({
       )}
 
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-slate-500">
+        <p className="py-8 text-center text-sm text-zinc-500">
           {transactions.length === 0
             ? "Nessuna transazione fallita registrata al momento."
             : "Nessuna transazione corrisponde ai filtri selezionati."}
@@ -114,7 +114,7 @@ export function FailedTransactionsTable({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200/60 text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-500">
                 <th className="px-3 pb-3 font-medium first:pl-0">Cliente</th>
                 <th className="px-3 pb-3 font-medium">Importo</th>
                 <th className="px-3 pb-3 font-medium">Motivo</th>
@@ -127,7 +127,7 @@ export function FailedTransactionsTable({
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-zinc-200">
               {filtered.map((tx) => (
                 <TransactionRow
                   key={tx.id}
@@ -173,21 +173,21 @@ function TransactionRow({
   }
 
   return (
-    <tr className="transition-colors hover:bg-slate-100">
+    <tr className="transition-colors hover:bg-zinc-100">
       <td className="px-3 py-3 first:pl-0">
-        <p className="font-medium text-slate-900">{transaction.customerName}</p>
-        <p className="text-xs text-slate-500">{transaction.customerEmail}</p>
+        <p className="font-medium text-zinc-900">{transaction.customerName}</p>
+        <p className="text-xs text-zinc-500">{transaction.customerEmail}</p>
       </td>
-      <td className="px-3 py-3 font-medium text-slate-900">
+      <td className="px-3 py-3 font-medium text-zinc-900">
         {formatAmount(transaction.amount, transaction.currency)}
       </td>
-      <td className="px-3 py-3 text-slate-500">{transaction.reason}</td>
+      <td className="px-3 py-3 text-zinc-500">{transaction.reason}</td>
       <td className="px-3 py-3">
         <Badge className={STATUS_BADGE_CLASS[transaction.status]}>
           {STATUS_LABEL[transaction.status]}
         </Badge>
       </td>
-      <td className="px-3 py-3 text-slate-500">
+      <td className="px-3 py-3 text-zinc-500">
         {formatDate(transaction.createdAt)}
       </td>
       {interactive && (

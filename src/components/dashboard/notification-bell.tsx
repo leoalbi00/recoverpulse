@@ -131,18 +131,18 @@ export function NotificationBell() {
         aria-label={
           unreadCount > 0 ? `Notifiche (${unreadCount} non lette)` : "Notifiche"
         }
-        className="relative inline-flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        className="relative inline-flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
         {hasUnread && (
-          <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-white" />
+          <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-zinc-900" />
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200/60 bg-white opacity-100 shadow-lg sm:w-96">
-          <div className="flex items-center justify-between border-b border-slate-200/60 px-4 py-3">
-            <p className="text-sm font-semibold text-slate-900">Notifiche</p>
+        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-200/80 bg-white opacity-100 shadow-lg sm:w-96">
+          <div className="flex items-center justify-between border-b border-zinc-200/80 px-4 py-3">
+            <p className="text-sm font-semibold text-zinc-900">Notifiche</p>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -156,11 +156,11 @@ export function NotificationBell() {
 
           <div className="max-h-96 overflow-y-auto">
             {loading ? (
-              <p className="px-4 py-6 text-center text-sm text-slate-500">
+              <p className="px-4 py-6 text-center text-sm text-zinc-600">
                 Caricamento…
               </p>
             ) : notifications.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-slate-500">
+              <p className="px-4 py-6 text-center text-sm text-zinc-600">
                 Nessuna notifica.
               </p>
             ) : (
@@ -174,7 +174,7 @@ export function NotificationBell() {
                       !notification.read && markAsRead(notification.id)
                     }
                     className={cn(
-                      "flex w-full items-start gap-3 border-b border-l-4 border-slate-200/60 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-slate-100",
+                      "flex w-full items-start gap-3 border-b border-l-4 border-zinc-200/80 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-zinc-100",
                       notification.read
                         ? "border-l-transparent"
                         : cn(style.borderClass, style.tintClass),
@@ -182,20 +182,20 @@ export function NotificationBell() {
                   >
                     <NotificationTypeIcon type={notification.type} />
                     <div className="min-w-0 flex-1">
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-medium text-zinc-600">
                         {style.label}
                       </span>
                       <p
                         className={cn(
                           "mt-0.5 text-sm",
                           notification.read
-                            ? "text-slate-500"
-                            : "font-semibold text-slate-900",
+                            ? "text-zinc-600"
+                            : "font-semibold text-zinc-900",
                         )}
                       >
                         {notification.message}
                       </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-zinc-500">
                         {formatRelativeTime(notification.createdAt)}
                       </p>
                     </div>
@@ -208,7 +208,7 @@ export function NotificationBell() {
           <Link
             href="/dashboard/notifiche"
             onClick={() => setOpen(false)}
-            className="block border-t border-slate-200/60 px-4 py-2.5 text-center text-xs font-medium text-emerald-600 hover:bg-slate-100 hover:text-emerald-700"
+            className="block border-t border-zinc-200/80 px-4 py-2.5 text-center text-xs font-medium text-emerald-600 hover:bg-zinc-100 hover:text-emerald-700"
           >
             Vedi tutte
           </Link>

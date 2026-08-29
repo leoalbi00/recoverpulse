@@ -141,7 +141,7 @@ export function MerchantSettingsPanel({
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md"
+      className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -149,10 +149,10 @@ export function MerchantSettingsPanel({
             <Palette className="size-4 text-emerald-500" />
           </span>
           <div>
-            <p className="text-sm font-medium text-slate-900">
+            <p className="text-sm font-medium text-zinc-900">
               Brand &amp; Personalizzazione
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-zinc-500">
               Applicati automaticamente alle email di sollecito e al portale di
               aggiornamento carta.
             </p>
@@ -171,7 +171,7 @@ export function MerchantSettingsPanel({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="companyName"
-              className="text-sm font-medium text-slate-700"
+              className="text-sm font-medium text-zinc-700"
             >
               Nome azienda
             </label>
@@ -183,14 +183,14 @@ export function MerchantSettingsPanel({
               value={companyName}
               onChange={(event) => setCompanyName(event.target.value)}
               placeholder="RecoverPulse"
-              className="h-10 rounded-lg border border-slate-200/60 bg-slate-100 px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="supportEmail"
-              className="text-sm font-medium text-slate-700"
+              className="text-sm font-medium text-zinc-700"
             >
               Email di supporto
             </label>
@@ -201,12 +201,12 @@ export function MerchantSettingsPanel({
               value={supportEmail}
               onChange={(event) => setSupportEmail(event.target.value)}
               placeholder="supporto@tuaazienda.com"
-              className="h-10 rounded-lg border border-slate-200/60 bg-slate-100 px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
-            <label className="text-sm font-medium text-slate-700">Logo</label>
+            <label className="text-sm font-medium text-zinc-700">Logo</label>
 
             <input
               ref={fileInputRef}
@@ -237,26 +237,26 @@ export function MerchantSettingsPanel({
               className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
                 isDragging
                   ? "border-emerald-500 bg-emerald-500/5"
-                  : "border-slate-200/60 bg-slate-100 hover:border-slate-300"
+                  : "border-zinc-200/80 bg-zinc-100 hover:border-zinc-300"
               }`}
             >
               {uploading ? (
                 <>
                   <Loader2 className="size-5 animate-spin text-emerald-500" />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-zinc-500">
                     Caricamento in corso…
                   </p>
                 </>
               ) : (
                 <>
-                  <UploadCloud className="size-5 text-slate-500" />
-                  <p className="text-xs text-slate-500">
+                  <UploadCloud className="size-5 text-zinc-500" />
+                  <p className="text-xs text-zinc-500">
                     Trascina qui il logo o{" "}
                     <span className="font-medium text-emerald-600">
                       sfoglia i file
                     </span>
                   </p>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-zinc-400">
                     PNG, JPG, WebP o SVG · max 5MB
                   </p>
                 </>
@@ -268,7 +268,7 @@ export function MerchantSettingsPanel({
             )}
 
             <div className="mt-1 flex items-center gap-2">
-              <span className="shrink-0 text-xs text-slate-500">
+              <span className="shrink-0 text-xs text-zinc-500">
                 oppure URL:
               </span>
               <input
@@ -280,10 +280,10 @@ export function MerchantSettingsPanel({
                   setLogoError(false);
                 }}
                 placeholder="https://tuaazienda.com/logo.png"
-                className="h-9 w-full rounded-lg border border-slate-200/60 bg-slate-100 px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                className="h-9 w-full rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-zinc-500">
               Lascia vuoto per usare il logo predefinito di RecoverPulse.
               Consigliato: quadrato su sfondo trasparente.
             </p>
@@ -292,7 +292,7 @@ export function MerchantSettingsPanel({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="primaryColor"
-              className="text-sm font-medium text-slate-700"
+              className="text-sm font-medium text-zinc-700"
             >
               Colore primario del brand
             </label>
@@ -302,7 +302,7 @@ export function MerchantSettingsPanel({
                 type="color"
                 value={isValidColor ? primaryColor : "#10b981"}
                 onChange={(event) => setPrimaryColor(event.target.value)}
-                className="size-10 shrink-0 cursor-pointer rounded-lg border border-slate-200/60 bg-slate-100 p-1"
+                className="size-10 shrink-0 cursor-pointer rounded-lg border border-zinc-200/80 bg-zinc-100 p-1"
               />
               <input
                 type="text"
@@ -310,7 +310,7 @@ export function MerchantSettingsPanel({
                 onChange={(event) => setPrimaryColor(event.target.value)}
                 placeholder="#10b981"
                 maxLength={7}
-                className="h-10 w-full rounded-lg border border-slate-200/60 bg-slate-100 px-3 font-mono text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                className="h-10 w-full rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 font-mono text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
             {!isValidColor && (
@@ -322,8 +322,8 @@ export function MerchantSettingsPanel({
         </div>
 
         {/* Live preview: aggiornata a ogni digitazione/upload, prima ancora di salvare */}
-        <div className="rounded-xl border border-slate-200/60 bg-slate-100 p-4">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div className="rounded-xl border border-zinc-200/80 bg-zinc-100 p-4">
+          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
             Anteprima live
           </p>
           <div className="mt-3 flex items-center gap-2">
@@ -346,14 +346,14 @@ export function MerchantSettingsPanel({
                 {companyName.trim().charAt(0).toUpperCase() || "R"}
               </span>
             )}
-            <span className="truncate text-sm font-semibold text-slate-900">
+            <span className="truncate text-sm font-semibold text-zinc-900">
               {companyName || "RecoverPulse"}
             </span>
           </div>
 
-          <div className="mt-4 rounded-lg border border-slate-200/60 bg-white p-3">
-            <p className="text-[11px] text-slate-500">Email di sollecito</p>
-            <p className="mt-1 text-xs text-slate-700">
+          <div className="mt-4 rounded-lg border border-zinc-200/80 bg-white p-3">
+            <p className="text-[11px] text-zinc-500">Email di sollecito</p>
+            <p className="mt-1 text-xs text-zinc-700">
               Aggiorna il metodo di pagamento per continuare il servizio.
             </p>
             <button
@@ -366,7 +366,7 @@ export function MerchantSettingsPanel({
             </button>
           </div>
 
-          <p className="mt-3 text-[11px] text-slate-400">
+          <p className="mt-3 text-[11px] text-zinc-400">
             Così appariranno il pulsante nelle email e nel portale /pay.
           </p>
         </div>
@@ -374,7 +374,7 @@ export function MerchantSettingsPanel({
 
       {error && <p className="mt-4 text-xs text-rose-500">{error}</p>}
 
-      <div className="mt-6 flex items-center justify-end border-t border-slate-200/60 pt-5">
+      <div className="mt-6 flex items-center justify-end border-t border-zinc-200/80 pt-5">
         <Button
           type="submit"
           disabled={saving || !isValidColor}

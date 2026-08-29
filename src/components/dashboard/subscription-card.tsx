@@ -39,7 +39,7 @@ export function SubscriptionCard({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200/70 bg-white p-6 shadow-sm hover:shadow-md">
+    <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-sm hover:shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
@@ -47,16 +47,16 @@ export function SubscriptionCard({
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-medium text-zinc-900">
                 Abbonamento RecoverPulse
               </p>
               {hasSubscription && (
-                <Badge className="h-auto bg-emerald-500/10 px-2 py-0.5 text-emerald-500">
+                <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">
                   Attivo
                 </Badge>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-zinc-500">
               {hasSubscription
                 ? "Gestisci piano, metodo di pagamento e fatture dal portale Stripe."
                 : "Nessun abbonamento attivo: scegli un piano qui sotto per iniziare."}
