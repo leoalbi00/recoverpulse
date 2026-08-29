@@ -4,7 +4,11 @@ import { auth } from "@/auth";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
-import { computeDashboardStats, computeRecoveryChartData, listTransactions } from "@/lib/transactions";
+import {
+  computeDashboardStats,
+  computeRecoveryChartData,
+  listTransactions,
+} from "@/lib/transactions";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -22,10 +26,10 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-12">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
           Bentornato, {firstName}
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1.5 text-sm text-slate-500">
           Ecco lo stato del recupero abbonamenti questo mese.
         </p>
       </div>
@@ -35,21 +39,39 @@ export default async function DashboardPage() {
           icon={DollarSign}
           label="Fatturato Recuperato"
           value={recoveredAmountLabel}
-          delta={stats.totalCount > 0 ? `${stats.recoveredCount} di ${stats.totalCount} fatture` : "Nessun dato"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.recoveredCount} di ${stats.totalCount} fatture`
+              : "Nessun dato"
+          }
           trend={stats.recoveredAmount > 0 ? "up" : "neutral"}
         />
         <StatCard
           icon={TrendingUp}
           label="Tasso di Recupero"
           value={`${stats.recoveryRate}%`}
-          delta={stats.totalCount > 0 ? `${stats.recoveredCount}/${stats.totalCount} recuperate` : "Nessun dato"}
-          trend={stats.recoveryRate >= 50 ? "up" : stats.totalCount > 0 ? "down" : "neutral"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.recoveredCount}/${stats.totalCount} recuperate`
+              : "Nessun dato"
+          }
+          trend={
+            stats.recoveryRate >= 50
+              ? "up"
+              : stats.totalCount > 0
+                ? "down"
+                : "neutral"
+          }
         />
         <StatCard
           icon={XCircle}
           label="Pagamenti Persi"
           value={String(stats.lostCount)}
-          delta={stats.totalCount > 0 ? `${stats.lostCount}/${stats.totalCount} fatture` : "Nessun dato"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.lostCount}/${stats.totalCount} fatture`
+              : "Nessun dato"
+          }
           trend={stats.lostCount > 0 ? "down" : "neutral"}
         />
         <StatCard
@@ -62,17 +84,18 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm sm:p-8">
+        <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md sm:p-8">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-lg font-semibold text-slate-900">
                 Fatturato Recuperato vs Pagamenti Falliti
               </h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                Ultime due settimane, aggiornato in tempo reale via webhook Stripe.
+              <p className="mt-1 text-sm text-slate-500">
+                Ultime due settimane, aggiornato in tempo reale via webhook
+                Stripe.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs text-zinc-600 dark:text-zinc-400">
+            <div className="flex items-center gap-4 text-xs text-slate-500">
               <span className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-emerald-500" />
                 Fatturato Recuperato
@@ -91,17 +114,17 @@ export default async function DashboardPage() {
 
       <section id="transazioni" className="mt-10 scroll-mt-20">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg font-semibold text-slate-900">
             Transazioni Fallite Recenti
           </h2>
           <a
             href="/dashboard/transazioni"
-            className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-500 dark:hover:text-emerald-400"
+            className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
           >
             Vedi tutte
           </a>
         </div>
-        <div className="mt-4 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 p-6 shadow-sm hover:shadow-md dark:shadow-xl dark:shadow-black/20 dark:backdrop-blur-sm">
+        <div className="mt-4 rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm hover:shadow-md">
           <FailedTransactionsTable transactions={recentTransactions} />
         </div>
       </section>
