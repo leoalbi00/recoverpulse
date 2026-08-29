@@ -21,10 +21,20 @@ export function CopyField({ value }: { value: string }) {
         readOnly
         value={value}
         onFocus={(event) => event.currentTarget.select()}
-        className="h-10 flex-1 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 font-mono text-xs text-zinc-300 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+        className="h-10 flex-1 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 font-mono text-xs text-zinc-700 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
       />
-      <Button type="button" variant="outline" size="default" onClick={handleCopy} className="shrink-0">
-        {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+      <Button
+        type="button"
+        variant="outline"
+        size="default"
+        onClick={handleCopy}
+        className="shrink-0 border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+      >
+        {copied ? (
+          <Check className="size-3.5 text-emerald-500" />
+        ) : (
+          <Copy className="size-3.5" />
+        )}
         {copied ? "Copiato" : "Copia"}
       </Button>
     </div>

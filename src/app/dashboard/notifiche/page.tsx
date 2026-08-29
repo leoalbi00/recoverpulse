@@ -11,7 +11,8 @@ export default async function NotifichePage() {
           Notifiche
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">
-          Nuovi lead pilota, pagamenti recuperati e avvisi di sistema, in un unico posto.
+          Nuovi lead pilota, pagamenti recuperati e avvisi di sistema, in un
+          unico posto.
         </p>
       </div>
 

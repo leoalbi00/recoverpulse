@@ -13,7 +13,12 @@ type KeysStatus = Record<keyof IntegrationSettings, FieldStatus>;
 type Service = "stripe" | "resend" | "twilio";
 type ConnectionState = "idle" | "testing" | "success" | "error";
 
-type FieldConfig = { id: keyof IntegrationSettings; label: string; placeholder: string; helper: string };
+type FieldConfig = {
+  id: keyof IntegrationSettings;
+  label: string;
+  placeholder: string;
+  helper: string;
+};
 
 const EMPTY_VALUES: Record<keyof IntegrationSettings, string> = {
   stripePublishableKey: "",
@@ -32,13 +37,15 @@ const SERVICES: { id: Service; name: string; fields: FieldConfig[] }[] = [
         id: "stripePublishableKey",
         label: "Stripe Public Key",
         placeholder: "pk_live_...",
-        helper: "Usata dal browser per inizializzare Stripe.js nel portale di pagamento.",
+        helper:
+          "Usata dal browser per inizializzare Stripe.js nel portale di pagamento.",
       },
       {
         id: "stripeSecretKey",
         label: "Stripe Secret Key",
         placeholder: "sk_live_...",
-        helper: "Usata dal server per creare checkout, fatture e leggere gli eventi Stripe.",
+        helper:
+          "Usata dal server per creare checkout, fatture e leggere gli eventi Stripe.",
       },
     ],
   },
@@ -74,12 +81,18 @@ const SERVICES: { id: Service; name: string; fields: FieldConfig[] }[] = [
   },
 ];
 
-function ConnectionBadge({ state, message }: { state: ConnectionState; message?: string }) {
+function ConnectionBadge({
+  state,
+  message,
+}: {
+  state: ConnectionState;
+  message?: string;
+}) {
   if (state === "idle") return null;
 
   if (state === "testing") {
     return (
-      <Badge variant="outline" className="h-auto border-zinc-700 bg-zinc-900 px-2 py-0.5 text-zinc-400">
+      <Badge className="h-auto bg-zinc-100 px-2 py-0.5 text-zinc-600">
         <Loader2 className="size-3 animate-spin" />
         Verifica…
       </Badge>
@@ -89,11 +102,12 @@ function ConnectionBadge({ state, message }: { state: ConnectionState; message?:
   const isSuccess = state === "success";
   return (
     <Badge
-      variant="outline"
       title={message}
       className={cn(
         "h-auto px-2 py-0.5",
-        isSuccess ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-rose-500/30 bg-rose-500/10 text-rose-500"
+        isSuccess
+          ? "bg-emerald-100 text-emerald-800"
+          : "bg-rose-100 text-rose-800",
       )}
     >
       {isSuccess ? "🟢 Connesso" : "🔴 Errore"}
@@ -101,20 +115,31 @@ function ConnectionBadge({ state, message }: { state: ConnectionState; message?:
   );
 }
 
-export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysStatus }) {
+export function IntegrationKeysPanel({
+  initialStatus,
+}: {
+  initialStatus: KeysStatus;
+}) {
   const [status, setStatus] = useState(initialStatus);
-  const [values, setValues] = useState<Record<keyof IntegrationSettings, string>>(EMPTY_VALUES);
-  const [visible, setVisible] = useState<Partial<Record<keyof IntegrationSettings, boolean>>>({});
+  const [values, setValues] =
+    useState<Record<keyof IntegrationSettings, string>>(EMPTY_VALUES);
+  const [visible, setVisible] = useState<
+    Partial<Record<keyof IntegrationSettings, boolean>>
+  >({});
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const [connectionState, setConnectionState] = useState<Record<Service, ConnectionState>>({
+  const [connectionState, setConnectionState] = useState<
+    Record<Service, ConnectionState>
+  >({
     stripe: "idle",
     resend: "idle",
     twilio: "idle",
   });
-  const [connectionMessage, setConnectionMessage] = useState<Partial<Record<Service, string>>>({});
+  const [connectionMessage, setConnectionMessage] = useState<
+    Partial<Record<Service, string>>
+  >({});
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
@@ -122,7 +147,7 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
     setSaving(true);
 
     const payload = Object.fromEntries(
-      Object.entries(values).filter(([, value]) => value.trim().length > 0)
+      Object.entries(values).filter(([, value]) => value.trim().length > 0),
     );
 
     try {
@@ -138,7 +163,9 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
       setValues(EMPTY_VALUES);
       setSavedAt(Date.now());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore durante il salvataggio.");
+      setError(
+        err instanceof Error ? err.message : "Errore durante il salvataggio.",
+      );
     } finally {
       setSaving(false);
     }
@@ -157,33 +184,43 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
       const data = await response.json().catch(() => null);
       const ok = Boolean(data?.ok);
 
-      setConnectionState((prev) => ({ ...prev, [service]: ok ? "success" : "error" }));
-      setConnectionMessage((prev) => ({ ...prev, [service]: data?.message ?? "Errore durante la verifica." }));
+      setConnectionState((prev) => ({
+        ...prev,
+        [service]: ok ? "success" : "error",
+      }));
+      setConnectionMessage((prev) => ({
+        ...prev,
+        [service]: data?.message ?? "Errore durante la verifica.",
+      }));
     } catch {
       setConnectionState((prev) => ({ ...prev, [service]: "error" }));
-      setConnectionMessage((prev) => ({ ...prev, [service]: "Impossibile contattare RecoverPulse. Riprova." }));
+      setConnectionMessage((prev) => ({
+        ...prev,
+        [service]: "Impossibile contattare RecoverPulse. Riprova.",
+      }));
     }
   }
 
   return (
     <form
       onSubmit={handleSave}
-      className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm"
+      className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <KeyRound className="size-4 text-emerald-500" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+            <KeyRound className="size-4 text-emerald-700" />
           </span>
           <div>
-            <p className="text-sm font-medium text-zinc-100">Chiavi API</p>
+            <p className="text-sm font-medium text-zinc-900">Chiavi API</p>
             <p className="mt-0.5 text-xs text-zinc-500">
-              Salvate su Supabase e usate subito nelle chiamate API, senza toccare i file .env.
+              Salvate su Supabase e usate subito nelle chiamate API, senza
+              toccare i file .env.
             </p>
           </div>
         </div>
         {savedAt > 0 && (
-          <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-500">
+          <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-600">
             <Check className="size-3.5" />
             Salvato
           </span>
@@ -192,26 +229,40 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
 
       <div className="mt-6 flex flex-col gap-6">
         {SERVICES.map((service) => (
-          <div key={service.id} className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
+          <div
+            key={service.id}
+            className="rounded-lg border border-zinc-200/80 bg-zinc-100 p-4"
+          >
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-zinc-200">{service.name}</p>
+              <p className="text-sm font-medium text-zinc-800">
+                {service.name}
+              </p>
               <div className="flex items-center gap-2">
-                <ConnectionBadge state={connectionState[service.id]} message={connectionMessage[service.id]} />
+                <ConnectionBadge
+                  state={connectionState[service.id]}
+                  message={connectionMessage[service.id]}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                   disabled={connectionState[service.id] === "testing"}
                   onClick={() => testConnection(service.id)}
                 >
-                  {connectionState[service.id] === "testing" ? "Verifica…" : "Testa Connessione"}
+                  {connectionState[service.id] === "testing"
+                    ? "Verifica…"
+                    : "Testa Connessione"}
                 </Button>
               </div>
             </div>
 
-            {connectionMessage[service.id] && connectionState[service.id] === "error" && (
-              <p className="mt-2 text-xs text-rose-500">{connectionMessage[service.id]}</p>
-            )}
+            {connectionMessage[service.id] &&
+              connectionState[service.id] === "error" && (
+                <p className="mt-2 text-xs text-rose-500">
+                  {connectionMessage[service.id]}
+                </p>
+              )}
 
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {service.fields.map((field) => {
@@ -219,14 +270,14 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
                 return (
                   <div key={field.id} className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <label htmlFor={field.id} className="text-sm font-medium text-zinc-300">
+                      <label
+                        htmlFor={field.id}
+                        className="text-sm font-medium text-zinc-700"
+                      >
                         {field.label}
                       </label>
                       {status[field.id].configured && (
-                        <Badge
-                          variant="outline"
-                          className="h-auto border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-emerald-500"
-                        >
+                        <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">
                           Configurata
                         </Badge>
                       )}
@@ -238,18 +289,36 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
                         autoComplete="off"
                         value={values[field.id]}
                         onChange={(event) =>
-                          setValues((prev) => ({ ...prev, [field.id]: event.target.value }))
+                          setValues((prev) => ({
+                            ...prev,
+                            [field.id]: event.target.value,
+                          }))
                         }
-                        placeholder={status[field.id].configured ? status[field.id].masked : field.placeholder}
-                        className="h-10 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 pr-10 font-mono text-sm text-zinc-100 placeholder:font-sans placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                        placeholder={
+                          status[field.id].configured
+                            ? status[field.id].masked
+                            : field.placeholder
+                        }
+                        className="h-10 w-full rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 pr-10 font-mono text-sm text-zinc-900 placeholder:font-sans placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                       />
                       <button
                         type="button"
-                        onClick={() => setVisible((prev) => ({ ...prev, [field.id]: !isVisible }))}
-                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
-                        aria-label={isVisible ? "Nascondi chiave" : "Mostra chiave"}
+                        onClick={() =>
+                          setVisible((prev) => ({
+                            ...prev,
+                            [field.id]: !isVisible,
+                          }))
+                        }
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-700"
+                        aria-label={
+                          isVisible ? "Nascondi chiave" : "Mostra chiave"
+                        }
                       >
-                        {isVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        {isVisible ? (
+                          <EyeOff className="size-4" />
+                        ) : (
+                          <Eye className="size-4" />
+                        )}
                       </button>
                     </div>
                     <p className="text-xs text-zinc-500">{field.helper}</p>
@@ -263,8 +332,10 @@ export function IntegrationKeysPanel({ initialStatus }: { initialStatus: KeysSta
 
       {error && <p className="mt-4 text-xs text-rose-500">{error}</p>}
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-800 pt-5">
-        <p className="text-xs text-zinc-500">Lascia un campo vuoto per mantenere il valore già salvato.</p>
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-200/80 pt-5">
+        <p className="text-xs text-zinc-500">
+          Lascia un campo vuoto per mantenere il valore già salvato.
+        </p>
         <Button type="submit" disabled={saving} className="shrink-0">
           {saving ? "Salvataggio…" : "Salva Chiavi API"}
         </Button>

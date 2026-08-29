@@ -11,8 +11,9 @@ export default function DunningPage() {
           Sequenze Dunning
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">
-          Automazione dei solleciti via email dopo un pagamento fallito: attiva o disattiva ogni passaggio e
-          personalizza il modello di ciascuna email.
+          Automazione dei solleciti via email dopo un pagamento fallito: attiva
+          o disattiva ogni passaggio e personalizza il modello di ciascuna
+          email.
         </p>
       </div>
 

@@ -23,7 +23,11 @@ import { NotificationBell } from "@/components/dashboard/notification-bell";
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Notifiche", href: "/dashboard/notifiche", icon: Bell },
-  { label: "Sequenze Dunning", href: "/dashboard/sequenze", icon: MessagesSquare },
+  {
+    label: "Sequenze Dunning",
+    href: "/dashboard/sequenze",
+    icon: MessagesSquare,
+  },
   { label: "Modelli Email", href: "/dashboard/dunning", icon: Mail },
   { label: "Transazioni", href: "/dashboard/transazioni", icon: Receipt },
   { label: "Impostazioni", href: "/dashboard/impostazioni", icon: Settings },
@@ -41,11 +45,14 @@ function SidebarContent({
 
   return (
     <div className="flex h-full flex-col">
-      <Link href="/" className="flex items-center gap-2 px-6 py-5 transition-opacity hover:opacity-80">
+      <Link
+        href="/"
+        className="flex items-center gap-2 px-6 py-5 transition-opacity hover:opacity-80"
+      >
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-semibold tracking-tight text-zinc-100">
+        <span className="text-base font-bold tracking-tight text-zinc-100">
           RecoverPulse
         </span>
       </Link>
@@ -53,7 +60,9 @@ function SidebarContent({
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {NAV_ITEMS.map((item) => {
           const isActive =
-            item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
+            item.href === "/dashboard"
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
 
           return (
             <a
@@ -64,11 +73,13 @@ function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "border-l-2 border-emerald-500 bg-zinc-800/60 text-zinc-100"
-                  : "border-l-2 border-transparent border-y-transparent border-r-transparent text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-100"
+                  ? "bg-emerald-500/10 text-emerald-400 font-semibold"
+                  : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100",
               )}
             >
-              <item.icon className={cn("size-4", isActive && "text-emerald-500")} />
+              <item.icon
+                className={cn("size-4", isActive && "text-emerald-400")}
+              />
               {item.label}
             </a>
           );
@@ -77,20 +88,20 @@ function SidebarContent({
 
       <div className="border-t border-zinc-800 p-4">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-medium text-emerald-500 ring-1 ring-emerald-500/20">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-400">
             {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-zinc-100">
               {user.name ?? "Utente"}
             </p>
-            <p className="truncate text-xs text-zinc-500">{user.email}</p>
+            <p className="truncate text-xs text-zinc-400">{user.email}</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800/40 hover:text-zinc-100"
+          className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
         >
           <LogOut className="size-4" />
           Esci
@@ -109,8 +120,11 @@ export function DashboardSidebar({ user }: SidebarProps) {
         <SidebarContent user={user} />
       </div>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 md:hidden">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:hidden">
+        <Link
+          href="/"
+          className="flex items-center gap-2 transition-opacity hover:opacity-80"
+        >
           <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
             <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
           </span>
@@ -138,7 +152,7 @@ export function DashboardSidebar({ user }: SidebarProps) {
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-800 bg-zinc-950">
+          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-800 bg-zinc-900">
             <button
               type="button"
               onClick={() => setOpen(false)}

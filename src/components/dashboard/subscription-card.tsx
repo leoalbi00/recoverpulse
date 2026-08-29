@@ -6,7 +6,11 @@ import { CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function SubscriptionCard({ hasSubscription }: { hasSubscription: boolean }) {
+export function SubscriptionCard({
+  hasSubscription,
+}: {
+  hasSubscription: boolean;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,30 +18,42 @@ export function SubscriptionCard({ hasSubscription }: { hasSubscription: boolean
     setError(null);
     setLoading(true);
     try {
-      const response = await fetch("/api/dashboard/billing-portal", { method: "POST" });
+      const response = await fetch("/api/dashboard/billing-portal", {
+        method: "POST",
+      });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.url) {
-        throw new Error(data?.error ?? "Impossibile aprire il portale di fatturazione.");
+        throw new Error(
+          data?.error ?? "Impossibile aprire il portale di fatturazione.",
+        );
       }
       window.location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossibile aprire il portale di fatturazione.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Impossibile aprire il portale di fatturazione.",
+      );
       setLoading(false);
     }
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
+    <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-            <CreditCard className="size-4 text-emerald-500" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+            <CreditCard className="size-4 text-emerald-700" />
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-zinc-100">Abbonamento RecoverPulse</p>
+              <p className="text-sm font-medium text-zinc-900">
+                Abbonamento RecoverPulse
+              </p>
               {hasSubscription && (
-                <Badge className="h-auto bg-emerald-500/10 px-2 py-0.5 text-emerald-500">Attivo</Badge>
+                <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">
+                  Attivo
+                </Badge>
               )}
             </div>
             <p className="mt-0.5 text-xs text-zinc-500">
@@ -47,7 +63,13 @@ export function SubscriptionCard({ hasSubscription }: { hasSubscription: boolean
             </p>
           </div>
         </div>
-        <Button type="button" variant="outline" disabled={loading} onClick={handleManage} className="shrink-0">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={loading}
+          onClick={handleManage}
+          className="shrink-0 border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+        >
           {loading ? "Apertura…" : "Gestisci Abbonamento"}
         </Button>
       </div>

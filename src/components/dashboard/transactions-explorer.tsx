@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Search, Send } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Loader2,
+  Search,
+  Send,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,17 +22,18 @@ const STATUS_LABEL: Record<TransactionStatus, string> = {
 };
 
 const STATUS_BADGE_CLASS: Record<TransactionStatus, string> = {
-  in_corso: "bg-amber-400/10 text-amber-400 ring-1 ring-inset ring-amber-400/20",
-  recuperato: "bg-emerald-500/10 text-emerald-500 ring-1 ring-inset ring-emerald-500/20",
-  perso: "bg-rose-500/10 text-rose-500 ring-1 ring-inset ring-rose-500/20",
+  in_corso: "bg-amber-100 text-amber-800",
+  recuperato: "bg-emerald-100 text-emerald-800",
+  perso: "bg-rose-100 text-rose-800",
 };
 
-const STATUS_FILTERS: { value: TransactionStatus | "tutti"; label: string }[] = [
-  { value: "tutti", label: "Tutti" },
-  { value: "recuperato", label: STATUS_LABEL.recuperato },
-  { value: "in_corso", label: STATUS_LABEL.in_corso },
-  { value: "perso", label: STATUS_LABEL.perso },
-];
+const STATUS_FILTERS: { value: TransactionStatus | "tutti"; label: string }[] =
+  [
+    { value: "tutti", label: "Tutti" },
+    { value: "recuperato", label: STATUS_LABEL.recuperato },
+    { value: "in_corso", label: STATUS_LABEL.in_corso },
+    { value: "perso", label: STATUS_LABEL.perso },
+  ];
 
 const CHANNEL_LABEL: Record<DunningLogChannel, string> = {
   whatsapp: "WhatsApp",
@@ -50,12 +58,17 @@ function formatAmount(amount: number, currency: string) {
 }
 
 function formatDate(iso: string) {
-  return new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "short", year: "numeric" }).format(
-    new Date(iso)
-  );
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(iso));
 }
 
-function lastActionLabel(transaction: FailedTransaction, dunning: DunningAttemptInfo | undefined): string {
+function lastActionLabel(
+  transaction: FailedTransaction,
+  dunning: DunningAttemptInfo | undefined,
+): string {
   if (transaction.status === "recuperato" && transaction.recoveredAt) {
     return `Pagamento recuperato il ${formatDate(transaction.recoveredAt)}`;
   }
@@ -79,7 +92,7 @@ function csvEscape(value: string): string {
 
 function downloadTransactionsCsv(
   transactions: FailedTransaction[],
-  dunningByInvoice: Record<string, DunningAttemptInfo>
+  dunningByInvoice: Record<string, DunningAttemptInfo>,
 ) {
   const header = [
     "ID Fattura",
@@ -129,15 +142,21 @@ type TransactionsExplorerProps = {
   dunningByInvoice: Record<string, DunningAttemptInfo>;
 };
 
-export function TransactionsExplorer({ transactions, dunningByInvoice }: TransactionsExplorerProps) {
+export function TransactionsExplorer({
+  transactions,
+  dunningByInvoice,
+}: TransactionsExplorerProps) {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "tutti">("tutti");
+  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "tutti">(
+    "tutti",
+  );
   const [page, setPage] = useState(0);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return transactions.filter((tx) => {
-      const matchesStatus = statusFilter === "tutti" || tx.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "tutti" || tx.status === statusFilter;
       const matchesQuery =
         query.length === 0 ||
         tx.customerName.toLowerCase().includes(query) ||
@@ -149,7 +168,10 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
-  const paginated = filtered.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+  const paginated = filtered.slice(
+    currentPage * PAGE_SIZE,
+    currentPage * PAGE_SIZE + PAGE_SIZE,
+  );
 
   function updateSearch(value: string) {
     setSearch(value);
@@ -172,16 +194,24 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
               value={search}
               onChange={(event) => updateSearch(event.target.value)}
               placeholder="Cerca per cliente, email o ID fattura…"
-              className="h-9 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-9 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white text-zinc-900 pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={(event) => updateStatusFilter(event.target.value as TransactionStatus | "tutti")}
-            className="h-9 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
+            onChange={(event) =>
+              updateStatusFilter(
+                event.target.value as TransactionStatus | "tutti",
+              )
+            }
+            className="h-9 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
           >
             {STATUS_FILTERS.map((option) => (
-              <option key={option.value} value={option.value} className="bg-zinc-900">
+              <option
+                key={option.value}
+                value={option.value}
+                className="bg-white text-zinc-900"
+              >
                 {option.label}
               </option>
             ))}
@@ -192,6 +222,7 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
           type="button"
           variant="outline"
           size="sm"
+          className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
           disabled={filtered.length === 0}
           onClick={() => downloadTransactionsCsv(filtered, dunningByInvoice)}
         >
@@ -211,34 +242,42 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-xs uppercase tracking-wide text-zinc-400">
+                <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-500">
                   <th className="px-3 pb-3 font-medium first:pl-0">Cliente</th>
                   <th className="px-3 pb-3 font-medium">Importo</th>
                   <th className="px-3 pb-3 font-medium">Data Fallimento</th>
                   <th className="px-3 pb-3 font-medium">Stato</th>
                   <th className="px-3 pb-3 font-medium">Tentativi Dunning</th>
                   <th className="px-3 pb-3 font-medium">Ultima Azione</th>
-                  <th className="px-3 pb-3 text-right font-medium last:pr-0">Azioni</th>
+                  <th className="px-3 pb-3 text-right font-medium last:pr-0">
+                    Azioni
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
+              <tbody className="divide-y divide-zinc-200">
                 {paginated.map((tx) => (
-                  <TransactionRow key={tx.id} transaction={tx} dunning={dunningByInvoice[tx.invoiceId]} />
+                  <TransactionRow
+                    key={tx.id}
+                    transaction={tx}
+                    dunning={dunningByInvoice[tx.invoiceId]}
+                  />
                 ))}
               </tbody>
             </table>
           </div>
 
           {pageCount > 1 && (
-            <div className="mt-5 flex items-center justify-between text-sm text-zinc-400">
+            <div className="mt-5 flex items-center justify-between text-sm text-zinc-500">
               <p>
-                Pagina {currentPage + 1} di {pageCount} · {filtered.length} transazioni
+                Pagina {currentPage + 1} di {pageCount} · {filtered.length}{" "}
+                transazioni
               </p>
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="icon-sm"
+                  className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                   disabled={currentPage === 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                 >
@@ -248,6 +287,7 @@ export function TransactionsExplorer({ transactions, dunningByInvoice }: Transac
                   type="button"
                   variant="outline"
                   size="icon-sm"
+                  className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                   disabled={currentPage >= pageCount - 1}
                   onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
                 >
@@ -269,14 +309,19 @@ function TransactionRow({
   transaction: FailedTransaction;
   dunning: DunningAttemptInfo | undefined;
 }) {
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
 
   async function handleResend() {
     setState("sending");
     try {
-      const response = await fetch(`/api/dashboard/transactions/${transaction.invoiceId}/resend`, {
-        method: "POST",
-      });
+      const response = await fetch(
+        `/api/dashboard/transactions/${transaction.invoiceId}/resend`,
+        {
+          method: "POST",
+        },
+      );
       if (!response.ok) throw new Error("resend failed");
       setState("sent");
     } catch {
@@ -287,30 +332,45 @@ function TransactionRow({
   }
 
   return (
-    <tr className="transition-colors hover:bg-zinc-800/30">
+    <tr className="transition-colors hover:bg-zinc-100">
       <td className="px-3 py-3 first:pl-0">
-        <p className="font-medium text-zinc-100">{transaction.customerName}</p>
+        <p className="font-medium text-zinc-900">{transaction.customerName}</p>
         <p className="text-xs text-zinc-500">{transaction.customerEmail}</p>
       </td>
-      <td className="px-3 py-3 font-medium text-zinc-100">
+      <td className="px-3 py-3 font-medium text-zinc-900">
         {formatAmount(transaction.amount, transaction.currency)}
       </td>
-      <td className="px-3 py-3 text-zinc-400">{formatDate(transaction.createdAt)}</td>
-      <td className="px-3 py-3">
-        <Badge className={STATUS_BADGE_CLASS[transaction.status]}>{STATUS_LABEL[transaction.status]}</Badge>
+      <td className="px-3 py-3 text-zinc-500">
+        {formatDate(transaction.createdAt)}
       </td>
-      <td className="px-3 py-3 text-zinc-400">{dunning?.attempts ?? 0}</td>
-      <td className="px-3 py-3 text-zinc-400">{lastActionLabel(transaction, dunning)}</td>
+      <td className="px-3 py-3">
+        <Badge className={STATUS_BADGE_CLASS[transaction.status]}>
+          {STATUS_LABEL[transaction.status]}
+        </Badge>
+      </td>
+      <td className="px-3 py-3 text-zinc-500">{dunning?.attempts ?? 0}</td>
+      <td className="px-3 py-3 text-zinc-500">
+        {lastActionLabel(transaction, dunning)}
+      </td>
       <td className="px-3 py-3 text-right last:pr-0">
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
           disabled={transaction.status !== "in_corso" || state === "sending"}
           onClick={handleResend}
         >
-          {state === "sending" ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
-          {state === "sent" ? "Inviato" : state === "error" ? "Errore" : "Sollecito"}
+          {state === "sending" ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Send className="size-3.5" />
+          )}
+          {state === "sent"
+            ? "Inviato"
+            : state === "error"
+              ? "Errore"
+              : "Sollecito"}
         </Button>
       </td>
     </tr>

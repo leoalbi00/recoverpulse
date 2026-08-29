@@ -19,16 +19,24 @@ async function loadTransactionsData(): Promise<{
   try {
     transactions = await listTransactions();
   } catch (error) {
-    console.error("[dashboard/transazioni] errore nel recupero delle transazioni:", error);
+    console.error(
+      "[dashboard/transazioni] errore nel recupero delle transazioni:",
+      error,
+    );
     return { transactions: [], dunningByInvoice: {} };
   }
 
   let dunningByInvoice: Record<string, DunningAttemptInfo> = {};
   try {
-    const summaries = await getDunningLogSummaries(transactions.map((tx) => tx.invoiceId));
+    const summaries = await getDunningLogSummaries(
+      transactions.map((tx) => tx.invoiceId),
+    );
     dunningByInvoice = Object.fromEntries(summaries);
   } catch (error) {
-    console.error("[dashboard/transazioni] errore nel recupero dello storico solleciti:", error);
+    console.error(
+      "[dashboard/transazioni] errore nel recupero dello storico solleciti:",
+      error,
+    );
   }
 
   return { transactions, dunningByInvoice };
@@ -44,13 +52,17 @@ export default async function TransazioniPage() {
           Transazioni
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">
-          Storico completo dei pagamenti falliti intercettati via webhook Stripe, con lo stato di
-          recupero e i solleciti inviati per ciascuna fattura.
+          Storico completo dei pagamenti falliti intercettati via webhook
+          Stripe, con lo stato di recupero e i solleciti inviati per ciascuna
+          fattura.
         </p>
       </div>
 
-      <div className="mt-8 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
-        <TransactionsExplorer transactions={transactions} dunningByInvoice={dunningByInvoice} />
+      <div className="mt-8 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
+        <TransactionsExplorer
+          transactions={transactions}
+          dunningByInvoice={dunningByInvoice}
+        />
       </div>
     </main>
   );

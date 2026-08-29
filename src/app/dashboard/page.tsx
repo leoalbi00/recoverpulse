@@ -4,7 +4,11 @@ import { auth } from "@/auth";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
-import { computeDashboardStats, computeRecoveryChartData, listTransactions } from "@/lib/transactions";
+import {
+  computeDashboardStats,
+  computeRecoveryChartData,
+  listTransactions,
+} from "@/lib/transactions";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -35,21 +39,39 @@ export default async function DashboardPage() {
           icon={DollarSign}
           label="Fatturato Recuperato"
           value={recoveredAmountLabel}
-          delta={stats.totalCount > 0 ? `${stats.recoveredCount} di ${stats.totalCount} fatture` : "Nessun dato"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.recoveredCount} di ${stats.totalCount} fatture`
+              : "Nessun dato"
+          }
           trend={stats.recoveredAmount > 0 ? "up" : "neutral"}
         />
         <StatCard
           icon={TrendingUp}
           label="Tasso di Recupero"
           value={`${stats.recoveryRate}%`}
-          delta={stats.totalCount > 0 ? `${stats.recoveredCount}/${stats.totalCount} recuperate` : "Nessun dato"}
-          trend={stats.recoveryRate >= 50 ? "up" : stats.totalCount > 0 ? "down" : "neutral"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.recoveredCount}/${stats.totalCount} recuperate`
+              : "Nessun dato"
+          }
+          trend={
+            stats.recoveryRate >= 50
+              ? "up"
+              : stats.totalCount > 0
+                ? "down"
+                : "neutral"
+          }
         />
         <StatCard
           icon={XCircle}
           label="Pagamenti Persi"
           value={String(stats.lostCount)}
-          delta={stats.totalCount > 0 ? `${stats.lostCount}/${stats.totalCount} fatture` : "Nessun dato"}
+          delta={
+            stats.totalCount > 0
+              ? `${stats.lostCount}/${stats.totalCount} fatture`
+              : "Nessun dato"
+          }
           trend={stats.lostCount > 0 ? "down" : "neutral"}
         />
         <StatCard
@@ -62,17 +84,18 @@ export default async function DashboardPage() {
       </div>
 
       <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-8">
+        <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-100">
+              <h2 className="text-lg font-semibold text-zinc-900">
                 Fatturato Recuperato vs Pagamenti Falliti
               </h2>
-              <p className="mt-1 text-sm text-zinc-400">
-                Ultime due settimane, aggiornato in tempo reale via webhook Stripe.
+              <p className="mt-1 text-sm text-zinc-500">
+                Ultime due settimane, aggiornato in tempo reale via webhook
+                Stripe.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs text-zinc-400">
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
               <span className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-emerald-500" />
                 Fatturato Recuperato
@@ -101,7 +124,7 @@ export default async function DashboardPage() {
             Vedi tutte
           </a>
         </div>
-        <div className="mt-4 rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
+        <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
           <FailedTransactionsTable transactions={recentTransactions} />
         </div>
       </section>

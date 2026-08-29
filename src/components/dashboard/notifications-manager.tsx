@@ -1,22 +1,43 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Layers, Loader2, Trash2, X, Zap, type LucideIcon } from "lucide-react";
+import {
+  Check,
+  Layers,
+  Loader2,
+  Trash2,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyField } from "@/components/dashboard/copy-field";
 import { NotificationTypeIcon } from "@/components/dashboard/notification-type-icon";
-import { broadcastNotificationsChanged, onNotificationsChanged } from "@/lib/notification-events";
+import {
+  broadcastNotificationsChanged,
+  onNotificationsChanged,
+} from "@/lib/notification-events";
 import { NOTIFICATION_STYLES } from "@/lib/notification-style";
 import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/lib/notifications";
 
 type CategoryFilter = "all" | NotificationType;
 
-const CATEGORIES: { value: CategoryFilter; label: string; Icon: LucideIcon; iconClass: string }[] = [
-  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-400" },
-  { value: "lead", label: "Lead", Icon: NOTIFICATION_STYLES.lead.Icon, iconClass: NOTIFICATION_STYLES.lead.iconClass },
+const CATEGORIES: {
+  value: CategoryFilter;
+  label: string;
+  Icon: LucideIcon;
+  iconClass: string;
+}[] = [
+  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-500" },
+  {
+    value: "lead",
+    label: "Lead",
+    Icon: NOTIFICATION_STYLES.lead.Icon,
+    iconClass: NOTIFICATION_STYLES.lead.iconClass,
+  },
   {
     value: "recovery",
     label: "Recuperi",
@@ -39,7 +60,11 @@ type LeadMetadata = {
   message?: string | null;
 };
 
-type SimulateResult = { portalUrl: string; customerName: string; amountLabel: string };
+type SimulateResult = {
+  portalUrl: string;
+  customerName: string;
+  amountLabel: string;
+};
 
 function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat("it-IT", {
@@ -51,14 +76,20 @@ function formatDateTime(iso: string): string {
   }).format(new Date(iso));
 }
 
-export function NotificationsManager({ initialNotifications }: { initialNotifications: Notification[] }) {
+export function NotificationsManager({
+  initialNotifications,
+}: {
+  initialNotifications: Notification[];
+}) {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [leadModal, setLeadModal] = useState<Notification | null>(null);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   const [simulating, setSimulating] = useState(false);
-  const [simulateResult, setSimulateResult] = useState<SimulateResult | null>(null);
+  const [simulateResult, setSimulateResult] = useState<SimulateResult | null>(
+    null,
+  );
   const [simulateError, setSimulateError] = useState<string | null>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -82,7 +113,10 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
     }
   }, []);
 
-  useEffect(() => onNotificationsChanged(refreshNotifications), [refreshNotifications]);
+  useEffect(
+    () => onNotificationsChanged(refreshNotifications),
+    [refreshNotifications],
+  );
 
   function setPending(id: string, pending: boolean) {
     setPendingIds((prev) => {
@@ -94,7 +128,9 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
   }
 
   async function markAsRead(id: string) {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
     setPending(id, true);
 
     try {
@@ -152,11 +188,15 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
     setSimulateResult(null);
 
     try {
-      const response = await fetch("/api/test/generate-failed-payment", { method: "POST" });
+      const response = await fetch("/api/test/generate-failed-payment", {
+        method: "POST",
+      });
       const data = await response.json().catch(() => null);
 
       if (!response.ok || !data?.success) {
-        setSimulateError(data?.error ?? "Impossibile generare la transazione di prova.");
+        setSimulateError(
+          data?.error ?? "Impossibile generare la transazione di prova.",
+        );
         return;
       }
 
@@ -184,16 +224,19 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm">
+      <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/10 ring-1 ring-amber-400/20">
-              <Zap className="size-4 text-amber-400" />
+              <Zap className="size-4 text-amber-600" />
             </span>
             <div>
-              <p className="text-sm font-medium text-zinc-100">Simula Pagamento Fallito</p>
+              <p className="text-sm font-medium text-zinc-900">
+                Simula Pagamento Fallito
+              </p>
               <p className="mt-0.5 text-xs text-zinc-500">
-                Genera una fattura di test (TechCorp, €199) e il link al portale di recupero.
+                Genera una fattura di test (TechCorp, €199) e il link al portale
+                di recupero.
               </p>
             </div>
           </div>
@@ -203,20 +246,29 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
             size="sm"
             disabled={simulating}
             onClick={simulateFailedPayment}
-            className="w-full shrink-0 sm:w-auto"
+            className="w-full shrink-0 border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 sm:w-auto"
           >
-            {simulating ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
+            {simulating ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Zap className="size-3.5" />
+            )}
             {simulating ? "Generazione…" : "Simula Pagamento Fallito"}
           </Button>
         </div>
 
-        {simulateError && <p className="mt-4 text-xs text-rose-500">{simulateError}</p>}
+        {simulateError && (
+          <p className="mt-4 text-xs text-rose-500">{simulateError}</p>
+        )}
 
         {simulateResult && (
-          <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
-            <p className="text-xs text-zinc-400">
-              Transazione creata per <span className="text-zinc-200">{simulateResult.customerName}</span> ·{" "}
-              {simulateResult.amountLabel}
+          <div className="mt-4 rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
+            <p className="text-xs text-zinc-500">
+              Transazione creata per{" "}
+              <span className="text-zinc-800">
+                {simulateResult.customerName}
+              </span>{" "}
+              · {simulateResult.amountLabel}
             </p>
             <div className="mt-2.5">
               <CopyField value={simulateResult.portalUrl} />
@@ -235,8 +287,8 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
               className={cn(
                 "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                 category === item.value
-                  ? "border-zinc-700 bg-zinc-800/80 text-zinc-100"
-                  : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-100"
+                  ? "border-zinc-300 bg-zinc-100 text-zinc-900"
+                  : "border-zinc-200/80 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900",
               )}
             >
               <item.Icon className={cn("size-3.5 shrink-0", item.iconClass)} />
@@ -246,109 +298,143 @@ export function NotificationsManager({ initialNotifications }: { initialNotifica
         </div>
 
         {unreadCount > 0 && (
-          <Button type="button" variant="ghost" size="sm" onClick={markAllAsRead} className="self-start sm:self-auto">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={markAllAsRead}
+            className="self-start sm:self-auto"
+          >
             <Check className="size-3.5" />
             Segna tutte come lette
           </Button>
         )}
       </div>
 
-      <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/60 shadow-xl shadow-black/20 backdrop-blur-sm">
-        {filtered.length === 0 ? (
-          <p className="px-6 py-10 text-center text-sm text-zinc-500">
-            {notifications.length === 0 ? "Nessuna notifica al momento." : "Nessuna notifica in questa categoria."}
-          </p>
-        ) : (
-          <ul className="divide-y divide-zinc-800/60">
-            {filtered.map((notification) => {
-              const style = NOTIFICATION_STYLES[notification.type];
-              const isLead = notification.type === "lead";
-              const isPending = pendingIds.has(notification.id);
+      {filtered.length === 0 ? (
+        <p className="px-6 py-10 text-center text-sm text-zinc-400">
+          {notifications.length === 0
+            ? "Nessuna notifica al momento."
+            : "Nessuna notifica in questa categoria."}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {filtered.map((notification) => {
+            const style = NOTIFICATION_STYLES[notification.type];
+            const isLead = notification.type === "lead";
+            const isPending = pendingIds.has(notification.id);
 
-              return (
-                <li
-                  key={notification.id}
+            return (
+              <li
+                key={notification.id}
+                className={cn(
+                  "flex items-start gap-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-4 shadow-md",
+                  !notification.read && cn("border-l-4", style.borderClass),
+                )}
+              >
+                <NotificationTypeIcon
+                  type={notification.type}
+                  className="mt-0.5"
+                />
+
+                <button
+                  type="button"
+                  disabled={!isLead}
+                  onClick={() => isLead && openLead(notification)}
                   className={cn(
-                    "flex items-start gap-4 border-l-4 px-5 py-4 transition-colors hover:bg-zinc-800/50",
-                    notification.read ? "border-l-transparent" : cn(style.borderClass, style.tintClass)
+                    "min-w-0 flex-1 text-left",
+                    isLead && "cursor-pointer",
                   )}
                 >
-                  <NotificationTypeIcon type={notification.type} className="mt-0.5" />
-
-                  <button
-                    type="button"
-                    disabled={!isLead}
-                    onClick={() => isLead && openLead(notification)}
-                    className={cn("min-w-0 flex-1 text-left", isLead && "cursor-pointer")}
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-medium text-zinc-400">{style.label}</span>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "h-auto px-1.5 py-0 text-[10px]",
-                          notification.read
-                            ? "border-zinc-700 text-zinc-500"
-                            : "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                        )}
-                      >
-                        {notification.read ? "Letta" : "Non letta"}
-                      </Badge>
-                      {isLead && <span className="text-[11px] text-indigo-400">Vedi dettagli →</span>}
-                    </div>
-                    <p
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-zinc-500">
+                      {style.label}
+                    </span>
+                    <Badge
                       className={cn(
-                        "mt-1 text-sm",
-                        notification.read ? "text-zinc-400" : "font-semibold text-white"
+                        "h-auto px-1.5 py-0 text-[10px]",
+                        notification.read
+                          ? "bg-zinc-100 text-zinc-600"
+                          : "bg-emerald-100 text-emerald-800",
                       )}
                     >
-                      {notification.message}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-400">{formatDateTime(notification.createdAt)}</p>
-                  </button>
-
-                  <div className="flex shrink-0 items-center gap-1">
-                    {!notification.read && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={isPending}
-                        onClick={() => markAsRead(notification.id)}
-                        aria-label="Segna come letta"
-                        title="Segna come letta"
-                      >
-                        <Check className="size-3.5" />
-                      </Button>
+                      {notification.read ? "Letta" : "Non letta"}
+                    </Badge>
+                    {isLead && (
+                      <span className="text-[11px] text-indigo-600">
+                        Vedi dettagli →
+                      </span>
                     )}
+                  </div>
+                  <p
+                    className={cn(
+                      "mt-1 text-sm",
+                      notification.read
+                        ? "text-zinc-500"
+                        : "font-semibold text-zinc-900",
+                    )}
+                  >
+                    {notification.message}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {formatDateTime(notification.createdAt)}
+                  </p>
+                </button>
+
+                <div className="flex shrink-0 items-center gap-1">
+                  {!notification.read && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
                       disabled={isPending}
-                      onClick={() => deleteOne(notification.id)}
-                      aria-label="Elimina notifica"
-                      title="Elimina notifica"
-                      className="hover:text-rose-500"
+                      onClick={() => markAsRead(notification.id)}
+                      aria-label="Segna come letta"
+                      title="Segna come letta"
                     >
-                      <Trash2 className="size-3.5" />
+                      <Check className="size-3.5" />
                     </Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={isPending}
+                    onClick={() => deleteOne(notification.id)}
+                    aria-label="Elimina notifica"
+                    title="Elimina notifica"
+                    className="hover:text-rose-500"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-      {leadModal && <LeadDetailModal notification={leadModal} onClose={() => setLeadModal(null)} />}
+      {leadModal && (
+        <LeadDetailModal
+          notification={leadModal}
+          onClose={() => setLeadModal(null)}
+        />
+      )}
     </div>
   );
 }
 
-function LeadDetailModal({ notification, onClose }: { notification: Notification; onClose: () => void }) {
+function LeadDetailModal({
+  notification,
+  onClose,
+}: {
+  notification: Notification;
+  onClose: () => void;
+}) {
   const metadata = (notification.metadata ?? {}) as LeadMetadata;
-  const hasDetails = Boolean(metadata.name || metadata.email || metadata.company);
+  const hasDetails = Boolean(
+    metadata.name || metadata.email || metadata.company,
+  );
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -365,20 +451,22 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl shadow-black/90"
+        className="relative w-full max-w-md rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-lg"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <NotificationTypeIcon type="lead" />
             <div>
-              <p className="text-xs font-medium text-indigo-400">Nuovo Lead</p>
-              <h3 className="mt-0.5 text-lg font-semibold text-zinc-100">Richiesta pilota</h3>
+              <p className="text-xs font-medium text-indigo-600">Nuovo Lead</p>
+              <h3 className="mt-0.5 text-lg font-semibold text-zinc-900">
+                Richiesta pilota
+              </h3>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-800/80 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 transition-colors hover:bg-zinc-200 hover:text-zinc-900"
             aria-label="Chiudi"
           >
             <X className="size-4" />
@@ -394,13 +482,13 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
             <DetailRow label="Messaggio" value={metadata.message} multiline />
           </dl>
         ) : (
-          <p className="mt-5 text-sm text-zinc-400">{notification.message}</p>
+          <p className="mt-5 text-sm text-zinc-500">{notification.message}</p>
         )}
 
         {!hasDetails && (
           <p className="mt-3 text-xs text-zinc-500">
-            Dettagli del modulo non disponibili per questa notifica (generata prima dell&apos;introduzione della
-            scheda lead).
+            Dettagli del modulo non disponibili per questa notifica (generata
+            prima dell&apos;introduzione della scheda lead).
           </p>
         )}
       </div>
@@ -408,12 +496,27 @@ function LeadDetailModal({ notification, onClose }: { notification: Notification
   );
 }
 
-function DetailRow({ label, value, multiline = false }: { label: string; value?: string | null; multiline?: boolean }) {
+function DetailRow({
+  label,
+  value,
+  multiline = false,
+}: {
+  label: string;
+  value?: string | null;
+  multiline?: boolean;
+}) {
   const displayValue = value && value.trim().length > 0 ? value : "—";
   return (
     <div>
       <dt className="text-xs font-medium text-zinc-500">{label}</dt>
-      <dd className={cn("mt-0.5 text-zinc-200", multiline && "whitespace-pre-wrap")}>{displayValue}</dd>
+      <dd
+        className={cn(
+          "mt-0.5 text-zinc-800",
+          multiline && "whitespace-pre-wrap",
+        )}
+      >
+        {displayValue}
+      </dd>
     </div>
   );
 }
