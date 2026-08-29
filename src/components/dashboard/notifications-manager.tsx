@@ -31,7 +31,7 @@ const CATEGORIES: {
   Icon: LucideIcon;
   iconClass: string;
 }[] = [
-  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-500" },
+  { value: "all", label: "Tutte", Icon: Layers, iconClass: "text-zinc-600" },
   {
     value: "lead",
     label: "Lead",
@@ -234,7 +234,7 @@ export function NotificationsManager({
               <p className="text-sm font-medium text-zinc-900">
                 Simula Pagamento Fallito
               </p>
-              <p className="mt-0.5 text-xs text-zinc-500">
+              <p className="mt-0.5 text-xs text-zinc-600">
                 Genera una fattura di test (TechCorp, €199) e il link al portale
                 di recupero.
               </p>
@@ -263,7 +263,7 @@ export function NotificationsManager({
 
         {simulateResult && (
           <div className="mt-4 rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-600">
               Transazione creata per{" "}
               <span className="text-zinc-800">
                 {simulateResult.customerName}
@@ -347,7 +347,7 @@ export function NotificationsManager({
                   )}
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-medium text-zinc-500">
+                    <span className="text-xs font-medium text-zinc-600">
                       {style.label}
                     </span>
                     <Badge
@@ -370,13 +370,13 @@ export function NotificationsManager({
                     className={cn(
                       "mt-1 text-sm",
                       notification.read
-                        ? "text-zinc-500"
+                        ? "text-zinc-600"
                         : "font-semibold text-zinc-900",
                     )}
                   >
                     {notification.message}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-zinc-600">
                     {formatDateTime(notification.createdAt)}
                   </p>
                 </button>
@@ -482,11 +482,11 @@ function LeadDetailModal({
             <DetailRow label="Messaggio" value={metadata.message} multiline />
           </dl>
         ) : (
-          <p className="mt-5 text-sm text-zinc-500">{notification.message}</p>
+          <p className="mt-5 text-sm text-zinc-600">{notification.message}</p>
         )}
 
         {!hasDetails && (
-          <p className="mt-3 text-xs text-zinc-500">
+          <p className="mt-3 text-xs text-zinc-600">
             Dettagli del modulo non disponibili per questa notifica (generata
             prima dell&apos;introduzione della scheda lead).
           </p>
@@ -508,7 +508,7 @@ function DetailRow({
   const displayValue = value && value.trim().length > 0 ? value : "—";
   return (
     <div>
-      <dt className="text-xs font-medium text-zinc-500">{label}</dt>
+      <dt className="text-xs font-medium text-zinc-600">{label}</dt>
       <dd
         className={cn(
           "mt-0.5 text-zinc-800",

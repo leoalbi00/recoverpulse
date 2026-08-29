@@ -56,7 +56,7 @@ export function SubscriptionCard({
                 </Badge>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="mt-0.5 text-xs text-zinc-600">
               {hasSubscription
                 ? "Gestisci piano, metodo di pagamento e fatture dal portale Stripe."
                 : "Nessun abbonamento attivo: scegli un piano qui sotto per iniziare."}

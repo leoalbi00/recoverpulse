@@ -152,7 +152,7 @@ export function MerchantSettingsPanel({
             <p className="text-sm font-medium text-zinc-900">
               Brand &amp; Personalizzazione
             </p>
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="mt-0.5 text-xs text-zinc-600">
               Applicati automaticamente alle email di sollecito e al portale di
               aggiornamento carta.
             </p>
@@ -243,20 +243,20 @@ export function MerchantSettingsPanel({
               {uploading ? (
                 <>
                   <Loader2 className="size-5 animate-spin text-emerald-500" />
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-zinc-600">
                     Caricamento in corso…
                   </p>
                 </>
               ) : (
                 <>
-                  <UploadCloud className="size-5 text-zinc-500" />
-                  <p className="text-xs text-zinc-500">
+                  <UploadCloud className="size-5 text-zinc-600" />
+                  <p className="text-xs text-zinc-600">
                     Trascina qui il logo o{" "}
                     <span className="font-medium text-emerald-600">
                       sfoglia i file
                     </span>
                   </p>
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-[11px] text-zinc-600">
                     PNG, JPG, WebP o SVG · max 5MB
                   </p>
                 </>
@@ -268,7 +268,7 @@ export function MerchantSettingsPanel({
             )}
 
             <div className="mt-1 flex items-center gap-2">
-              <span className="shrink-0 text-xs text-zinc-500">
+              <span className="shrink-0 text-xs text-zinc-600">
                 oppure URL:
               </span>
               <input
@@ -283,7 +283,7 @@ export function MerchantSettingsPanel({
                 className="h-9 w-full rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-600">
               Lascia vuoto per usare il logo predefinito di RecoverPulse.
               Consigliato: quadrato su sfondo trasparente.
             </p>
@@ -323,7 +323,7 @@ export function MerchantSettingsPanel({
 
         {/* Live preview: aggiornata a ogni digitazione/upload, prima ancora di salvare */}
         <div className="rounded-xl border border-zinc-200/80 bg-zinc-100 p-4">
-          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
+          <p className="text-xs font-medium text-zinc-600 uppercase tracking-wide">
             Anteprima live
           </p>
           <div className="mt-3 flex items-center gap-2">
@@ -352,7 +352,7 @@ export function MerchantSettingsPanel({
           </div>
 
           <div className="mt-4 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 p-3">
-            <p className="text-[11px] text-zinc-500">Email di sollecito</p>
+            <p className="text-[11px] text-zinc-600">Email di sollecito</p>
             <p className="mt-1 text-xs text-zinc-700">
               Aggiorna il metodo di pagamento per continuare il servizio.
             </p>
@@ -366,7 +366,7 @@ export function MerchantSettingsPanel({
             </button>
           </div>
 
-          <p className="mt-3 text-[11px] text-zinc-500">
+          <p className="mt-3 text-[11px] text-zinc-600">
             Così appariranno il pulsante nelle email e nel portale /pay.
           </p>
         </div>

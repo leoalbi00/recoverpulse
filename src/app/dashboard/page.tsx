@@ -90,12 +90,12 @@ export default async function DashboardPage() {
               <h2 className="text-lg font-semibold text-zinc-900">
                 Fatturato Recuperato vs Pagamenti Falliti
               </h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-600">
                 Ultime due settimane, aggiornato in tempo reale via webhook
                 Stripe.
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs text-zinc-500">
+            <div className="flex items-center gap-4 text-xs text-zinc-600">
               <span className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full bg-emerald-500" />
                 Fatturato Recuperato

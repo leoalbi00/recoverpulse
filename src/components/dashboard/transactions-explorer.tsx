@@ -188,13 +188,13 @@ export function TransactionsExplorer({
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:max-w-xs">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-600" />
             <input
               type="text"
               value={search}
               onChange={(event) => updateSearch(event.target.value)}
               placeholder="Cerca per cliente, email o ID fattura…"
-              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white text-zinc-900 pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
           <select
@@ -204,7 +204,7 @@ export function TransactionsExplorer({
                 event.target.value as TransactionStatus | "tutti",
               )
             }
-            className="h-9 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
+            className="h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
           >
             {STATUS_FILTERS.map((option) => (
               <option
@@ -232,7 +232,7 @@ export function TransactionsExplorer({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-10 text-center text-sm text-zinc-500">
+        <p className="py-10 text-center text-sm text-zinc-600">
           {transactions.length === 0
             ? "Nessuna transazione registrata al momento."
             : "Nessuna transazione corrisponde ai filtri selezionati."}
@@ -242,7 +242,7 @@ export function TransactionsExplorer({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-500">
+                <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
                   <th className="px-3 pb-3 font-medium first:pl-0">Cliente</th>
                   <th className="px-3 pb-3 font-medium">Importo</th>
                   <th className="px-3 pb-3 font-medium">Data Fallimento</th>
@@ -267,7 +267,7 @@ export function TransactionsExplorer({
           </div>
 
           {pageCount > 1 && (
-            <div className="mt-5 flex items-center justify-between text-sm text-zinc-500">
+            <div className="mt-5 flex items-center justify-between text-sm text-zinc-600">
               <p>
                 Pagina {currentPage + 1} di {pageCount} · {filtered.length}{" "}
                 transazioni
@@ -335,12 +335,12 @@ function TransactionRow({
     <tr className="transition-colors hover:bg-zinc-100">
       <td className="px-3 py-3 first:pl-0">
         <p className="font-medium text-zinc-900">{transaction.customerName}</p>
-        <p className="text-xs text-zinc-500">{transaction.customerEmail}</p>
+        <p className="text-xs text-zinc-600">{transaction.customerEmail}</p>
       </td>
       <td className="px-3 py-3 font-medium text-zinc-900">
         {formatAmount(transaction.amount, transaction.currency)}
       </td>
-      <td className="px-3 py-3 text-zinc-500">
+      <td className="px-3 py-3 text-zinc-600">
         {formatDate(transaction.createdAt)}
       </td>
       <td className="px-3 py-3">
@@ -348,8 +348,8 @@ function TransactionRow({
           {STATUS_LABEL[transaction.status]}
         </Badge>
       </td>
-      <td className="px-3 py-3 text-zinc-500">{dunning?.attempts ?? 0}</td>
-      <td className="px-3 py-3 text-zinc-500">
+      <td className="px-3 py-3 text-zinc-600">{dunning?.attempts ?? 0}</td>
+      <td className="px-3 py-3 text-zinc-600">
         {lastActionLabel(transaction, dunning)}
       </td>
       <td className="px-3 py-3 text-right last:pr-0">

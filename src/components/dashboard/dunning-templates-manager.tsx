@@ -108,7 +108,7 @@ export function DunningTemplatesManager({
           <p className="text-sm font-medium text-zinc-900">
             Automazione {automationEnabled ? "Attiva" : "In Pausa"}
           </p>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-zinc-600">
             Quando è attiva, ogni pagamento fallito avvia automaticamente la
             sequenza di solleciti qui sotto.
           </p>
@@ -137,7 +137,7 @@ export function DunningTemplatesManager({
                     "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
                     step.enabled
                       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
-                      : "border-zinc-300 bg-zinc-100 text-zinc-500",
+                      : "border-zinc-300 bg-zinc-100 text-zinc-600",
                   )}
                 >
                   {index + 1}
@@ -149,14 +149,14 @@ export function DunningTemplatesManager({
                       <p className="text-sm font-semibold text-zinc-900">
                         {step.label}
                       </p>
-                      <p className="mt-0.5 text-xs text-zinc-500">
+                      <p className="mt-0.5 text-xs text-zinc-600">
                         {step.description}
                       </p>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-3">
                       {step.delayDays > 0 && (
-                        <label className="flex items-center gap-1.5 text-xs text-zinc-500">
+                        <label className="flex items-center gap-1.5 text-xs text-zinc-600">
                           T+
                           <input
                             type="number"
@@ -207,7 +207,7 @@ export function DunningTemplatesManager({
 
                   {openStepId === step.id && (
                     <div className="mt-4 rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
-                      <div className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+                      <div className="flex items-center gap-2 text-xs font-medium text-zinc-600">
                         <Mail className="size-3.5" />
                         Variabili disponibili
                       </div>
@@ -230,7 +230,7 @@ export function DunningTemplatesManager({
                       <div className="mt-4 flex flex-col gap-1.5">
                         <label
                           htmlFor={`subject-${step.id}`}
-                          className="text-xs font-medium text-zinc-500"
+                          className="text-xs font-medium text-zinc-600"
                         >
                           Oggetto email
                         </label>
@@ -247,14 +247,14 @@ export function DunningTemplatesManager({
                           onChange={(event) =>
                             updateStep(step.id, { subject: event.target.value })
                           }
-                          className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                          className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                         />
                       </div>
 
                       <div className="mt-4 flex flex-col gap-1.5">
                         <label
                           htmlFor={`body-${step.id}`}
-                          className="text-xs font-medium text-zinc-500"
+                          className="text-xs font-medium text-zinc-600"
                         >
                           Testo dell&apos;email
                         </label>
@@ -271,7 +271,7 @@ export function DunningTemplatesManager({
                             updateStep(step.id, { body: event.target.value })
                           }
                           rows={8}
-                          className="w-full min-w-0 resize-y rounded-lg border border-zinc-200/80 bg-white text-zinc-900 p-3 font-mono text-xs leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                          className="w-full min-w-0 resize-y rounded-lg border border-zinc-200/80 bg-white p-3 font-mono text-xs leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                         />
                       </div>
                     </div>
@@ -293,7 +293,7 @@ export function DunningTemplatesManager({
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="pointer-events-auto flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-white text-zinc-900 px-4 py-3 text-sm text-zinc-900 shadow-lg"
+            className="pointer-events-auto flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-white px-4 py-3 text-sm text-zinc-900 shadow-lg"
           >
             <Check className="size-4 text-emerald-500" />
             {toast.message}

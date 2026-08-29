@@ -102,7 +102,7 @@ export default async function ImpostazioniPage() {
               <Badge
                 key={eventName}
                 variant="outline"
-                className="h-auto border-zinc-200/80 bg-zinc-100 px-2 py-1 font-mono text-[11px] text-zinc-500"
+                className="h-auto border-zinc-200/80 bg-zinc-100 px-2 py-1 font-mono text-[11px] text-zinc-600"
               >
                 {eventName}
               </Badge>
@@ -154,9 +154,9 @@ export default async function ImpostazioniPage() {
                 <span className="text-2xl font-semibold text-zinc-900">
                   {plan.price}
                 </span>
-                <span className="text-xs text-zinc-500">{plan.period}</span>
+                <span className="text-xs text-zinc-600">{plan.period}</span>
               </div>
-              <p className="mt-2 text-xs text-zinc-500">{plan.description}</p>
+              <p className="mt-2 text-xs text-zinc-600">{plan.description}</p>
               <PlanButton
                 plan={plan}
                 variant={plan.popular ? "default" : "outline"}

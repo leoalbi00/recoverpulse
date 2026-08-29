@@ -195,7 +195,7 @@ export function NotificationBell() {
                       >
                         {notification.message}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-500">
+                      <p className="mt-1 text-xs text-zinc-600">
                         {formatRelativeTime(notification.createdAt)}
                       </p>
                     </div>

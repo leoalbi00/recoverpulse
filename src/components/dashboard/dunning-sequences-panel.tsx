@@ -111,10 +111,10 @@ export function DunningSequencesPanel({
                 <p className="mt-4 text-lg font-semibold text-zinc-900">
                   {channel.label}
                 </p>
-                <p className="mt-1 text-sm text-zinc-500">
+                <p className="mt-1 text-sm text-zinc-600">
                   {channel.description}
                 </p>
-                <p className="mt-4 text-xs text-zinc-500">
+                <p className="mt-4 text-xs text-zinc-600">
                   {enabled ? "Canale attivo" : "Canale disattivato"}
                 </p>
               </div>
@@ -156,11 +156,11 @@ export function DunningSequencesPanel({
                     <p className="text-sm font-medium text-zinc-900">
                       {step.label}
                     </p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-600">
                       Passaggio {index + 1} della sequenza
                     </p>
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-zinc-500">
+                  <label className="flex items-center gap-2 text-sm text-zinc-600">
                     T+
                     <input
                       type="number"
@@ -173,7 +173,7 @@ export function DunningSequencesPanel({
                           step.unit,
                         )
                       }
-                      className="h-9 w-20 rounded-lg border border-zinc-200/80 bg-white text-zinc-900 px-2 text-center text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                      className="h-9 w-20 rounded-lg border border-zinc-200/80 bg-white px-2 text-center text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
                     />
                     {step.unit}
                   </label>

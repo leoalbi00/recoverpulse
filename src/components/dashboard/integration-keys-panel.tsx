@@ -213,7 +213,7 @@ export function IntegrationKeysPanel({
           </span>
           <div>
             <p className="text-sm font-medium text-zinc-900">Chiavi API</p>
-            <p className="mt-0.5 text-xs text-zinc-500">
+            <p className="mt-0.5 text-xs text-zinc-600">
               Salvate su Supabase e usate subito nelle chiamate API, senza
               toccare i file .env.
             </p>
@@ -309,7 +309,7 @@ export function IntegrationKeysPanel({
                             [field.id]: !isVisible,
                           }))
                         }
-                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-500 hover:text-zinc-700"
+                        className="absolute top-1/2 right-2.5 -translate-y-1/2 text-zinc-600 hover:text-zinc-700"
                         aria-label={
                           isVisible ? "Nascondi chiave" : "Mostra chiave"
                         }
@@ -321,7 +321,7 @@ export function IntegrationKeysPanel({
                         )}
                       </button>
                     </div>
-                    <p className="text-xs text-zinc-500">{field.helper}</p>
+                    <p className="text-xs text-zinc-600">{field.helper}</p>
                   </div>
                 );
               })}
@@ -333,7 +333,7 @@ export function IntegrationKeysPanel({
       {error && <p className="mt-4 text-xs text-rose-500">{error}</p>}
 
       <div className="mt-6 flex items-center justify-between gap-3 border-t border-zinc-200/80 pt-5">
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-600">
           Lascia un campo vuoto per mantenere il valore già salvato.
         </p>
         <Button type="submit" disabled={saving} className="shrink-0">
