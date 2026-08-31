@@ -24,11 +24,6 @@ export async function GET(request: Request) {
   }
 
   const clientId = process.env.STRIPE_CONNECT_CLIENT_ID;
-  // TODO(debug temporaneo): rimuovere dopo aver diagnosticato "No application
-  // matches the supplied client identifier" — non logga il valore completo.
-  console.log(
-    `[stripe-connect][debug] client_id prefix=${clientId?.slice(0, 7) ?? "undefined"} length=${clientId?.length ?? 0}`
-  );
   if (!clientId) {
     console.error("[stripe-connect] STRIPE_CONNECT_CLIENT_ID non configurato.");
     return NextResponse.json(
