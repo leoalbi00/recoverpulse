@@ -6,6 +6,8 @@ import { getAppBaseUrl } from "@/lib/app-url";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createConnectState } from "@/lib/stripe-connect-state";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Punto di ingresso del bottone "Connetti con Stripe"
  * (src/components/dashboard/stripe-connect-card.tsx): redirige alla pagina

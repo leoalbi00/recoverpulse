@@ -10,6 +10,8 @@ import {
   upsertConnectedStripeAccount,
 } from "@/lib/connected-stripe-accounts";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Callback OAuth Standard Connect: scambia il `code` per un access_token
  * scoped sull'account collegato e lo salva. Vedi
