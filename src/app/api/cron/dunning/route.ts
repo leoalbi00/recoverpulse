@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { listActiveFailedTransactions, type FailedTransaction } from "@/lib/transactions";
+import { listActiveFailedTransactions, markInvoiceLost, type FailedTransaction } from "@/lib/transactions";
 import { hasDunningLogForStep, recordDunningLog } from "@/lib/dunning-logs";
 import { sendDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
@@ -10,6 +10,10 @@ export const dynamic = "force-dynamic";
 // Sequenza di solleciti via email: numero di giorni trascorsi dalla creazione
 // della fattura fallita ai quali va inviato il prossimo promemoria.
 const DUNNING_STEP_DAYS = [3, 7, 14] as const;
+
+// Oltre l'ultimo step la sequenza di solleciti è esaurita: se la fattura è
+// ancora 'in_corso' a questo punto, il recupero viene considerato fallito.
+const DUNNING_MAX_STEP_DAYS = DUNNING_STEP_DAYS[DUNNING_STEP_DAYS.length - 1];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -88,7 +92,8 @@ async function sendStepReminder(transaction: FailedTransaction, stepDays: number
  * se i giorni trascorsi dalla creazione coincidono con uno degli step
  * previsti (3, 7, 14 giorni) invia il sollecito via email con il link al
  * portale /pay/[token], registrando l'invio in dunning_logs per non
- * spedirlo due volte.
+ * spedirlo due volte. Superato l'ultimo step senza che il pagamento sia
+ * stato recuperato, la fattura viene segnata come 'perso'.
  */
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
@@ -103,11 +108,32 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Errore nel recupero delle transazioni." }, { status: 500 });
   }
 
-  const summary = { checked: transactions.length, sent: 0, skipped: 0, failed: 0 };
+  const summary = { checked: transactions.length, sent: 0, skipped: 0, failed: 0, lost: 0 };
 
   for (const transaction of transactions) {
-    const stepDays = DUNNING_STEP_DAYS.find((days) => days === daysElapsedSince(transaction.createdAt));
+    const elapsedDays = daysElapsedSince(transaction.createdAt);
+    const stepDays = DUNNING_STEP_DAYS.find((days) => days === elapsedDays);
+
     if (stepDays === undefined) {
+      if (elapsedDays > DUNNING_MAX_STEP_DAYS) {
+        try {
+          const lost = await markInvoiceLost(transaction.invoiceId);
+          if (lost) {
+            console.log(
+              `[cron/dunning] fattura ${transaction.invoiceId} segnata come "perso": sequenza di solleciti esaurita dopo ${DUNNING_MAX_STEP_DAYS} giorni senza recupero.`
+            );
+            summary.lost++;
+            continue;
+          }
+        } catch (error) {
+          console.error(
+            `[cron/dunning] impossibile segnare come "perso" la fattura ${transaction.invoiceId}:`,
+            error
+          );
+          summary.failed++;
+          continue;
+        }
+      }
       summary.skipped++;
       continue;
     }

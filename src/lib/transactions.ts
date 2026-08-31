@@ -128,6 +128,29 @@ export async function markInvoiceRecovered(invoiceId: string): Promise<FailedTra
 }
 
 /**
+ * Segna come "perso" una singola fattura ancora in corso, tipicamente
+ * chiamata dal cron di dunning (src/app/api/cron/dunning/route.ts) quando i
+ * giorni trascorsi superano l'ultimo step della sequenza di solleciti senza
+ * che il pagamento sia stato recuperato. Il filtro su status "in_corso"
+ * rende la chiamata idempotente tra esecuzioni successive del cron.
+ */
+export async function markInvoiceLost(invoiceId: string): Promise<FailedTransaction | null> {
+  const { data, error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ status: "perso" satisfies TransactionStatus })
+    .eq("invoice_id", invoiceId)
+    .eq("status", "in_corso")
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Errore nell'aggiornamento della fattura persa su Supabase: ${error.message}`);
+  }
+
+  return data ? mapRow(data) : null;
+}
+
+/**
  * Segna come "perso" ogni recupero ancora in corso legato a uno Stripe
  * Subscription ID, tipicamente in risposta a customer.subscription.deleted:
  * una volta cancellato l'abbonamento non ha più senso proseguire la
