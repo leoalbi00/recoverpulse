@@ -89,6 +89,7 @@ async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoic
     currency: invoice.currency,
     reason,
     paymentLinkToken,
+    hostedInvoiceUrl: invoice.hosted_invoice_url,
   });
 
   console.log(
@@ -191,6 +192,7 @@ export async function POST(request: Request) {
         await handleInvoicePaymentFailed(stripe, event.data.object);
         break;
       case "invoice.payment_succeeded":
+      case "invoice.paid":
         await handleInvoicePaymentSucceeded(event.data.object);
         break;
       case "payment_intent.succeeded":

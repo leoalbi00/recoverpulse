@@ -17,6 +17,8 @@ export type FailedTransaction = {
   reason: string;
   status: TransactionStatus;
   paymentLinkToken: string;
+  /** Link Stripe alla fattura ospitata (invoice.hosted_invoice_url), se disponibile. */
+  hostedInvoiceUrl: string | null;
   createdAt: string;
   recoveredAt: string | null;
 };
@@ -34,6 +36,7 @@ type FailedTransactionRow = {
   reason: string;
   status: TransactionStatus;
   payment_link_token: string;
+  hosted_invoice_url: string | null;
   created_at: string;
   recovered_at: string | null;
 };
@@ -52,6 +55,7 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
     reason: row.reason,
     status: row.status,
     paymentLinkToken: row.payment_link_token,
+    hostedInvoiceUrl: row.hosted_invoice_url,
     createdAt: row.created_at,
     recoveredAt: row.recovered_at,
   };
@@ -75,6 +79,8 @@ export async function recordFailedPayment(input: {
   reason: string;
   /** Token monouso (in chiaro) generato su Supabase da `createPaymentToken` per il link del portale. */
   paymentLinkToken: string;
+  /** Link Stripe alla fattura ospitata (invoice.hosted_invoice_url), se disponibile. */
+  hostedInvoiceUrl?: string | null;
 }): Promise<FailedTransaction> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
@@ -90,6 +96,7 @@ export async function recordFailedPayment(input: {
         currency: input.currency,
         reason: input.reason,
         payment_link_token: input.paymentLinkToken,
+        hosted_invoice_url: input.hostedInvoiceUrl ?? null,
         status: "in_corso" satisfies TransactionStatus,
         recovered_at: null,
       },

@@ -17,6 +17,9 @@ import { cn } from "@/lib/utils";
 const WEBHOOK_EVENTS = [
   "invoice.payment_failed",
   "invoice.payment_succeeded",
+  "invoice.paid",
+  "payment_intent.succeeded",
+  "customer.subscription.deleted",
   "checkout.session.completed",
 ];
 
