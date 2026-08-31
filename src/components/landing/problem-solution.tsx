@@ -1,6 +1,7 @@
 import { ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const PROBLEM_POINTS = [
   "Il pagamento fallisce in silenzio: nessun avviso, nessun follow-up.",
@@ -96,13 +97,15 @@ export function ProblemSolution() {
                 </li>
               ))}
             </ul>
-            <a
-              href="#roi-calculator"
-              className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300"
+            <Button
+              variant="outline"
+              size="sm"
+              render={<a href="#roi-calculator" />}
+              className="mt-6 gap-1.5 rounded-full border-emerald-500/40 bg-transparent text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
             >
               Scopri quanto puoi recuperare
-              <ArrowRight className="size-3.5" />
-            </a>
+              <ArrowRight className="size-3.5" data-icon="inline-end" />
+            </Button>
           </div>
         </div>
       </div>

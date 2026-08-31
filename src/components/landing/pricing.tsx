@@ -31,7 +31,7 @@ export function Pricing() {
           {PLANS.map((plan) => (
             <div key={plan.id} className="relative h-full">
               {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 z-10 h-auto -translate-x-1/2 gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-zinc-950">
+                <Badge className="absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-zinc-950 shadow-lg shadow-emerald-500/30">
                   <Sparkles className="size-3.5" />
                   Più Popolare
                 </Badge>
@@ -60,7 +60,10 @@ export function Pricing() {
                 <PlanButton
                   plan={plan}
                   variant={plan.popular ? "default" : "outline"}
-                  className="mt-8 h-12 w-full rounded-full text-base font-semibold"
+                  className={cn(
+                    "mt-8 h-12 w-full rounded-full text-base font-semibold",
+                    plan.popular && "shadow-lg shadow-emerald-500/20",
+                  )}
                 />
 
                 <ul className="mt-8 flex flex-col gap-3">
