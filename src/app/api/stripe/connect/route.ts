@@ -12,7 +12,10 @@ export async function GET() {
   }
 
   const [account, trial] = await Promise.all([
-    getConnectedAccountForUser(session.user.id),
+    getConnectedAccountForUser(session.user.id).catch((error) => {
+      console.error("[stripe-connect] errore nel recupero dell'account collegato:", error);
+      return null;
+    }),
     getTrialStatus(session.user.id),
   ]);
 

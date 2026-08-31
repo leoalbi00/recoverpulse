@@ -8,7 +8,12 @@ export default async function NotifichePage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const notifications = await listNotifications(200, session.user.id);
+  let notifications: Awaited<ReturnType<typeof listNotifications>> = [];
+  try {
+    notifications = await listNotifications(200, session.user.id);
+  } catch (error) {
+    console.error("[dashboard/notifiche] errore nel recupero delle notifiche:", error);
+  }
 
   return (
     <div className="mx-auto max-w-5xl">

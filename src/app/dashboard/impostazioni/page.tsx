@@ -20,7 +20,10 @@ export default async function ImpostazioniPage() {
 
   const settings = await getIntegrationSettings();
   const merchantSettings = await getMerchantSettings(session.user.id);
-  const connectedAccount = await getConnectedAccountForUser(session.user.id);
+  const connectedAccount = await getConnectedAccountForUser(session.user.id).catch((error) => {
+    console.error("[impostazioni] errore nel recupero dell'account Stripe collegato:", error);
+    return null;
+  });
   const keysStatus = {
     resendApiKey: {
       configured: settings.resendApiKey.length > 0,

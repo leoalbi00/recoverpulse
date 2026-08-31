@@ -230,7 +230,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     }
 
     const preventiveStripeAccountId = paymentToken.userId
-      ? await getStripeAccountIdForUser(paymentToken.userId)
+      ? await getStripeAccountIdForUser(paymentToken.userId).catch(() => null)
       : null;
     const preventiveStripePublishableKey = preventiveStripeAccountId
       ? await getStripePublishableKeyForAccount(preventiveStripeAccountId)
@@ -309,7 +309,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     );
   }
 
-  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId);
+  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId).catch(() => null);
   const stripePublishableKey = stripeAccountId ? await getStripePublishableKeyForAccount(stripeAccountId) : "";
 
   return (

@@ -20,7 +20,7 @@ export async function POST() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  const stripeAccountId = await getStripeAccountIdForUser(session.user.id);
+  const stripeAccountId = await getStripeAccountIdForUser(session.user.id).catch(() => null);
   if (!stripeAccountId) {
     return NextResponse.json(
       { error: "Collega prima un account Stripe da Impostazioni per generare una transazione di test." },

@@ -21,12 +21,16 @@ export async function GET(request: Request) {
   const rawLimit = Number(searchParams.get("limit"));
   const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : DEFAULT_LIST_LIMIT;
 
-  const [notifications, unreadCount] = await Promise.all([
-    listNotifications(limit, session.user.id),
-    countUnreadNotifications(session.user.id),
-  ]);
-
-  return NextResponse.json({ notifications, unreadCount });
+  try {
+    const [notifications, unreadCount] = await Promise.all([
+      listNotifications(limit, session.user.id),
+      countUnreadNotifications(session.user.id),
+    ]);
+    return NextResponse.json({ notifications, unreadCount });
+  } catch (error) {
+    console.error("[notifications] errore nel recupero:", error);
+    return NextResponse.json({ error: "Errore durante il recupero delle notifiche." }, { status: 500 });
+  }
 }
 
 export async function PATCH(request: Request) {

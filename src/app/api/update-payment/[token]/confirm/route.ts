@@ -75,7 +75,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
       return NextResponse.json({ error: "Token non associato a un merchant." }, { status: 409 });
     }
 
-    const stripeAccountId = await getStripeAccountIdForUser(paymentToken.userId);
+    const stripeAccountId = await getStripeAccountIdForUser(paymentToken.userId).catch(() => null);
     if (!stripeAccountId) {
       return NextResponse.json({ error: "Nessun account Stripe collegato per questo merchant." }, { status: 409 });
     }
@@ -149,7 +149,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     return NextResponse.json({ success: true, planName: transaction.planName, simulated: true });
   }
 
-  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId);
+  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId).catch(() => null);
   if (!stripeAccountId) {
     return NextResponse.json(
       { error: "Nessun account Stripe collegato per questo merchant. Usa la conferma simulata." },
