@@ -94,3 +94,31 @@ export async function getDunningLogSummaries(
 
   return summaries;
 }
+
+/**
+ * Tutti i solleciti registrati (invoice_id, step_days, status), usata dalla
+ * dashboard principale (src/app/dashboard/page.tsx) per calcolare il tasso di
+ * conversione per step della sequenza dunning
+ * (src/lib/dashboard-analytics.ts, computeSequencePerformance). A differenza
+ * di getDunningLogSummaries non aggrega per fattura: serve il dettaglio per
+ * step per capire quali step ha effettivamente raggiunto ciascuna fattura.
+ */
+export async function listAllDunningLogs(): Promise<
+  { invoiceId: string; stepDays: number; status: DunningLogStatus }[]
+> {
+  const { data, error } = await supabaseAdmin
+    .from("dunning_logs")
+    .select("invoice_id, step_days, status")
+    .order("sent_at", { ascending: false })
+    .limit(2000);
+
+  if (error) {
+    throw new Error(`Errore nel recupero dei solleciti su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    invoiceId: row.invoice_id,
+    stepDays: row.step_days,
+    status: row.status,
+  }));
+}

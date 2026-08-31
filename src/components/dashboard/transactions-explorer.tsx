@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { FailedTransaction, TransactionStatus } from "@/lib/transactions";
 import type { DunningLogChannel } from "@/lib/dunning-logs";
+import { csvEscape, downloadCsv } from "@/lib/csv-export";
 
 const STATUS_LABEL: Record<TransactionStatus, string> = {
   in_corso: "In corso",
@@ -83,13 +84,6 @@ function lastActionLabel(
   return `Sollecito ${channelLabel} ${outcome} il ${formatDate(dunning.lastSentAt)}`;
 }
 
-function csvEscape(value: string): string {
-  if (/[",\n;]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
 function downloadTransactionsCsv(
   transactions: FailedTransaction[],
   dunningByInvoice: Record<string, DunningAttemptInfo>,
@@ -123,18 +117,8 @@ function downloadTransactionsCsv(
       .join(";");
   });
 
-  const csv = [header.join(";"), ...rows].join("\n");
-  // BOM iniziale: senza, Excel apre il CSV UTF-8 interpretando male gli accenti.
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `transazioni-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const csv = "\ufeff" + [header.join(";"), ...rows].join("\n");
+  downloadCsv(`transazioni-${new Date().toISOString().slice(0, 10)}.csv`, csv);
 }
 
 type TransactionsExplorerProps = {

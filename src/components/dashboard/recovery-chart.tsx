@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
-import type { RecoveryChartPoint } from "@/lib/transactions";
+import type { RecoveryChartPoint } from "@/lib/dashboard-analytics";
 
 function ChartTooltip({
   active,

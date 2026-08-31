@@ -239,64 +239,7 @@ export async function listActiveFailedTransactions(): Promise<FailedTransaction[
   return (data ?? []).map(mapRow);
 }
 
-export type DashboardStats = {
-  totalCount: number;
-  recoveredCount: number;
-  activeFailedCount: number;
-  lostCount: number;
-  recoveredAmount: number;
-  recoveryRate: number;
-  currency: string;
-};
-
-export function computeDashboardStats(all: FailedTransaction[]): DashboardStats {
-  const recovered = all.filter((t) => t.status === "recuperato");
-  const active = all.filter((t) => t.status === "in_corso");
-  const lost = all.filter((t) => t.status === "perso");
-
-  return {
-    totalCount: all.length,
-    recoveredCount: recovered.length,
-    activeFailedCount: active.length,
-    lostCount: lost.length,
-    recoveredAmount: recovered.reduce((sum, t) => sum + t.amount, 0),
-    recoveryRate: all.length > 0 ? Math.round((recovered.length / all.length) * 100) : 0,
-    currency: all[0]?.currency ?? "usd",
-  };
-}
-
-export type RecoveryChartPoint = {
-  day: string;
-  recovered: number;
-  failed: number;
-};
-
-export function computeRecoveryChartData(all: FailedTransaction[], days = 14): RecoveryChartPoint[] {
-  const dayMs = 24 * 60 * 60 * 1000;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const buckets = Array.from({ length: days }, (_, index) => {
-    const date = new Date(today.getTime() - (days - 1 - index) * dayMs);
-    return {
-      key: date.toISOString().slice(0, 10),
-      day: new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "short" }).format(date),
-      recovered: 0,
-      failed: 0,
-    };
-  });
-
-  const byKey = new Map(buckets.map((bucket) => [bucket.key, bucket]));
-
-  for (const transaction of all) {
-    const failedBucket = byKey.get(transaction.createdAt.slice(0, 10));
-    if (failedBucket) failedBucket.failed += Math.round((transaction.amount / 100) * 100) / 100;
-
-    if (transaction.status === "recuperato" && transaction.recoveredAt) {
-      const recoveredBucket = byKey.get(transaction.recoveredAt.slice(0, 10));
-      if (recoveredBucket) recoveredBucket.recovered += Math.round((transaction.amount / 100) * 100) / 100;
-    }
-  }
-
-  return buckets.map(({ day, recovered, failed }) => ({ day, recovered, failed }));
-}
+// computeDashboardStats, computeRecoveryChartData e i relativi tipi sono
+// stati spostati in src/lib/dashboard-analytics.ts: sono funzioni pure senza
+// dipendenze da Supabase, richiamabili anche dal componente client che
+// gestisce il filtro temporale della dashboard (niente "server-only" lì).
