@@ -64,7 +64,7 @@ const STEP_ORDER: DunningTemplateStepId[] = ["immediate", "first_reminder", "fin
 
 // RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
 // riga identificata da questo id fisso, sempre la stessa a ogni upsert.
-const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
+const SETTINGS_ID = "default";
 
 const VARIABLE_PLACEHOLDER_BODY = (label: string) =>
   `Ciao {{nome_cliente}},\n\n${label} Il pagamento di {{importo}} per {{nome_piano}} non è ancora andato a buon fine.\n\nAggiorna il tuo metodo di pagamento qui:\n{{link_recupero}}\n\nGrazie,\nIl team`;

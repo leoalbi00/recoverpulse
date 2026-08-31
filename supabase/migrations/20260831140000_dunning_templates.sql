@@ -23,7 +23,7 @@
 -- via service role lato server.
 
 create table if not exists public.dunning_template_settings (
-  id uuid primary key,
+  id text primary key default 'default',
   automation_enabled boolean not null default true,
   updated_at timestamptz not null default now()
 );
@@ -44,7 +44,7 @@ grant select, insert, update, delete on public.dunning_template_settings to serv
 grant select, insert, update, delete on public.dunning_template_steps to service_role;
 
 insert into public.dunning_template_settings (id, automation_enabled)
-values ('00000000-0000-0000-0000-000000000001', true)
+values ('default', true)
 on conflict (id) do nothing;
 
 -- Seed con gli stessi default storici di src/lib/dunning-templates.ts

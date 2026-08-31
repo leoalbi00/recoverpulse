@@ -15,7 +15,7 @@
 -- src/lib/dunning.ts), i relativi toggle in dashboard sono disabilitati.
 
 create table if not exists public.dunning_settings (
-  id uuid primary key,
+  id text primary key default 'default',
   channel_whatsapp boolean not null default false,
   channel_sms boolean not null default false,
   channel_email boolean not null default true,
@@ -30,5 +30,5 @@ alter table public.dunning_settings enable row level security;
 grant select, insert, update, delete on public.dunning_settings to service_role;
 
 insert into public.dunning_settings (id)
-values ('00000000-0000-0000-0000-000000000001')
+values ('default')
 on conflict (id) do nothing;

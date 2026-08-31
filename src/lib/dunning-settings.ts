@@ -14,7 +14,7 @@ export type DunningSettings = {
 
 // RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
 // riga identificata da questo id fisso, sempre la stessa a ogni upsert.
-const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
+const SETTINGS_ID = "default";
 
 function defaultSettings(): DunningSettings {
   return {
