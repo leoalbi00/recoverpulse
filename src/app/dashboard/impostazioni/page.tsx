@@ -1,46 +1,27 @@
-import { headers } from "next/headers";
-import { Webhook } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
-import { CopyField } from "@/components/dashboard/copy-field";
 import { IntegrationKeysPanel } from "@/components/dashboard/integration-keys-panel";
 import { MerchantSettingsPanel } from "@/components/dashboard/merchant-settings-panel";
+import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { PlanButton } from "@/components/billing/plan-button";
 import { getIntegrationSettings, maskSecret } from "@/lib/integration-settings";
 import { getMerchantSettings } from "@/lib/merchant-settings";
+import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 import { getStripeCustomerForUser } from "@/lib/billing";
 import { PLANS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
-const WEBHOOK_EVENTS = [
-  "invoice.payment_failed",
-  "invoice.payment_succeeded",
-  "invoice.paid",
-  "payment_intent.succeeded",
-  "customer.subscription.deleted",
-  "checkout.session.completed",
-];
-
 export default async function ImpostazioniPage() {
   const session = await auth();
-  const hdrs = await headers();
-  const host = hdrs.get("host") ?? "localhost:3000";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
-  const webhookUrl = `${protocol}://${host}/api/webhooks/stripe`;
+  if (!session?.user) redirect("/login");
 
   const settings = await getIntegrationSettings();
-  const merchantSettings = await getMerchantSettings();
+  const merchantSettings = await getMerchantSettings(session.user.id);
+  const connectedAccount = await getConnectedAccountForUser(session.user.id);
   const keysStatus = {
-    stripePublishableKey: {
-      configured: settings.stripePublishableKey.length > 0,
-      masked: maskSecret(settings.stripePublishableKey),
-    },
-    stripeSecretKey: {
-      configured: settings.stripeSecretKey.length > 0,
-      masked: maskSecret(settings.stripeSecretKey),
-    },
     resendApiKey: {
       configured: settings.resendApiKey.length > 0,
       masked: maskSecret(settings.resendApiKey),
@@ -55,9 +36,7 @@ export default async function ImpostazioniPage() {
     },
   };
 
-  const hasSubscription = session?.user
-    ? getStripeCustomerForUser(session.user.id) !== null
-    : false;
+  const hasSubscription = getStripeCustomerForUser(session.user.id) !== null;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -85,40 +64,26 @@ export default async function ImpostazioniPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-sm font-medium text-zinc-300">Webhook Stripe</h2>
+        <h2 className="text-sm font-medium text-zinc-300">Account Stripe</h2>
         <p className="mt-1 text-xs text-zinc-400">
-          Incolla questo URL in Stripe (Sviluppatori → Webhook) e seleziona gli
-          eventi elencati sotto.
+          Nessuna chiave da incollare né webhook da configurare a mano: un
+          click autorizza RecoverPulse a leggere i pagamenti falliti del tuo
+          account e a intervenire per te.
         </p>
-        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
-          <div className="flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <Webhook className="size-4 text-emerald-700" />
-            </span>
-            <p className="text-sm font-medium text-zinc-900">URL Endpoint</p>
-          </div>
-          <div className="mt-4">
-            <CopyField value={webhookUrl} />
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {WEBHOOK_EVENTS.map((eventName) => (
-              <Badge
-                key={eventName}
-                variant="outline"
-                className="h-auto border-zinc-200/80 bg-zinc-100 px-2 py-1 font-mono text-[11px] text-zinc-600"
-              >
-                {eventName}
-              </Badge>
-            ))}
-          </div>
+        <div className="mt-3">
+          <StripeConnectCard
+            connected={connectedAccount !== null}
+            stripeAccountId={connectedAccount?.stripeAccountId ?? null}
+            livemode={connectedAccount?.livemode ?? null}
+          />
         </div>
       </section>
 
       <section className="mt-10">
         <h2 className="text-sm font-medium text-zinc-300">Chiavi API</h2>
         <p className="mt-1 text-xs text-zinc-400">
-          Collega i tuoi provider per attivare i canali dunning e la
-          sincronizzazione con Stripe.
+          Collega i tuoi provider per attivare i canali dunning via SMS e
+          WhatsApp.
         </p>
         <div className="mt-3">
           <IntegrationKeysPanel initialStatus={keysStatus} />

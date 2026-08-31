@@ -224,7 +224,9 @@ export function Hero() {
           </div>
 
           <p className="mt-5 text-xs text-zinc-500">
-            Nessuna carta di credito richiesta &middot; connetti Stripe in pochi minuti, no-code
+            14 giorni di prova gratuita per RecoverPulse &mdash; nessuna carta di
+            credito richiesta per registrarsi &middot; connetti Stripe in pochi
+            minuti, no-code
           </p>
 
           <div className="mt-14 grid w-full max-w-lg grid-cols-3 gap-4 border-t border-zinc-800 pt-8">

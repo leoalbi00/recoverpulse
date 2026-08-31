@@ -6,6 +6,7 @@ export type TransactionStatus = "in_corso" | "recuperato" | "perso";
 
 export type FailedTransaction = {
   id: string;
+  userId: string;
   invoiceId: string;
   customerId: string;
   customerName: string;
@@ -25,6 +26,7 @@ export type FailedTransaction = {
 
 type FailedTransactionRow = {
   id: string;
+  user_id: string;
   invoice_id: string;
   customer_id: string;
   customer_name: string;
@@ -44,6 +46,7 @@ type FailedTransactionRow = {
 function mapRow(row: FailedTransactionRow): FailedTransaction {
   return {
     id: row.id,
+    userId: row.user_id,
     invoiceId: row.invoice_id,
     customerId: row.customer_id,
     customerName: row.customer_name,
@@ -62,12 +65,15 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
 }
 
 /**
- * Registra (o aggiorna) una fattura fallita su Supabase. L'upsert avviene su
- * `invoice_id`: `id` e `created_at` restano quelli della riga esistente (non
- * sono inclusi nel payload), mentre stato ed esito di recupero vengono sempre
- * ripristinati a "in corso" perché rappresentano un nuovo fallimento.
+ * Registra (o aggiorna) una fattura fallita su Supabase, per l'account
+ * Stripe collegato `userId` (risolto dal webhook via `event.account`, vedi
+ * src/lib/connected-stripe-accounts.ts). L'upsert avviene su `invoice_id`:
+ * `id` e `created_at` restano quelli della riga esistente (non sono inclusi
+ * nel payload), mentre stato ed esito di recupero vengono sempre ripristinati
+ * a "in corso" perché rappresentano un nuovo fallimento.
  */
 export async function recordFailedPayment(input: {
+  userId: string;
   invoiceId: string;
   customerId: string;
   customerName: string;
@@ -86,6 +92,7 @@ export async function recordFailedPayment(input: {
     .from("failed_transactions")
     .upsert(
       {
+        user_id: input.userId,
         invoice_id: input.invoiceId,
         customer_id: input.customerId,
         customer_name: input.customerName,
@@ -112,13 +119,20 @@ export async function recordFailedPayment(input: {
   return mapRow(data);
 }
 
-export async function markInvoiceRecovered(invoiceId: string): Promise<FailedTransaction | null> {
-  const { data, error } = await supabaseAdmin
+/**
+ * `userId` opzionale: il webhook lo passa sempre (risolto da `event.account`
+ * o dal token del portale); resta opzionale solo per non rompere percorsi
+ * legacy che non lo hanno ancora — se passato, filtra anche per proprietario
+ * come difesa in profondità.
+ */
+export async function markInvoiceRecovered(invoiceId: string, userId?: string): Promise<FailedTransaction | null> {
+  let query = supabaseAdmin
     .from("failed_transactions")
     .update({ status: "recuperato" satisfies TransactionStatus, recovered_at: new Date().toISOString() })
-    .eq("invoice_id", invoiceId)
-    .select()
-    .maybeSingle();
+    .eq("invoice_id", invoiceId);
+  if (userId) query = query.eq("user_id", userId);
+
+  const { data, error } = await query.select().maybeSingle();
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento della transazione recuperata su Supabase: ${error.message}`);
@@ -134,14 +148,15 @@ export async function markInvoiceRecovered(invoiceId: string): Promise<FailedTra
  * che il pagamento sia stato recuperato. Il filtro su status "in_corso"
  * rende la chiamata idempotente tra esecuzioni successive del cron.
  */
-export async function markInvoiceLost(invoiceId: string): Promise<FailedTransaction | null> {
-  const { data, error } = await supabaseAdmin
+export async function markInvoiceLost(invoiceId: string, userId?: string): Promise<FailedTransaction | null> {
+  let query = supabaseAdmin
     .from("failed_transactions")
     .update({ status: "perso" satisfies TransactionStatus })
     .eq("invoice_id", invoiceId)
-    .eq("status", "in_corso")
-    .select()
-    .maybeSingle();
+    .eq("status", "in_corso");
+  if (userId) query = query.eq("user_id", userId);
+
+  const { data, error } = await query.select().maybeSingle();
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento della fattura persa su Supabase: ${error.message}`);
@@ -156,13 +171,15 @@ export async function markInvoiceLost(invoiceId: string): Promise<FailedTransact
  * una volta cancellato l'abbonamento non ha più senso proseguire la
  * sequenza di dunning sulle sue fatture non pagate.
  */
-export async function markSubscriptionLost(subscriptionId: string): Promise<FailedTransaction[]> {
-  const { data, error } = await supabaseAdmin
+export async function markSubscriptionLost(subscriptionId: string, userId?: string): Promise<FailedTransaction[]> {
+  let query = supabaseAdmin
     .from("failed_transactions")
     .update({ status: "perso" satisfies TransactionStatus })
     .eq("subscription_id", subscriptionId)
-    .eq("status", "in_corso")
-    .select();
+    .eq("status", "in_corso");
+  if (userId) query = query.eq("user_id", userId);
+
+  const { data, error } = await query.select();
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento delle transazioni perse su Supabase: ${error.message}`);
@@ -171,11 +188,17 @@ export async function markSubscriptionLost(subscriptionId: string): Promise<Fail
   return (data ?? []).map(mapRow);
 }
 
-export async function getTransaction(invoiceId: string): Promise<FailedTransaction | null> {
+/**
+ * `userId` obbligatorio: chiamata da route dashboard autenticate (resend
+ * manuale del sollecito) — senza questo filtro un utente potrebbe leggere e
+ * agire sulla fattura di un altro account collegato.
+ */
+export async function getTransaction(invoiceId: string, userId: string): Promise<FailedTransaction | null> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
     .select("*")
     .eq("invoice_id", invoiceId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -188,14 +211,18 @@ export async function getTransaction(invoiceId: string): Promise<FailedTransacti
 /**
  * Risolve la transazione di pagamento fallito più recente non ancora recuperata
  * per uno Stripe Customer ID. Usata da `/pay/[token]`: il token del portale
- * (validato su Supabase) porta con sé solo il `customerId`, non l'invoiceId.
+ * (validato su Supabase) porta con sé anche `userId`, passato qui come difesa
+ * in profondità (un customer_id Stripe non collide comunque tra account
+ * diversi, ma il filtro evita ogni ambiguità).
  */
-export async function getTransactionByCustomerId(customerId: string): Promise<FailedTransaction | null> {
-  const { data, error } = await supabaseAdmin
-    .from("failed_transactions")
-    .select("*")
-    .eq("customer_id", customerId)
-    .order("created_at", { ascending: false });
+export async function getTransactionByCustomerId(
+  customerId: string,
+  userId?: string
+): Promise<FailedTransaction | null> {
+  let query = supabaseAdmin.from("failed_transactions").select("*").eq("customer_id", customerId);
+  if (userId) query = query.eq("user_id", userId);
+
+  const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Errore nella ricerca della transazione su Supabase: ${error.message}`);
@@ -207,10 +234,11 @@ export async function getTransactionByCustomerId(customerId: string): Promise<Fa
   return mapRow(active ?? data[0]);
 }
 
-export async function listTransactions(): Promise<FailedTransaction[]> {
+export async function listTransactions(userId: string): Promise<FailedTransaction[]> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
     .select("*")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -221,14 +249,16 @@ export async function listTransactions(): Promise<FailedTransaction[]> {
 }
 
 /**
- * Fatture ancora in corso di recupero, usata dal cron dei solleciti
- * (src/app/api/cron/dunning/route.ts) per valutare, fattura per fattura, se è
- * il momento di inviare il prossimo sollecito della sequenza.
+ * Fatture ancora in corso di recupero per un account, usata dal cron dei
+ * solleciti (src/app/api/cron/dunning/route.ts, un loop per ogni account
+ * collegato) per valutare, fattura per fattura, se è il momento di inviare
+ * il prossimo sollecito della sequenza.
  */
-export async function listActiveFailedTransactions(): Promise<FailedTransaction[]> {
+export async function listActiveFailedTransactions(userId: string): Promise<FailedTransaction[]> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
     .select("*")
+    .eq("user_id", userId)
     .eq("status", "in_corso")
     .order("created_at", { ascending: true });
 

@@ -1,7 +1,6 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { createNotification } from "@/lib/notifications";
 import { sendPilotRequestConfirmationEmail } from "@/lib/email";
 
 export async function createPilotRequest(input: {
@@ -23,29 +22,17 @@ export async function createPilotRequest(input: {
     throw new Error(`Errore nel salvataggio della richiesta pilota su Supabase: ${error.message}`);
   }
 
-  // La notifica in-app è un effetto collaterale: se fallisce non deve far
-  // fallire la richiesta pilota, già salvata con successo qui sopra.
-  try {
-    await createNotification({
-      type: "lead",
-      title: "Nuovo lead pilota",
-      message: `Nuova richiesta pilota da ${input.company}`,
-      metadata: {
-        name: input.name,
-        email: input.email,
-        company: input.company,
-        estimatedMrr: input.estimatedMrr ?? null,
-        message: input.message ?? null,
-      },
-    });
-  } catch (notificationError) {
-    console.error("[pilot-requests] errore nella creazione della notifica:", notificationError);
-  }
+  // Nessuna notifica in-app per i lead pilota: le notifiche sono ora per
+  // account collegato (vedi src/lib/notifications.ts), ma un lead pilota
+  // riguarda RecoverPulse stesso, non un merchant specifico — instradarla a
+  // un account a caso mostrerebbe dati di un lead di vendita nella dashboard
+  // di un cliente. La richiesta resta comunque consultabile su Supabase
+  // (tabella pilot_requests) e il lead riceve una conferma via email sotto.
 
-  // Email di conferma al lead: come la notifica in-app sopra, è un effetto
-  // collaterale non critico e non deve far fallire la richiesta pilota, già
-  // salvata con successo. sendPilotRequestConfirmationEmail non propaga mai
-  // errori di suo, ma resta wrappata per coerenza con la notifica sopra.
+  // Email di conferma al lead: effetto collaterale non critico, non deve far
+  // fallire la richiesta pilota, già salvata con successo qui sopra.
+  // sendPilotRequestConfirmationEmail non propaga mai errori di suo, ma
+  // resta wrappata per coerenza con lo stesso principio.
   try {
     await sendPilotRequestConfirmationEmail({ to: input.email, name: input.name });
   } catch (emailError) {

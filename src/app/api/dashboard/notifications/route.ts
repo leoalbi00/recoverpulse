@@ -22,8 +22,8 @@ export async function GET(request: Request) {
   const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 200) : DEFAULT_LIST_LIMIT;
 
   const [notifications, unreadCount] = await Promise.all([
-    listNotifications(limit),
-    countUnreadNotifications(),
+    listNotifications(limit, session.user.id),
+    countUnreadNotifications(session.user.id),
   ]);
 
   return NextResponse.json({ notifications, unreadCount });
@@ -39,12 +39,12 @@ export async function PATCH(request: Request) {
 
   try {
     if (body?.all === true) {
-      await markAllNotificationsAsRead();
+      await markAllNotificationsAsRead(session.user.id);
       return NextResponse.json({ success: true });
     }
 
     if (typeof body?.id === "string" && body.id.length > 0) {
-      await markNotificationAsRead(body.id);
+      await markNotificationAsRead(body.id, session.user.id);
       return NextResponse.json({ success: true });
     }
   } catch (error) {
@@ -68,7 +68,7 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    await deleteNotification(body.id);
+    await deleteNotification(body.id, session.user.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[notifications] errore nell'eliminazione:", error);

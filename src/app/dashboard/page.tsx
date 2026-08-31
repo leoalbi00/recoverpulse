@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { listTransactions, type FailedTransaction } from "@/lib/transactions";
@@ -11,28 +13,28 @@ import type { DunningLogEntry, SequenceStepDefinition } from "@/lib/dashboard-an
  * mostra la dashboard con valori a zero invece di rompere il render del
  * Server Component (stesso principio di /dashboard/transazioni).
  */
-async function loadDashboardData(): Promise<{
+async function loadDashboardData(userId: string): Promise<{
   allTransactions: FailedTransaction[];
   dunningLogs: DunningLogEntry[];
   sequenceSteps: SequenceStepDefinition[];
 }> {
   let allTransactions: FailedTransaction[] = [];
   try {
-    allTransactions = await listTransactions();
+    allTransactions = await listTransactions(userId);
   } catch (error) {
     console.error("[dashboard] errore nel recupero delle transazioni:", error);
   }
 
   let dunningLogs: DunningLogEntry[] = [];
   try {
-    dunningLogs = await listAllDunningLogs();
+    dunningLogs = await listAllDunningLogs(userId);
   } catch (error) {
     console.error("[dashboard] errore nel recupero dello storico solleciti:", error);
   }
 
   // getDunningTemplates() non lancia mai (fallback interno ai default),
   // vedi src/lib/dunning-templates.ts.
-  const templates = await getDunningTemplates();
+  const templates = await getDunningTemplates(userId);
   const sequenceSteps: SequenceStepDefinition[] = templates.steps.map((step) => ({
     id: step.id,
     label: step.label,
@@ -44,9 +46,10 @@ async function loadDashboardData(): Promise<{
 
 export default async function DashboardPage() {
   const session = await auth();
-  const firstName = session?.user?.name?.split(" ")[0] ?? "Utente";
+  if (!session?.user) redirect("/login");
+  const firstName = session.user.name?.split(" ")[0] ?? "Utente";
 
-  const { allTransactions, dunningLogs, sequenceSteps } = await loadDashboardData();
+  const { allTransactions, dunningLogs, sequenceSteps } = await loadDashboardData(session.user.id);
 
   return (
     <div className="mx-auto max-w-6xl">

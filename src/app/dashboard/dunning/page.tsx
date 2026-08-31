@@ -1,8 +1,14 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import { DunningTemplatesManager } from "@/components/dashboard/dunning-templates-manager";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 
 export default async function DunningPage() {
-  const settings = await getDunningTemplates();
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const settings = await getDunningTemplates(session.user.id);
 
   return (
     <div className="mx-auto max-w-4xl">

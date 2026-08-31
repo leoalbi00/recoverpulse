@@ -22,10 +22,15 @@ function isValidInviteCode(provided: string, expected: string): boolean {
 }
 
 export async function POST(request: Request) {
-  // La registrazione pubblica dà accesso a dati condivisi tra tutti gli
-  // account (transazioni, chiavi di integrazione): finché il dashboard non è
-  // multi-tenant, l'accesso resta invito-only. Nessun REGISTRATION_INVITE_CODE
-  // configurato in produzione = registrazione disabilitata di default (fail closed).
+  // Il dashboard è multi-tenant (ogni account collega il proprio Stripe via
+  // OAuth Connect e vede solo i propri dati, vedi src/lib/connected-stripe-accounts.ts
+  // e lo scoping per user_id in transactions.ts/notifications.ts/ecc.), ma la
+  // registrazione pubblica resta comunque invito-only: non esiste ancora un
+  // paywall reale a prova scaduta (src/lib/trial.ts è solo informativo) né uno
+  // stato abbonamento persistito (src/lib/billing.ts è in-memory), quindi
+  // aprirla senza controllo esporrebbe RecoverPulse ad abusi del piano
+  // gratuito. Nessun REGISTRATION_INVITE_CODE configurato in produzione =
+  // registrazione disabilitata di default (fail closed).
   const expectedInviteCode = process.env.REGISTRATION_INVITE_CODE;
   if (!expectedInviteCode) {
     return NextResponse.json(

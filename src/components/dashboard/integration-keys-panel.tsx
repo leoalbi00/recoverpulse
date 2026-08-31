@@ -6,49 +6,34 @@ import { Check, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { IntegrationSettings } from "@/lib/integration-settings";
+
+// Solo Resend/Twilio: Stripe non si gestisce più incollando chiavi qui, vedi
+// src/components/dashboard/stripe-connect-card.tsx (OAuth Stripe Connect).
+// Il tipo IntegrationSettings (src/lib/integration-settings.ts) conserva
+// ancora le colonne stripePublishableKey/stripeSecretKey per non rompere lo
+// schema esistente, ma questo pannello non le gestisce più: da qui il tipo
+// dedicato invece di derivarlo da IntegrationSettings.
+type ManagedField = "resendApiKey" | "twilioAccountSid" | "twilioAuthToken";
 
 type FieldStatus = { configured: boolean; masked: string };
-type KeysStatus = Record<keyof IntegrationSettings, FieldStatus>;
-type Service = "stripe" | "resend" | "twilio";
+type KeysStatus = Record<ManagedField, FieldStatus>;
+type Service = "resend" | "twilio";
 type ConnectionState = "idle" | "testing" | "success" | "error";
 
 type FieldConfig = {
-  id: keyof IntegrationSettings;
+  id: ManagedField;
   label: string;
   placeholder: string;
   helper: string;
 };
 
-const EMPTY_VALUES: Record<keyof IntegrationSettings, string> = {
-  stripePublishableKey: "",
-  stripeSecretKey: "",
+const EMPTY_VALUES: Record<ManagedField, string> = {
   resendApiKey: "",
   twilioAccountSid: "",
   twilioAuthToken: "",
 };
 
 const SERVICES: { id: Service; name: string; fields: FieldConfig[] }[] = [
-  {
-    id: "stripe",
-    name: "Stripe",
-    fields: [
-      {
-        id: "stripePublishableKey",
-        label: "Stripe Public Key",
-        placeholder: "pk_live_...",
-        helper:
-          "Usata dal browser per inizializzare Stripe.js nel portale di pagamento.",
-      },
-      {
-        id: "stripeSecretKey",
-        label: "Stripe Secret Key",
-        placeholder: "sk_live_...",
-        helper:
-          "Usata dal server per creare checkout, fatture e leggere gli eventi Stripe.",
-      },
-    ],
-  },
   {
     id: "resend",
     name: "Resend",
@@ -122,9 +107,9 @@ export function IntegrationKeysPanel({
 }) {
   const [status, setStatus] = useState(initialStatus);
   const [values, setValues] =
-    useState<Record<keyof IntegrationSettings, string>>(EMPTY_VALUES);
+    useState<Record<ManagedField, string>>(EMPTY_VALUES);
   const [visible, setVisible] = useState<
-    Partial<Record<keyof IntegrationSettings, boolean>>
+    Partial<Record<ManagedField, boolean>>
   >({});
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(0);
@@ -133,7 +118,6 @@ export function IntegrationKeysPanel({
   const [connectionState, setConnectionState] = useState<
     Record<Service, ConnectionState>
   >({
-    stripe: "idle",
     resend: "idle",
     twilio: "idle",
   });

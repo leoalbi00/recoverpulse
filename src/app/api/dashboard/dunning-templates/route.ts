@@ -25,7 +25,7 @@ export async function GET() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  return NextResponse.json(await getDunningTemplates());
+  return NextResponse.json(await getDunningTemplates(session.user.id));
 }
 
 export async function PATCH(request: Request) {
@@ -40,6 +40,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Dati non validi." }, { status: 400 });
   }
 
-  const updated = await updateDunningTemplates(parsed.data);
+  const updated = await updateDunningTemplates(parsed.data, session.user.id);
   return NextResponse.json(updated);
 }

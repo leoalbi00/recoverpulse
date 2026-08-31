@@ -14,7 +14,7 @@ export async function POST(
   }
 
   const { invoiceId } = await context.params;
-  const transaction = await getTransaction(decodeURIComponent(invoiceId));
+  const transaction = await getTransaction(decodeURIComponent(invoiceId), session.user.id);
 
   if (!transaction) {
     return NextResponse.json({ error: "Transazione non trovata." }, { status: 404 });

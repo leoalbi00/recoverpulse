@@ -3,15 +3,21 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export type IntegrationSettings = {
+  /** @deprecated Non più gestita da qui: Stripe ora si collega via OAuth Connect, vedi src/lib/connected-stripe-accounts.ts. */
   stripePublishableKey: string;
+  /** @deprecated Vedi stripePublishableKey. */
   stripeSecretKey: string;
   resendApiKey: string;
   twilioAccountSid: string;
   twilioAuthToken: string;
 };
 
-// RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
-// riga identificata da questo id fisso, sempre la stessa a ogni upsert.
+// A differenza delle tabelle applicative (transazioni, notifiche, impostazioni
+// dunning/brand — tutte per-utente, vedi supabase/migrations/20260831170000_...),
+// questa riga resta un singleton globale per scelta: Resend/Twilio sono le
+// credenziali di invio della PIATTAFORMA RecoverPulse (non del merchant
+// collegato), quindi condivise da ogni account. Un unico id fisso, sempre lo
+// stesso a ogni upsert.
 const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
 
 const DEFAULT_INTEGRATION_SETTINGS: IntegrationSettings = {

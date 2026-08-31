@@ -33,7 +33,7 @@ export async function startDunningSequence(
   transaction: FailedTransaction,
   options: { skipAutomationGate?: boolean } = {}
 ) {
-  const templates = await getDunningTemplates();
+  const templates = await getDunningTemplates(transaction.userId);
   if (!options.skipAutomationGate) {
     if (!templates.automationEnabled) {
       console.log(
@@ -51,7 +51,7 @@ export async function startDunningSequence(
     }
   }
 
-  const settings = await getDunningSettings();
+  const settings = await getDunningSettings(transaction.userId);
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
   );
@@ -77,6 +77,7 @@ export async function startDunningSequence(
     // cliente.
     try {
       await sendDunningEmail({
+        userId: transaction.userId,
         to: transaction.customerEmail,
         customerName: transaction.customerName,
         planName: transaction.planName,

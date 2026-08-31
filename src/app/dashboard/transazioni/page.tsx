@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import {
   TransactionsExplorer,
   type DunningAttemptInfo,
@@ -11,13 +14,13 @@ import { listTransactions, type FailedTransaction } from "@/lib/transactions";
  * ambiente locale senza .env completo), la pagina mostra lo stato vuoto della
  * tabella invece di rompere il render del Server Component.
  */
-async function loadTransactionsData(): Promise<{
+async function loadTransactionsData(userId: string): Promise<{
   transactions: FailedTransaction[];
   dunningByInvoice: Record<string, DunningAttemptInfo>;
 }> {
   let transactions: FailedTransaction[] = [];
   try {
-    transactions = await listTransactions();
+    transactions = await listTransactions(userId);
   } catch (error) {
     console.error(
       "[dashboard/transazioni] errore nel recupero delle transazioni:",
@@ -30,6 +33,7 @@ async function loadTransactionsData(): Promise<{
   try {
     const summaries = await getDunningLogSummaries(
       transactions.map((tx) => tx.invoiceId),
+      userId,
     );
     dunningByInvoice = Object.fromEntries(summaries);
   } catch (error) {
@@ -43,7 +47,10 @@ async function loadTransactionsData(): Promise<{
 }
 
 export default async function TransazioniPage() {
-  const { transactions, dunningByInvoice } = await loadTransactionsData();
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const { transactions, dunningByInvoice } = await loadTransactionsData(session.user.id);
 
   return (
     <div className="mx-auto max-w-6xl">

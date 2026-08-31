@@ -5,10 +5,9 @@ import { auth } from "@/auth";
 import { getIntegrationSettings } from "@/lib/integration-settings";
 
 const testSchema = z.object({
-  service: z.enum(["stripe", "resend", "twilio"]),
+  service: z.enum(["resend", "twilio"]),
   // Valore grezzo digitato nel form, non ancora salvato: testiamo quello così
   // l'utente può verificare una chiave prima ancora di premere "Salva".
-  stripeSecretKey: z.string().optional(),
   resendApiKey: z.string().optional(),
   twilioAccountSid: z.string().optional(),
   twilioAuthToken: z.string().optional(),
@@ -59,16 +58,6 @@ export async function POST(request: Request) {
   // così si può testare la connessione attiva senza dover ridigitare un
   // secret già configurato, e senza mai rispedirlo al browser per farlo.
   const saved = await getIntegrationSettings();
-
-  if (service === "stripe") {
-    const key = (parsed.data.stripeSecretKey?.trim() || saved.stripeSecretKey).trim();
-    if (!key) {
-      return NextResponse.json({ ok: false, message: "Inserisci prima la Stripe Secret Key." } satisfies TestResult);
-    }
-    return NextResponse.json(
-      await testAuthenticatedEndpoint("https://api.stripe.com/v1/balance", { Authorization: `Bearer ${key}` })
-    );
-  }
 
   if (service === "resend") {
     const key = (parsed.data.resendApiKey?.trim() || saved.resendApiKey).trim();

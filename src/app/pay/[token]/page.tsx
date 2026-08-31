@@ -1,9 +1,10 @@
 import { Activity, AlertTriangle, ShieldCheck, XCircle } from "lucide-react";
 
-import { getStripePublishableKey } from "@/lib/stripe";
+import { getStripePublishableKeyForAccount } from "@/lib/stripe";
+import { getStripeAccountIdForUser } from "@/lib/connected-stripe-accounts";
 import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
-import { getMerchantSettings, type MerchantSettings } from "@/lib/merchant-settings";
+import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS, type MerchantSettings } from "@/lib/merchant-settings";
 import { getReadableTextColor } from "@/lib/color";
 import { tryCreateSetupIntent } from "@/lib/payment-portal";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
@@ -137,13 +138,12 @@ function AlreadyRecovered({ transaction, merchant }: { transaction: FailedTransa
 
 export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[token]">) {
   const { token } = await params;
-  const merchant = await getMerchantSettings();
 
   if (DEMO_TOKENS.includes(token)) {
     const amountFormatted = formatAmount(DEMO_TRANSACTION.amount, DEMO_TRANSACTION.currency);
 
     return (
-      <Shell merchant={merchant}>
+      <Shell merchant={DEFAULT_MERCHANT_SETTINGS}>
         <div className="mb-6 text-center">
           <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
             Demo · Portale 1-Click
@@ -169,7 +169,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
         <DemoCardForm
           planName={DEMO_TRANSACTION.planName}
           amountFormatted={amountFormatted}
-          primaryColor={merchant.primaryColor}
+          primaryColor={DEFAULT_MERCHANT_SETTINGS.primaryColor}
         />
       </Shell>
     );
@@ -183,15 +183,19 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   let transaction: FailedTransaction | null;
   try {
     const paymentToken = await validatePaymentToken(token);
-    transaction = paymentToken ? await getTransactionByCustomerId(paymentToken.customerId) : null;
+    transaction = paymentToken
+      ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
+      : null;
   } catch (error) {
     console.error(`[pay-portal] errore nella verifica del token "${token}" su Supabase:`, error);
-    return <ConnectionError merchant={merchant} />;
+    return <ConnectionError merchant={DEFAULT_MERCHANT_SETTINGS} />;
   }
 
   if (!transaction) {
-    return <InvalidLink merchant={merchant} />;
+    return <InvalidLink merchant={DEFAULT_MERCHANT_SETTINGS} />;
   }
+
+  const merchant = await getMerchantSettings(transaction.userId);
 
   if (transaction.status === "recuperato") {
     return <AlreadyRecovered transaction={transaction} merchant={merchant} />;
@@ -239,7 +243,8 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     );
   }
 
-  const stripePublishableKey = await getStripePublishableKey();
+  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId);
+  const stripePublishableKey = stripeAccountId ? await getStripePublishableKeyForAccount(stripeAccountId) : "";
 
   return (
     <Shell merchant={merchant}>

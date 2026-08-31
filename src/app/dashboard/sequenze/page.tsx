@@ -1,8 +1,14 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import { DunningSequencesPanel } from "@/components/dashboard/dunning-sequences-panel";
 import { getDunningSettings } from "@/lib/dunning-settings";
 
 export default async function SequenzePage() {
-  const settings = await getDunningSettings();
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const settings = await getDunningSettings(session.user.id);
 
   return (
     <div className="mx-auto max-w-6xl">

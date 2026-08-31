@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getStripeClient } from "@/lib/stripe";
+import { getStripeClientForAccount } from "@/lib/stripe";
+import { getStripeAccountIdForUser } from "@/lib/connected-stripe-accounts";
 import { validatePaymentToken, markPaymentTokenUsed } from "@/lib/tokens";
 import { getTransactionByCustomerId, markInvoiceRecovered, type FailedTransaction } from "@/lib/transactions";
 import { stopDunningSequence } from "@/lib/dunning";
@@ -27,6 +28,7 @@ function formatAmount(amount: number, currency: string): string {
 async function notifyRecovery(updated: FailedTransaction): Promise<void> {
   await notifyPaymentRecovered(updated);
   await sendRecoveryConfirmationEmail({
+    userId: updated.userId,
     to: updated.customerEmail,
     customerName: updated.customerName,
     planName: updated.planName,
@@ -40,7 +42,9 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   let transaction;
   try {
     const paymentToken = await validatePaymentToken(token);
-    transaction = paymentToken ? await getTransactionByCustomerId(paymentToken.customerId) : null;
+    transaction = paymentToken
+      ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
+      : null;
   } catch (error) {
     console.error(`[update-payment-confirm] errore nella verifica del token "${token}" su Supabase:`, error);
     return NextResponse.json(
@@ -79,7 +83,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
 
     await markPaymentTokenUsed(token);
 
-    const updated = await markInvoiceRecovered(transaction.invoiceId);
+    const updated = await markInvoiceRecovered(transaction.invoiceId, transaction.userId);
     if (updated) {
       await stopDunningSequence(updated);
       await notifyRecovery(updated);
@@ -88,7 +92,14 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     return NextResponse.json({ success: true, planName: transaction.planName, simulated: true });
   }
 
-  const stripe = await getStripeClient();
+  const stripeAccountId = await getStripeAccountIdForUser(transaction.userId);
+  if (!stripeAccountId) {
+    return NextResponse.json(
+      { error: "Nessun account Stripe collegato per questo merchant. Usa la conferma simulata." },
+      { status: 409 }
+    );
+  }
+  const stripe = await getStripeClientForAccount(stripeAccountId);
   const setupIntent = await stripe.setupIntents.retrieve(parsed.data.setupIntentId);
 
   const setupCustomerId =
@@ -131,7 +142,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   // monouso venga riutilizzato per un secondo aggiornamento carta.
   await markPaymentTokenUsed(token);
 
-  const updated = await markInvoiceRecovered(transaction.invoiceId);
+  const updated = await markInvoiceRecovered(transaction.invoiceId, transaction.userId);
   if (updated) {
     await stopDunningSequence(updated);
     await notifyRecovery(updated);

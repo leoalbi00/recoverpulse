@@ -8,10 +8,6 @@ export type DunningSettings = {
   channels: Record<DunningChannel, boolean>;
 };
 
-// RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
-// riga identificata da questo id fisso, sempre la stessa a ogni upsert.
-const SETTINGS_ID = "default";
-
 function defaultSettings(): DunningSettings {
   return {
     // whatsapp/sms restano false: nessuna integrazione Twilio/WhatsApp
@@ -40,16 +36,16 @@ function mapRow(row: DunningSettingsRow): DunningSettings {
 }
 
 /**
- * Legge i canali attivi della sequenza dunning da Supabase. Se la riga non
- * esiste ancora o Supabase non è raggiungibile, ritorna i default invece di
- * far fallire il webhook Stripe o la dashboard.
+ * Legge i canali attivi della sequenza dunning per l'account collegato
+ * `userId`. Se la riga non esiste ancora o Supabase non è raggiungibile,
+ * ritorna i default invece di far fallire il webhook Stripe o la dashboard.
  */
-export async function getDunningSettings(): Promise<DunningSettings> {
+export async function getDunningSettings(userId: string): Promise<DunningSettings> {
   try {
     const { data, error } = await supabaseAdmin
       .from("dunning_settings")
       .select("channel_whatsapp, channel_sms, channel_email")
-      .eq("id", SETTINGS_ID)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error) {
@@ -64,18 +60,18 @@ export async function getDunningSettings(): Promise<DunningSettings> {
   }
 }
 
-export async function updateDunningSettings(next: DunningSettings): Promise<DunningSettings> {
+export async function updateDunningSettings(next: DunningSettings, userId: string): Promise<DunningSettings> {
   const { data, error } = await supabaseAdmin
     .from("dunning_settings")
     .upsert(
       {
-        id: SETTINGS_ID,
+        user_id: userId,
         channel_whatsapp: next.channels.whatsapp,
         channel_sms: next.channels.sms,
         channel_email: next.channels.email,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "id" }
+      { onConflict: "user_id" }
     )
     .select("channel_whatsapp, channel_sms, channel_email")
     .single();

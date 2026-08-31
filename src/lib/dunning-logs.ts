@@ -15,12 +15,13 @@ const UNIQUE_VIOLATION = "23505";
  * Verifica se il sollecito per uno specifico step (giorni trascorsi) è già
  * stato registrato per questa fattura, per evitare di inviarlo due volte.
  */
-export async function hasDunningLogForStep(invoiceId: string, stepDays: number): Promise<boolean> {
+export async function hasDunningLogForStep(invoiceId: string, stepDays: number, userId: string): Promise<boolean> {
   const { data, error } = await supabaseAdmin
     .from("dunning_logs")
     .select("id")
     .eq("invoice_id", invoiceId)
     .eq("step_days", stepDays)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -31,6 +32,7 @@ export async function hasDunningLogForStep(invoiceId: string, stepDays: number):
 }
 
 export async function recordDunningLog(input: {
+  userId: string;
   invoiceId: string;
   stepDays: number;
   customerEmail: string;
@@ -38,6 +40,7 @@ export async function recordDunningLog(input: {
   status: DunningLogStatus;
 }): Promise<void> {
   const { error } = await supabaseAdmin.from("dunning_logs").insert({
+    user_id: input.userId,
     invoice_id: input.invoiceId,
     step_days: input.stepDays,
     customer_email: input.customerEmail,
@@ -65,7 +68,8 @@ export type DunningLogSummary = {
  * query per riga.
  */
 export async function getDunningLogSummaries(
-  invoiceIds: string[]
+  invoiceIds: string[],
+  userId: string
 ): Promise<Map<string, DunningLogSummary>> {
   const summaries = new Map<string, DunningLogSummary>();
   if (invoiceIds.length === 0) return summaries;
@@ -74,6 +78,7 @@ export async function getDunningLogSummaries(
     .from("dunning_logs")
     .select("invoice_id, channel, status, sent_at")
     .in("invoice_id", invoiceIds)
+    .eq("user_id", userId)
     .order("sent_at", { ascending: true });
 
   if (error) {
@@ -96,19 +101,20 @@ export async function getDunningLogSummaries(
 }
 
 /**
- * Tutti i solleciti registrati (invoice_id, step_days, status), usata dalla
- * dashboard principale (src/app/dashboard/page.tsx) per calcolare il tasso di
- * conversione per step della sequenza dunning
+ * Tutti i solleciti registrati (invoice_id, step_days, status) per un
+ * account, usata dalla dashboard principale (src/app/dashboard/page.tsx) per
+ * calcolare il tasso di conversione per step della sequenza dunning
  * (src/lib/dashboard-analytics.ts, computeSequencePerformance). A differenza
  * di getDunningLogSummaries non aggrega per fattura: serve il dettaglio per
  * step per capire quali step ha effettivamente raggiunto ciascuna fattura.
  */
-export async function listAllDunningLogs(): Promise<
-  { invoiceId: string; stepDays: number; status: DunningLogStatus }[]
-> {
+export async function listAllDunningLogs(
+  userId: string
+): Promise<{ invoiceId: string; stepDays: number; status: DunningLogStatus }[]> {
   const { data, error } = await supabaseAdmin
     .from("dunning_logs")
     .select("invoice_id, step_days, status")
+    .eq("user_id", userId)
     .order("sent_at", { ascending: false })
     .limit(2000);
 

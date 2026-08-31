@@ -44,10 +44,6 @@ const STEP_METADATA: Record<DunningTemplateStepId, { label: string; description:
 
 const STEP_ORDER: DunningTemplateStepId[] = ["immediate", "first_reminder", "final_notice"];
 
-// RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
-// riga identificata da questo id fisso, sempre la stessa a ogni upsert.
-const SETTINGS_ID = "default";
-
 const VARIABLE_PLACEHOLDER_BODY = (label: string) =>
   `Ciao {{nome_cliente}},\n\n${label} Il pagamento di {{importo}} per {{nome_piano}} non è ancora andato a buon fine.\n\nAggiorna il tuo metodo di pagamento qui:\n{{link_recupero}}\n\nGrazie,\nIl team`;
 
@@ -110,19 +106,23 @@ function mapStepRow(row: DunningTemplateStepRow): DunningTemplateStep {
 }
 
 /**
- * Legge automazione + step dunning da Supabase. Se le righe non esistono
- * ancora (migration non applicata) o Supabase non è raggiungibile, ritorna i
- * default in-memory invece di far fallire webhook/cron/dashboard.
+ * Legge automazione + step dunning per l'account collegato `userId`. Se le
+ * righe non esistono ancora (migration non applicata, o utente senza
+ * template salvati) o Supabase non è raggiungibile, ritorna i default
+ * in-memory invece di far fallire webhook/cron/dashboard.
  */
-export async function getDunningTemplates(): Promise<DunningTemplatesSettings> {
+export async function getDunningTemplates(userId: string): Promise<DunningTemplatesSettings> {
   try {
     const [settingsResult, stepsResult] = await Promise.all([
       supabaseAdmin
         .from("dunning_template_settings")
         .select("automation_enabled")
-        .eq("id", SETTINGS_ID)
+        .eq("user_id", userId)
         .maybeSingle(),
-      supabaseAdmin.from("dunning_template_steps").select("step_id, enabled, delay_days, subject, body"),
+      supabaseAdmin
+        .from("dunning_template_steps")
+        .select("step_id, enabled, delay_days, subject, body")
+        .eq("user_id", userId),
     ]);
 
     if (settingsResult.error || stepsResult.error) {
@@ -155,14 +155,17 @@ export async function getDunningTemplates(): Promise<DunningTemplatesSettings> {
   }
 }
 
-export async function updateDunningTemplates(next: DunningTemplatesSettings): Promise<DunningTemplatesSettings> {
+export async function updateDunningTemplates(
+  next: DunningTemplatesSettings,
+  userId: string
+): Promise<DunningTemplatesSettings> {
   const { error: settingsError } = await supabaseAdmin.from("dunning_template_settings").upsert(
     {
-      id: SETTINGS_ID,
+      user_id: userId,
       automation_enabled: next.automationEnabled,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "id" }
+    { onConflict: "user_id" }
   );
 
   if (settingsError) {
@@ -171,6 +174,7 @@ export async function updateDunningTemplates(next: DunningTemplatesSettings): Pr
 
   const { error: stepsError } = await supabaseAdmin.from("dunning_template_steps").upsert(
     next.steps.map((step) => ({
+      user_id: userId,
       step_id: step.id,
       enabled: step.enabled,
       delay_days: step.delayDays,
@@ -178,12 +182,12 @@ export async function updateDunningTemplates(next: DunningTemplatesSettings): Pr
       body: step.body,
       updated_at: new Date().toISOString(),
     })),
-    { onConflict: "step_id" }
+    { onConflict: "user_id,step_id" }
   );
 
   if (stepsError) {
     throw new Error(`Errore nel salvataggio degli step dunning su Supabase: ${stepsError.message}`);
   }
 
-  return getDunningTemplates();
+  return getDunningTemplates(userId);
 }

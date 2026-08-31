@@ -18,7 +18,7 @@ export async function GET() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  return NextResponse.json(await getDunningSettings());
+  return NextResponse.json(await getDunningSettings(session.user.id));
 }
 
 export async function PATCH(request: Request) {
@@ -36,9 +36,12 @@ export async function PATCH(request: Request) {
   // whatsapp/sms forzati a false lato server, non solo lato UI: nessuna
   // integrazione reale li invia (vedi src/lib/dunning.ts), quindi non vanno
   // attivabili nemmeno chiamando questa route direttamente.
-  const updated = await updateDunningSettings({
-    ...parsed.data,
-    channels: { ...parsed.data.channels, whatsapp: false, sms: false },
-  });
+  const updated = await updateDunningSettings(
+    {
+      ...parsed.data,
+      channels: { ...parsed.data.channels, whatsapp: false, sms: false },
+    },
+    session.user.id,
+  );
   return NextResponse.json(updated);
 }

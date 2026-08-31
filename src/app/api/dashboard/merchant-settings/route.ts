@@ -26,7 +26,7 @@ export async function GET() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  return NextResponse.json(await getMerchantSettings());
+  return NextResponse.json(await getMerchantSettings(session.user.id));
 }
 
 export async function PATCH(request: Request) {
@@ -42,12 +42,15 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const updated = await updateMerchantSettings({
-      companyName: parsed.data.companyName,
-      supportEmail: parsed.data.supportEmail,
-      logoUrl: parsed.data.logoUrl ? parsed.data.logoUrl : null,
-      primaryColor: parsed.data.primaryColor,
-    });
+    const updated = await updateMerchantSettings(
+      {
+        companyName: parsed.data.companyName,
+        supportEmail: parsed.data.supportEmail,
+        logoUrl: parsed.data.logoUrl ? parsed.data.logoUrl : null,
+        primaryColor: parsed.data.primaryColor,
+      },
+      session.user.id,
+    );
     return NextResponse.json(updated);
   } catch (error) {
     console.error("[merchant-settings] errore nel salvataggio:", error);

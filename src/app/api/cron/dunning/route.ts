@@ -5,6 +5,7 @@ import { hasDunningLogForStep, recordDunningLog } from "@/lib/dunning-logs";
 import { getDunningTemplates, type DunningTemplateStep } from "@/lib/dunning-templates";
 import { sendDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
+import { listConnectedAccountUserIds } from "@/lib/connected-stripe-accounts";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
   try {
     const recoveryLink = `${getAppBaseUrl()}/pay/${transaction.paymentLinkToken}`;
     await sendDunningEmail({
+      userId: transaction.userId,
       to: transaction.customerEmail,
       customerName: transaction.customerName,
       planName: transaction.planName,
@@ -41,6 +43,7 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
     emailSent = true;
 
     await recordDunningLog({
+      userId: transaction.userId,
       invoiceId: transaction.invoiceId,
       stepDays: step.delayDays,
       customerEmail: transaction.customerEmail,
@@ -64,6 +67,7 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
       error
     );
     await recordDunningLog({
+      userId: transaction.userId,
       invoiceId: transaction.invoiceId,
       stepDays: step.delayDays,
       customerEmail: transaction.customerEmail,
@@ -79,45 +83,31 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
   }
 }
 
-/**
- * Sequenza automatica di solleciti, eseguita una volta al giorno da Vercel
- * Cron (vedi vercel.json). Rispetta i template configurati in
- * /dashboard/dunning (src/lib/dunning-templates.ts): se l'automazione è in
- * pausa, l'esecuzione si ferma subito; altrimenti, per ogni fattura ancora
- * 'in_corso' su Supabase, se i giorni trascorsi dalla creazione coincidono
- * con lo step (T+giorni) di uno step attivo diverso da "immediate" (già
- * gestito subito dal webhook, vedi src/lib/dunning.ts), invia il sollecito
- * via email con il link al portale /pay/[token], registrando l'invio in
- * dunning_logs per non spedirlo due volte. Superato lo step attivo più
- * lontano nel tempo senza che il pagamento sia stato recuperato, la fattura
- * viene segnata come 'perso'.
- */
-export async function GET(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
-  }
+type Summary = { checked: number; sent: number; skipped: number; failed: number; lost: number };
 
-  const templates = await getDunningTemplates();
+/** Un passaggio completo della sequenza di solleciti per un singolo account collegato. */
+async function processAccount(userId: string): Promise<Summary> {
+  const summary: Summary = { checked: 0, sent: 0, skipped: 0, failed: 0, lost: 0 };
+
+  const templates = await getDunningTemplates(userId);
   if (!templates.automationEnabled) {
-    console.log("[cron/dunning] automazione in pausa da /dashboard/dunning: esecuzione saltata.");
-    return NextResponse.json({ success: true, paused: true, checked: 0, sent: 0, skipped: 0, failed: 0, lost: 0 });
+    return summary;
   }
 
   let transactions: FailedTransaction[];
   try {
-    transactions = await listActiveFailedTransactions();
+    transactions = await listActiveFailedTransactions(userId);
   } catch (error) {
-    console.error("[cron/dunning] errore nel recupero delle transazioni in corso:", error);
-    return NextResponse.json({ error: "Errore nel recupero delle transazioni." }, { status: 500 });
+    console.error(`[cron/dunning] errore nel recupero delle transazioni in corso per l'utente ${userId}:`, error);
+    return summary;
   }
+  summary.checked = transactions.length;
 
   // Solo gli step con T+giorni > 0 e attivi riguardano il cron: lo step
   // "immediate" (T+0) è inviato subito dal webhook al momento del fallimento
   // del pagamento, non da questa esecuzione giornaliera.
   const reminderSteps = templates.steps.filter((step) => step.enabled && step.delayDays > 0);
   const maxDelayDays = reminderSteps.length > 0 ? Math.max(...reminderSteps.map((step) => step.delayDays)) : null;
-
-  const summary = { checked: transactions.length, sent: 0, skipped: 0, failed: 0, lost: 0 };
 
   for (const transaction of transactions) {
     const elapsedDays = daysElapsedSince(transaction.createdAt);
@@ -126,7 +116,7 @@ export async function GET(request: Request) {
     if (!step) {
       if (maxDelayDays !== null && elapsedDays > maxDelayDays) {
         try {
-          const lost = await markInvoiceLost(transaction.invoiceId);
+          const lost = await markInvoiceLost(transaction.invoiceId, userId);
           if (lost) {
             console.log(
               `[cron/dunning] fattura ${transaction.invoiceId} segnata come "perso": sequenza di solleciti esaurita dopo ${maxDelayDays} giorni senza recupero.`
@@ -149,7 +139,7 @@ export async function GET(request: Request) {
 
     let alreadySent: boolean;
     try {
-      alreadySent = await hasDunningLogForStep(transaction.invoiceId, step.delayDays);
+      alreadySent = await hasDunningLogForStep(transaction.invoiceId, step.delayDays, userId);
     } catch (error) {
       console.error(
         `[cron/dunning] impossibile verificare i solleciti già inviati per la fattura ${transaction.invoiceId}:`,
@@ -168,6 +158,48 @@ export async function GET(request: Request) {
     summary[outcome]++;
   }
 
-  console.log("[cron/dunning] esecuzione completata:", summary);
-  return NextResponse.json({ success: true, ...summary });
+  return summary;
+}
+
+/**
+ * Sequenza automatica di solleciti, eseguita una volta al giorno da Vercel
+ * Cron (vedi vercel.json), un passaggio per ciascun account Stripe collegato
+ * (src/lib/connected-stripe-accounts.ts) — ognuno con i propri template
+ * (/dashboard/dunning) e le proprie transazioni: due account non condividono
+ * più né configurazione né dati. Rispetta l'automazione di ogni account: se
+ * in pausa, quell'account viene saltato senza fermare gli altri. Per ogni
+ * fattura ancora 'in_corso', se i giorni trascorsi dalla creazione
+ * coincidono con lo step (T+giorni) di uno step attivo diverso da
+ * "immediate" (già gestito subito dal webhook, vedi src/lib/dunning.ts),
+ * invia il sollecito via email con il link al portale /pay/[token],
+ * registrando l'invio in dunning_logs per non spedirlo due volte. Superato
+ * lo step attivo più lontano nel tempo senza che il pagamento sia stato
+ * recuperato, la fattura viene segnata come 'perso'.
+ */
+export async function GET(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+  }
+
+  let userIds: string[];
+  try {
+    userIds = await listConnectedAccountUserIds();
+  } catch (error) {
+    console.error("[cron/dunning] errore nel recupero degli account Stripe collegati:", error);
+    return NextResponse.json({ error: "Errore nel recupero degli account collegati." }, { status: 500 });
+  }
+
+  const total: Summary = { checked: 0, sent: 0, skipped: 0, failed: 0, lost: 0 };
+
+  for (const userId of userIds) {
+    const accountSummary = await processAccount(userId);
+    total.checked += accountSummary.checked;
+    total.sent += accountSummary.sent;
+    total.skipped += accountSummary.skipped;
+    total.failed += accountSummary.failed;
+    total.lost += accountSummary.lost;
+  }
+
+  console.log(`[cron/dunning] esecuzione completata su ${userIds.length} account:`, total);
+  return NextResponse.json({ success: true, accounts: userIds.length, ...total });
 }

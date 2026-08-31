@@ -557,11 +557,13 @@ export async function sendPilotRequestConfirmationEmail({
  * principio di notifyPaymentRecovered/notifyPaymentFailed.
  */
 export async function sendRecoveryConfirmationEmail({
+  userId,
   to,
   customerName,
   planName,
   amountFormatted,
 }: {
+  userId: string;
   to: string;
   customerName: string;
   planName: string;
@@ -579,7 +581,7 @@ export async function sendRecoveryConfirmationEmail({
       return;
     }
 
-    const merchant = await getMerchantSettings();
+    const merchant = await getMerchantSettings(userId);
     const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
     const html = buildRecoveryEmailHtml({
       customerName,
@@ -623,6 +625,7 @@ export async function sendRecoveryConfirmationEmail({
  * di far fallire l'intero handling del webhook Stripe.
  */
 export async function sendDunningEmail({
+  userId,
   to,
   customerName,
   planName,
@@ -630,6 +633,7 @@ export async function sendDunningEmail({
   recoveryLink,
   stepId,
 }: {
+  userId: string;
   to: string;
   customerName: string;
   planName: string;
@@ -649,11 +653,11 @@ export async function sendDunningEmail({
     return;
   }
 
-  const merchant = await getMerchantSettings();
+  const merchant = await getMerchantSettings(userId);
   const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
   const isFinalNotice = stepId === "final_notice";
 
-  const templates = await getDunningTemplates();
+  const templates = await getDunningTemplates(userId);
   const step = templates.steps.find((candidate) => candidate.id === stepId);
   if (!step) {
     console.error(`[email] template dunning mancante per lo step "${stepId}": invio email saltato.`);

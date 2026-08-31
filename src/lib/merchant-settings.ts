@@ -9,10 +9,6 @@ export type MerchantSettings = {
   primaryColor: string;
 };
 
-// RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
-// riga identificata da questo id fisso, sempre la stessa a ogni upsert.
-const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
-
 export const DEFAULT_MERCHANT_SETTINGS: MerchantSettings = {
   companyName: "RecoverPulse",
   supportEmail: "",
@@ -37,17 +33,17 @@ function mapRow(row: MerchantSettingsRow): MerchantSettings {
 }
 
 /**
- * Legge le impostazioni di brand del merchant. Se la riga non esiste ancora
- * (nessun salvataggio da /dashboard/impostazioni) o Supabase non è
- * raggiungibile, ritorna i default RecoverPulse invece di far fallire la
- * pagina /pay o l'invio delle email di dunning.
+ * Legge le impostazioni di brand del merchant collegato `userId`. Se la riga
+ * non esiste ancora (nessun salvataggio da /dashboard/impostazioni) o
+ * Supabase non è raggiungibile, ritorna i default RecoverPulse invece di far
+ * fallire la pagina /pay o l'invio delle email di dunning.
  */
-export async function getMerchantSettings(): Promise<MerchantSettings> {
+export async function getMerchantSettings(userId: string): Promise<MerchantSettings> {
   try {
     const { data, error } = await supabaseAdmin
       .from("merchant_settings")
       .select("company_name, support_email, logo_url, primary_color")
-      .eq("id", SETTINGS_ID)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error) {
@@ -62,19 +58,19 @@ export async function getMerchantSettings(): Promise<MerchantSettings> {
   }
 }
 
-export async function updateMerchantSettings(input: MerchantSettings): Promise<MerchantSettings> {
+export async function updateMerchantSettings(input: MerchantSettings, userId: string): Promise<MerchantSettings> {
   const { data, error } = await supabaseAdmin
     .from("merchant_settings")
     .upsert(
       {
-        id: SETTINGS_ID,
+        user_id: userId,
         company_name: input.companyName,
         support_email: input.supportEmail,
         logo_url: input.logoUrl,
         primary_color: input.primaryColor,
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "id" }
+      { onConflict: "user_id" }
     )
     .select("company_name, support_email, logo_url, primary_color")
     .single();

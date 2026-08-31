@@ -1,8 +1,14 @@
+import { redirect } from "next/navigation";
+
+import { auth } from "@/auth";
 import { listNotifications } from "@/lib/notifications";
 import { NotificationsManager } from "@/components/dashboard/notifications-manager";
 
 export default async function NotifichePage() {
-  const notifications = await listNotifications(200);
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const notifications = await listNotifications(200, session.user.id);
 
   return (
     <div className="mx-auto max-w-5xl">

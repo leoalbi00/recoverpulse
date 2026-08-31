@@ -38,6 +38,7 @@ function mapRow(row: NotificationRow): Notification {
 }
 
 export async function createNotification(input: {
+  userId: string;
   type: NotificationType;
   title: string;
   message: string;
@@ -45,6 +46,7 @@ export async function createNotification(input: {
   metadata?: Record<string, unknown>;
 }): Promise<void> {
   const { error } = await supabaseAdmin.from("notifications").insert({
+    user_id: input.userId,
     type: input.type,
     title: input.title,
     message: input.message,
@@ -56,10 +58,11 @@ export async function createNotification(input: {
   }
 }
 
-export async function listNotifications(limit = 100): Promise<Notification[]> {
+export async function listNotifications(limit: number, userId: string): Promise<Notification[]> {
   const { data, error } = await supabaseAdmin
     .from("notifications")
     .select("*")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -70,10 +73,11 @@ export async function listNotifications(limit = 100): Promise<Notification[]> {
   return (data ?? []).map(mapRow);
 }
 
-export async function countUnreadNotifications(): Promise<number> {
+export async function countUnreadNotifications(userId: string): Promise<number> {
   const { count, error } = await supabaseAdmin
     .from("notifications")
     .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
     .eq("is_read", false);
 
   if (error) {
@@ -83,24 +87,34 @@ export async function countUnreadNotifications(): Promise<number> {
   return count ?? 0;
 }
 
-export async function markNotificationAsRead(id: string): Promise<void> {
-  const { error } = await supabaseAdmin.from("notifications").update({ is_read: true }).eq("id", id);
+/** `userId` filtra anche `id`: senza, un utente potrebbe segnare come letta la notifica di un altro account indovinando l'UUID. */
+export async function markNotificationAsRead(id: string, userId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("id", id)
+    .eq("user_id", userId);
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento della notifica su Supabase: ${error.message}`);
   }
 }
 
-export async function markAllNotificationsAsRead(): Promise<void> {
-  const { error } = await supabaseAdmin.from("notifications").update({ is_read: true }).eq("is_read", false);
+export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", userId)
+    .eq("is_read", false);
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento delle notifiche su Supabase: ${error.message}`);
   }
 }
 
-export async function deleteNotification(id: string): Promise<void> {
-  const { error } = await supabaseAdmin.from("notifications").delete().eq("id", id);
+/** `userId` filtra anche `id`: stesso motivo di markNotificationAsRead. */
+export async function deleteNotification(id: string, userId: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("notifications").delete().eq("id", id).eq("user_id", userId);
 
   if (error) {
     throw new Error(`Errore nell'eliminazione della notifica su Supabase: ${error.message}`);
@@ -122,6 +136,7 @@ export async function notifyPaymentRecovered(transaction: FailedTransaction): Pr
 
   try {
     await createNotification({
+      userId: transaction.userId,
       type: "recovery",
       title: "Pagamento recuperato",
       message: `Recuperati ${amountLabel} da ${transaction.customerName}`,
@@ -145,6 +160,7 @@ export async function notifyPaymentFailed(transaction: FailedTransaction): Promi
 
   try {
     await createNotification({
+      userId: transaction.userId,
       type: "warning",
       title: "Pagamento fallito",
       message: `${transaction.customerName} non ha pagato ${amountLabel} per ${transaction.planName}`,

@@ -6,6 +6,7 @@ import { recordFailedPayment } from "@/lib/transactions";
 import { createPaymentToken } from "@/lib/tokens";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { createNotification } from "@/lib/notifications";
+import { getStripeAccountIdForUser } from "@/lib/connected-stripe-accounts";
 
 // Endpoint temporaneo per generare rapidamente un pagamento fallito di prova
 // (cliente "TechCorp", €199, status "in_corso") e il relativo link del
@@ -19,13 +20,22 @@ export async function POST() {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
+  const stripeAccountId = await getStripeAccountIdForUser(session.user.id);
+  if (!stripeAccountId) {
+    return NextResponse.json(
+      { error: "Collega prima un account Stripe da Impostazioni per generare una transazione di test." },
+      { status: 409 }
+    );
+  }
+
   const invoiceId = `test_${crypto.randomUUID()}`;
   const customerId = `cus_test_${crypto.randomUUID().slice(0, 12)}`;
 
   try {
-    const paymentLinkToken = await createPaymentToken({ customerId });
+    const paymentLinkToken = await createPaymentToken({ customerId, userId: session.user.id });
 
     const transaction = await recordFailedPayment({
+      userId: session.user.id,
       invoiceId,
       customerId,
       customerName: "TechCorp",
@@ -49,6 +59,7 @@ export async function POST() {
     // fallire la generazione della transazione di test, già salvata sopra.
     try {
       await createNotification({
+        userId: session.user.id,
         type: "warning",
         title: "Nuovo pagamento fallito",
         message: `Nuovo pagamento fallito intercettato: ${transaction.customerName} - ${amountLabel}`,

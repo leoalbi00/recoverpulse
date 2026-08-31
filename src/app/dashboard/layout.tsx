@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { TrialBanner } from "@/components/dashboard/trial-banner";
+import { getTrialStatus } from "@/lib/trial";
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +14,8 @@ export default async function DashboardLayout({
   if (!session?.user) {
     redirect("/login");
   }
+
+  const trial = await getTrialStatus(session.user.id);
 
   // Cornice bicolore: pagina, header e sidebar restano scuri (bg-zinc-950,
   // testo text-zinc-100), mentre ogni card/tabella/modulo al loro interno è
@@ -23,6 +27,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <DashboardSidebar user={session.user} />
       <div className="flex flex-col md:pl-64">
+        <TrialBanner trial={trial} />
         <header className="sticky top-0 z-50 hidden w-full items-center justify-end border-b border-zinc-800/60 bg-zinc-950/80 p-4 backdrop-blur-md transition-all md:flex">
           <NotificationBell />
         </header>

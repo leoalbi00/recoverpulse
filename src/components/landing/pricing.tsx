@@ -82,7 +82,13 @@ export function Pricing() {
           ))}
         </div>
 
-        <div className="mt-8 flex flex-col items-center gap-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-8 sm:flex-row sm:justify-between">
+        <div className="mt-16 flex items-center gap-4 text-xs font-medium text-zinc-600">
+          <span className="h-px flex-1 bg-zinc-800" />
+          oppure, per volumi più alti
+          <span className="h-px flex-1 bg-zinc-800" />
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-8 sm:flex-row sm:justify-between">
           <div className="flex items-start gap-4">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20">
               <Shield className="size-5 text-emerald-400" />
@@ -93,11 +99,18 @@ export function Pricing() {
                 <Badge className="h-auto rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs text-zinc-950">
                   Rischio Zero
                 </Badge>
+                <Badge
+                  variant="outline"
+                  className="h-auto rounded-full border-zinc-700 px-2.5 py-0.5 text-xs text-zinc-400"
+                >
+                  Opzione Enterprise · su misura per alti volumi
+                </Badge>
               </div>
               <p className="mt-1.5 max-w-md text-sm leading-relaxed text-zinc-400">
-                Niente canone fisso: paghi solo una piccola commissione sul
-                fatturato che recuperiamo per te. Se non recuperiamo nulla, non
-                paghi nulla.
+                Un&apos;alternativa ai piani mensili qui sopra, pensata per chi
+                gestisce volumi elevati di fatture: niente canone fisso, paghi
+                solo una piccola commissione sul fatturato che recuperiamo per
+                te. Se non recuperiamo nulla, non paghi nulla.
               </p>
             </div>
           </div>
