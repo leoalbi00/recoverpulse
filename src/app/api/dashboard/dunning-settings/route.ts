@@ -38,6 +38,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Dati non validi." }, { status: 400 });
   }
 
-  const updated = updateDunningSettings(parsed.data);
+  // whatsapp/sms forzati a false lato server, non solo lato UI: nessuna
+  // integrazione reale li invia (vedi src/lib/dunning.ts), quindi non vanno
+  // attivabili nemmeno chiamando questa route direttamente.
+  const updated = updateDunningSettings({
+    ...parsed.data,
+    channels: { ...parsed.data.channels, whatsapp: false, sms: false },
+  });
   return NextResponse.json(updated);
 }

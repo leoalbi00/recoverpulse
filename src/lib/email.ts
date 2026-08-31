@@ -4,6 +4,11 @@ import { Resend } from "resend";
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
 import { getIntegrationSettings } from "@/lib/integration-settings";
 import { getReadableTextColor } from "@/lib/color";
+import {
+  getDunningTemplates,
+  renderDunningTemplate,
+  type DunningTemplateStepId,
+} from "@/lib/dunning-templates";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "RecoverPulse <onboarding@resend.dev>";
 
@@ -46,6 +51,7 @@ function buildDunningEmailHtml({
   planName,
   amountFormatted,
   recoveryLink,
+  bodyText,
   isFinalNotice = false,
   companyName,
   logoUrl,
@@ -56,6 +62,8 @@ function buildDunningEmailHtml({
   planName: string;
   amountFormatted: string;
   recoveryLink: string;
+  /** Corpo email già renderizzato (variabili sostituite) dal template configurato in /dashboard/dunning. */
+  bodyText: string;
   isFinalNotice?: boolean;
   companyName: string;
   logoUrl: string | null;
@@ -66,10 +74,13 @@ function buildDunningEmailHtml({
   // riga fattura): un cliente può impostarli liberamente sul proprio account,
   // quindi vanno trattati come input non fidato ed escapati prima di finire
   // nell'HTML dell'email, esattamente come companyName/supportEmail qui sotto.
+  // bodyText arriva invece dal merchant (template salvato in dashboard), ma è
+  // comunque testo libero: stessa cautela.
   const safeCustomerName = escapeHtml(customerName);
   const safePlanName = escapeHtml(planName);
   const safeAmountFormatted = escapeHtml(amountFormatted);
   const safeRecoveryLink = escapeHtml(recoveryLink);
+  const safeBodyHtml = escapeHtml(bodyText).replace(/\n/g, "<br />");
 
   const greeting =
     customerName && customerName !== "Gentile cliente" ? `Ciao ${safeCustomerName}` : "Gentile cliente";
@@ -150,10 +161,8 @@ function buildDunningEmailHtml({
                       <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
                         ${isFinalNotice ? "Il tuo abbonamento sta per essere sospeso" : "Il pagamento non è andato a buon fine"}
                       </h1>
-                      <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
-                        ${greeting}, non siamo riusciti ad addebitare <strong>${safeAmountFormatted}</strong> per il piano
-                        <strong>${safePlanName}</strong>. Aggiorna il metodo di pagamento adesso: bastano meno di 60 secondi
-                        e il servizio riparte subito, senza interruzioni.
+                      <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46; white-space:normal;">
+                        ${safeBodyHtml}
                       </p>
                     </td>
                   </tr>
@@ -244,6 +253,9 @@ function buildDunningEmailHtml({
 
 /**
  * Invia l'email di dunning con il link monouso al portale di aggiornamento carta.
+ * Oggetto e corpo vengono renderizzati dal template dello step configurato in
+ * /dashboard/dunning (src/lib/dunning-templates.ts) — se il merchant lo
+ * modifica da dashboard, l'email cambia di conseguenza.
  * Se RESEND_API_KEY non è configurata, l'invio viene saltato (log soltanto) invece
  * di far fallire l'intero handling del webhook Stripe.
  */
@@ -253,15 +265,15 @@ export async function sendDunningEmail({
   planName,
   amountFormatted,
   recoveryLink,
-  isFinalNotice = false,
+  stepId,
 }: {
   to: string;
   customerName: string;
   planName: string;
   amountFormatted: string;
   recoveryLink: string;
-  /** Ultimo step della sequenza di solleciti (vedi src/app/api/cron/dunning/route.ts): tono più urgente. */
-  isFinalNotice?: boolean;
+  /** Step della sequenza dunning (immediate/first_reminder/final_notice) il cui template va usato. */
+  stepId: DunningTemplateStepId;
 }): Promise<void> {
   if (!to) {
     console.warn("[email] invio saltato: email cliente mancante.");
@@ -275,20 +287,37 @@ export async function sendDunningEmail({
   }
 
   const merchant = await getMerchantSettings();
+  const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
+  const isFinalNotice = stepId === "final_notice";
+
+  const step = getDunningTemplates().steps.find((candidate) => candidate.id === stepId);
+  if (!step) {
+    console.error(`[email] template dunning mancante per lo step "${stepId}": invio email saltato.`);
+    return;
+  }
+
+  const vars = {
+    nome_cliente: customerName,
+    importo: amountFormatted,
+    nome_piano: planName,
+    nome_azienda: companyName,
+    link_recupero: recoveryLink,
+  };
+  const subject = renderDunningTemplate(step.subject, vars);
+  const bodyText = renderDunningTemplate(step.body, vars);
+
   const html = buildDunningEmailHtml({
     customerName,
     planName,
     amountFormatted,
     recoveryLink,
+    bodyText,
     isFinalNotice,
-    companyName: merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName,
+    companyName,
     logoUrl: merchant.logoUrl,
     primaryColor: merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor,
     supportEmail: merchant.supportEmail,
   });
-  const subject = isFinalNotice
-    ? `Ultimo avviso: il tuo abbonamento a ${planName} sta per essere sospeso`
-    : `Azione richiesta: aggiorna il metodo di pagamento per ${planName}`;
 
   console.log(
     `[email] invio email di dunning tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`

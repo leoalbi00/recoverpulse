@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import type {
   DunningChannel,
   DunningSettings,
@@ -21,12 +22,15 @@ const CHANNELS: {
   label: string;
   description: string;
   icon: LucideIcon;
+  /** Nessuna integrazione Twilio/WhatsApp Business API implementata: il canale non invia ancora nulla. */
+  available: boolean;
 }[] = [
   {
     id: "whatsapp",
     label: "WhatsApp API",
     description: "Messaggio diretto con link 1-Click per aggiornare la carta.",
     icon: MessageCircle,
+    available: false,
   },
   {
     id: "sms",
@@ -34,6 +38,7 @@ const CHANNELS: {
     description:
       "Promemoria breve inviato se il messaggio precedente non converte.",
     icon: Smartphone,
+    available: false,
   },
   {
     id: "email",
@@ -41,6 +46,7 @@ const CHANNELS: {
     description:
       "Sequenza di follow-up con dettaglio fattura e portale di aggiornamento pagamento.",
     icon: Mail,
+    available: true,
   },
 ];
 
@@ -90,11 +96,14 @@ export function DunningSequencesPanel({
         <h2 className="text-sm font-medium text-zinc-300">Canali attivi</h2>
         <div className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {CHANNELS.map((channel) => {
-            const enabled = settings.channels[channel.id];
+            const enabled = channel.available && settings.channels[channel.id];
             return (
               <div
                 key={channel.id}
-                className="h-full rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md"
+                className={cn(
+                  "h-full rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md",
+                  !channel.available && "opacity-60",
+                )}
               >
                 <div className="flex items-center justify-between">
                   <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-100">
@@ -102,6 +111,7 @@ export function DunningSequencesPanel({
                   </span>
                   <Switch
                     checked={enabled}
+                    disabled={!channel.available}
                     onCheckedChange={(checked) =>
                       toggleChannel(channel.id, checked)
                     }
@@ -115,7 +125,11 @@ export function DunningSequencesPanel({
                   {channel.description}
                 </p>
                 <p className="mt-4 text-xs text-zinc-600">
-                  {enabled ? "Canale attivo" : "Canale disattivato"}
+                  {!channel.available
+                    ? "Non ancora disponibile"
+                    : enabled
+                      ? "Canale attivo"
+                      : "Canale disattivato"}
                 </p>
               </div>
             );

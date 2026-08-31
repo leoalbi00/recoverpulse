@@ -2,18 +2,11 @@ import { NextResponse } from "next/server";
 
 import { listActiveFailedTransactions, markInvoiceLost, type FailedTransaction } from "@/lib/transactions";
 import { hasDunningLogForStep, recordDunningLog } from "@/lib/dunning-logs";
+import { getDunningTemplates, type DunningTemplateStep } from "@/lib/dunning-templates";
 import { sendDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
 export const dynamic = "force-dynamic";
-
-// Sequenza di solleciti via email: numero di giorni trascorsi dalla creazione
-// della fattura fallita ai quali va inviato il prossimo promemoria.
-const DUNNING_STEP_DAYS = [3, 7, 14] as const;
-
-// Oltre l'ultimo step la sequenza di solleciti è esaurita: se la fattura è
-// ancora 'in_corso' a questo punto, il recupero viene considerato fallito.
-const DUNNING_MAX_STEP_DAYS = DUNNING_STEP_DAYS[DUNNING_STEP_DAYS.length - 1];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -33,7 +26,7 @@ function isAuthorized(request: Request): boolean {
   return request.headers.get("authorization") === `Bearer ${cronSecret}`;
 }
 
-async function sendStepReminder(transaction: FailedTransaction, stepDays: number): Promise<"sent" | "failed"> {
+async function sendStepReminder(transaction: FailedTransaction, step: DunningTemplateStep): Promise<"sent" | "failed"> {
   let emailSent = false;
   try {
     const recoveryLink = `${getAppBaseUrl()}/pay/${transaction.paymentLinkToken}`;
@@ -43,13 +36,13 @@ async function sendStepReminder(transaction: FailedTransaction, stepDays: number
       planName: transaction.planName,
       amountFormatted: formatAmount(transaction.amount, transaction.currency),
       recoveryLink,
-      isFinalNotice: stepDays === DUNNING_STEP_DAYS[DUNNING_STEP_DAYS.length - 1],
+      stepId: step.id,
     });
     emailSent = true;
 
     await recordDunningLog({
       invoiceId: transaction.invoiceId,
-      stepDays,
+      stepDays: step.delayDays,
       customerEmail: transaction.customerEmail,
       channel: "email",
       status: "sent",
@@ -60,19 +53,19 @@ async function sendStepReminder(transaction: FailedTransaction, stepDays: number
       // L'email è partita ma la scrittura del log è fallita: non ritentiamo
       // l'invio (rischio di duplicato), segnaliamo solo il problema di log.
       console.error(
-        `[cron/dunning] sollecito a ${stepDays} giorni inviato per la fattura ${transaction.invoiceId}, ma la registrazione del log su Supabase è fallita:`,
+        `[cron/dunning] sollecito "${step.label}" (T+${step.delayDays}g) inviato per la fattura ${transaction.invoiceId}, ma la registrazione del log su Supabase è fallita:`,
         error
       );
       return "sent";
     }
 
     console.error(
-      `[cron/dunning] invio del sollecito a ${stepDays} giorni fallito per la fattura ${transaction.invoiceId}:`,
+      `[cron/dunning] invio del sollecito "${step.label}" (T+${step.delayDays}g) fallito per la fattura ${transaction.invoiceId}:`,
       error
     );
     await recordDunningLog({
       invoiceId: transaction.invoiceId,
-      stepDays,
+      stepDays: step.delayDays,
       customerEmail: transaction.customerEmail,
       channel: "email",
       status: "failed",
@@ -88,16 +81,26 @@ async function sendStepReminder(transaction: FailedTransaction, stepDays: number
 
 /**
  * Sequenza automatica di solleciti, eseguita una volta al giorno da Vercel
- * Cron (vedi vercel.json). Per ogni fattura ancora 'in_corso' su Supabase,
- * se i giorni trascorsi dalla creazione coincidono con uno degli step
- * previsti (3, 7, 14 giorni) invia il sollecito via email con il link al
- * portale /pay/[token], registrando l'invio in dunning_logs per non
- * spedirlo due volte. Superato l'ultimo step senza che il pagamento sia
- * stato recuperato, la fattura viene segnata come 'perso'.
+ * Cron (vedi vercel.json). Rispetta i template configurati in
+ * /dashboard/dunning (src/lib/dunning-templates.ts): se l'automazione è in
+ * pausa, l'esecuzione si ferma subito; altrimenti, per ogni fattura ancora
+ * 'in_corso' su Supabase, se i giorni trascorsi dalla creazione coincidono
+ * con lo step (T+giorni) di uno step attivo diverso da "immediate" (già
+ * gestito subito dal webhook, vedi src/lib/dunning.ts), invia il sollecito
+ * via email con il link al portale /pay/[token], registrando l'invio in
+ * dunning_logs per non spedirlo due volte. Superato lo step attivo più
+ * lontano nel tempo senza che il pagamento sia stato recuperato, la fattura
+ * viene segnata come 'perso'.
  */
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
+  }
+
+  const templates = getDunningTemplates();
+  if (!templates.automationEnabled) {
+    console.log("[cron/dunning] automazione in pausa da /dashboard/dunning: esecuzione saltata.");
+    return NextResponse.json({ success: true, paused: true, checked: 0, sent: 0, skipped: 0, failed: 0, lost: 0 });
   }
 
   let transactions: FailedTransaction[];
@@ -108,19 +111,25 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Errore nel recupero delle transazioni." }, { status: 500 });
   }
 
+  // Solo gli step con T+giorni > 0 e attivi riguardano il cron: lo step
+  // "immediate" (T+0) è inviato subito dal webhook al momento del fallimento
+  // del pagamento, non da questa esecuzione giornaliera.
+  const reminderSteps = templates.steps.filter((step) => step.enabled && step.delayDays > 0);
+  const maxDelayDays = reminderSteps.length > 0 ? Math.max(...reminderSteps.map((step) => step.delayDays)) : null;
+
   const summary = { checked: transactions.length, sent: 0, skipped: 0, failed: 0, lost: 0 };
 
   for (const transaction of transactions) {
     const elapsedDays = daysElapsedSince(transaction.createdAt);
-    const stepDays = DUNNING_STEP_DAYS.find((days) => days === elapsedDays);
+    const step = reminderSteps.find((candidate) => candidate.delayDays === elapsedDays);
 
-    if (stepDays === undefined) {
-      if (elapsedDays > DUNNING_MAX_STEP_DAYS) {
+    if (!step) {
+      if (maxDelayDays !== null && elapsedDays > maxDelayDays) {
         try {
           const lost = await markInvoiceLost(transaction.invoiceId);
           if (lost) {
             console.log(
-              `[cron/dunning] fattura ${transaction.invoiceId} segnata come "perso": sequenza di solleciti esaurita dopo ${DUNNING_MAX_STEP_DAYS} giorni senza recupero.`
+              `[cron/dunning] fattura ${transaction.invoiceId} segnata come "perso": sequenza di solleciti esaurita dopo ${maxDelayDays} giorni senza recupero.`
             );
             summary.lost++;
             continue;
@@ -140,7 +149,7 @@ export async function GET(request: Request) {
 
     let alreadySent: boolean;
     try {
-      alreadySent = await hasDunningLogForStep(transaction.invoiceId, stepDays);
+      alreadySent = await hasDunningLogForStep(transaction.invoiceId, step.delayDays);
     } catch (error) {
       console.error(
         `[cron/dunning] impossibile verificare i solleciti già inviati per la fattura ${transaction.invoiceId}:`,
@@ -155,7 +164,7 @@ export async function GET(request: Request) {
       continue;
     }
 
-    const outcome = await sendStepReminder(transaction, stepDays);
+    const outcome = await sendStepReminder(transaction, step);
     summary[outcome]++;
   }
 

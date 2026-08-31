@@ -27,7 +27,9 @@ export async function POST(
     );
   }
 
-  await startDunningSequence(transaction);
+  // Azione manuale ed esplicita dell'operatore: va inviata anche se
+  // l'automazione dunning è in pausa da /dashboard/dunning.
+  await startDunningSequence(transaction, { skipAutomationGate: true });
 
   return NextResponse.json({ success: true });
 }

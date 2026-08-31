@@ -16,6 +16,27 @@ export type DunningTemplatesSettings = {
   steps: DunningTemplateStep[];
 };
 
+export type DunningTemplateVariables = {
+  nome_cliente: string;
+  importo: string;
+  nome_piano: string;
+  nome_azienda: string;
+  link_recupero: string;
+};
+
+/**
+ * Sostituisce i placeholder {{variabile}} di un template configurato in
+ * /dashboard/dunning (oggetto o corpo email) con i valori reali della
+ * fattura. Un placeholder senza un valore noto viene lasciato invariato
+ * invece di sparire silenziosamente, così un typo nel nome della variabile
+ * resta visibile nell'anteprima/nell'email inviata.
+ */
+export function renderDunningTemplate(template: string, vars: DunningTemplateVariables): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
+    key in vars ? vars[key as keyof DunningTemplateVariables] : match
+  );
+}
+
 const VARIABLE_PLACEHOLDER_BODY = (label: string) =>
   `Ciao {{nome_cliente}},\n\n${label} Il pagamento di {{importo}} per {{nome_piano}} non è ancora andato a buon fine.\n\nAggiorna il tuo metodo di pagamento qui:\n{{link_recupero}}\n\nGrazie,\nIl team`;
 

@@ -1,5 +1,6 @@
 import type { FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
+import { getDunningTemplates } from "@/lib/dunning-templates";
 import { sendDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
@@ -12,12 +13,44 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 /**
- * Avvia la sequenza dunning (WhatsApp -> SMS -> Email) per una fattura fallita,
- * rispettando i canali attivati in Impostazioni > Sequenze Dunning.
- * TODO: collegare i provider reali per WhatsApp Business API e SMS (Twilio)
- * usando le credenziali del cliente una volta disponibili.
+ * Avvia il primo step ("immediate") della sequenza dunning per una fattura
+ * fallita, rispettando sia il toggle "Automazione" sia lo step stesso
+ * configurati in /dashboard/dunning, oltre ai canali attivati in
+ * Impostazioni > Sequenze Dunning.
+ *
+ * Solo il canale email è realmente implementato: WhatsApp e SMS non sono
+ * ancora disponibili (nessuna integrazione Twilio/WhatsApp Business API), per
+ * questo il relativo toggle in /dashboard/sequenze è disabilitato — vedi
+ * DunningChannel e src/components/dashboard/dunning-sequences-panel.tsx.
+ *
+ * `skipAutomationGate` bypassa i controlli su automazione/step attivo: usato
+ * dal pulsante "Sollecito" della dashboard transazioni
+ * (src/app/api/dashboard/transactions/[invoiceId]/resend/route.ts), dove
+ * l'invio è un'azione manuale ed esplicita dell'operatore, non deve dipendere
+ * dal fatto che l'automazione sia in pausa.
  */
-export async function startDunningSequence(transaction: FailedTransaction) {
+export async function startDunningSequence(
+  transaction: FailedTransaction,
+  options: { skipAutomationGate?: boolean } = {}
+) {
+  const templates = getDunningTemplates();
+  if (!options.skipAutomationGate) {
+    if (!templates.automationEnabled) {
+      console.log(
+        `[dunning] automazione in pausa da /dashboard/dunning: sequenza per fattura ${transaction.invoiceId} non avviata.`
+      );
+      return;
+    }
+
+    const immediateStep = templates.steps.find((step) => step.id === "immediate");
+    if (!immediateStep?.enabled) {
+      console.log(
+        `[dunning] step "Sollecito Immediato" disattivato da /dashboard/dunning: nessuna email inviata subito per la fattura ${transaction.invoiceId}.`
+      );
+      return;
+    }
+  }
+
   const settings = getDunningSettings();
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
@@ -43,11 +76,9 @@ export async function startDunningSequence(transaction: FailedTransaction) {
       planName: transaction.planName,
       amountFormatted: formatAmount(transaction.amount, transaction.currency),
       recoveryLink,
+      stepId: "immediate",
     });
   }
-
-  // Placeholder: qui andrà l'invio effettivo dei messaggi WhatsApp/SMS della
-  // sequenza, con il link al portale 1-click (recoveryLink) incluso nel testo.
 }
 
 /**
