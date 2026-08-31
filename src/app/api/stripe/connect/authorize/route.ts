@@ -43,5 +43,10 @@ export async function GET(request: Request) {
     state,
   });
 
-  return NextResponse.redirect(authorizeUrl);
+  return NextResponse.json({
+    env_raw: process.env.STRIPE_CONNECT_CLIENT_ID,
+    clean_clientId: clientId,
+    client_length: clientId?.length,
+    generated_url: authorizeUrl
+  });
 }
