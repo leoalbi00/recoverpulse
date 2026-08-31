@@ -10,11 +10,6 @@ const settingsSchema = z.object({
     sms: z.boolean(),
     email: z.boolean(),
   }),
-  timing: z.object({
-    step1: z.number().min(1),
-    step2: z.number().min(1),
-    step3: z.number().min(1),
-  }),
 });
 
 export async function GET() {

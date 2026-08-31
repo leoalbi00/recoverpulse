@@ -1,21 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Check,
-  Mail,
-  MessageCircle,
-  Smartphone,
-  type LucideIcon,
-} from "lucide-react";
+import { Check, Mail, MessageCircle, Smartphone, type LucideIcon } from "lucide-react";
 
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import type {
-  DunningChannel,
-  DunningSettings,
-  DunningStep,
-} from "@/lib/dunning-settings";
+import type { DunningChannel, DunningSettings } from "@/lib/dunning-settings";
 
 const CHANNELS: {
   id: DunningChannel;
@@ -50,12 +40,6 @@ const CHANNELS: {
   },
 ];
 
-const STEPS: { id: DunningStep; label: string; unit: "min" | "h" }[] = [
-  { id: "step1", label: "Primo sollecito", unit: "min" },
-  { id: "step2", label: "Secondo sollecito", unit: "h" },
-  { id: "step3", label: "Terzo sollecito", unit: "h" },
-];
-
 export function DunningSequencesPanel({
   initialSettings,
 }: {
@@ -84,16 +68,18 @@ export function DunningSequencesPanel({
     persist({ ...settings, channels: { ...settings.channels, [id]: enabled } });
   }
 
-  function updateTiming(id: DunningStep, value: number, unit: "min" | "h") {
-    if (!Number.isFinite(value) || value <= 0) return;
-    const minutes = unit === "h" ? value * 60 : value;
-    persist({ ...settings, timing: { ...settings.timing, [id]: minutes } });
-  }
-
   return (
     <div className="mt-8 space-y-8">
       <section>
-        <h2 className="text-sm font-medium text-zinc-300">Canali attivi</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-zinc-300">Canali attivi</h2>
+          {savedAt > 0 && (
+            <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-500">
+              <Check className="size-3.5" />
+              {saving ? "Salvataggio…" : "Salvato"}
+            </span>
+          )}
+        </div>
         <div className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {CHANNELS.map((channel) => {
             const enabled = channel.available && settings.channels[channel.id];
@@ -134,67 +120,6 @@ export function DunningSequencesPanel({
               </div>
             );
           })}
-        </div>
-      </section>
-
-      <section>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-medium text-zinc-300">
-              Tempi di attesa sequenza automatica
-            </h2>
-            <p className="mt-1 text-xs text-zinc-400">
-              Ogni passaggio viene inviato sui canali attivi, a partire dal
-              momento del pagamento fallito.
-            </p>
-          </div>
-          {savedAt > 0 && (
-            <span className="flex shrink-0 items-center gap-1 text-xs text-emerald-500">
-              <Check className="size-3.5" />
-              {saving ? "Salvataggio…" : "Salvato"}
-            </span>
-          )}
-        </div>
-
-        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
-          <div className="divide-y divide-zinc-200">
-            {STEPS.map((step, index) => {
-              const minutes = settings.timing[step.id];
-              const displayValue = step.unit === "h" ? minutes / 60 : minutes;
-              return (
-                <div
-                  key={step.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-zinc-900">
-                      {step.label}
-                    </p>
-                    <p className="text-xs text-zinc-600">
-                      Passaggio {index + 1} della sequenza
-                    </p>
-                  </div>
-                  <label className="flex items-center gap-2 text-sm text-zinc-600">
-                    T+
-                    <input
-                      type="number"
-                      min={1}
-                      value={displayValue}
-                      onChange={(event) =>
-                        updateTiming(
-                          step.id,
-                          Number(event.target.value),
-                          step.unit,
-                        )
-                      }
-                      className="h-9 w-20 rounded-lg border border-zinc-200/80 bg-white px-2 text-center text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                    />
-                    {step.unit}
-                  </label>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </section>
     </div>
