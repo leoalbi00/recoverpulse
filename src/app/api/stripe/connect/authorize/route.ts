@@ -34,6 +34,7 @@ export async function GET(request: Request) {
 
   const stripe = await getPlatformStripeClient();
   const state = createConnectState(session.user.id);
+  console.log('[VERCEL_CLIENT_ID_READ]:', clientId);
   const authorizeUrl = stripe.oauth.authorizeUrl({
     response_type: "code",
     client_id: clientId,
