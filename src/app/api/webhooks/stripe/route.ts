@@ -16,6 +16,8 @@ import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications
 import { sendCardExpiringEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
+export const dynamic = "force-dynamic";
+
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
 // dunning parte comunque verso questo indirizzo di test.
