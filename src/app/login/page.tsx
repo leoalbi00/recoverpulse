@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Activity, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -150,8 +150,10 @@ function MagicLinkForm() {
   );
 }
 
-export default function LoginPage() {
-  const [mode, setMode] = useState<"password" | "magic-link">("password");
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const magicLinkError = searchParams.get("error") === "magic-link";
+  const [mode, setMode] = useState<"password" | "magic-link">(magicLinkError ? "magic-link" : "password");
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6 py-16">
@@ -174,6 +176,13 @@ export default function LoginPage() {
         <p className="mt-1.5 text-sm text-zinc-400">
           Accedi per vedere il tuo punteggio di recupero.
         </p>
+
+        {magicLinkError && (
+          <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-400/20 bg-amber-400/10 px-3 py-2.5 text-sm text-amber-300">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <span>Il link non è più valido o è scaduto. Richiedine uno nuovo qui sotto.</span>
+          </div>
+        )}
 
         <div className="mt-6 flex gap-1 rounded-lg border border-zinc-800 bg-zinc-950/60 p-1">
           <button
@@ -208,5 +217,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }
