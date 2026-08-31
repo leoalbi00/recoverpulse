@@ -6,10 +6,12 @@ import { AlertTriangle, DollarSign, Download, TrendingUp, XCircle } from "lucide
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
+import { PaywallUnlockCard } from "@/components/dashboard/paywall-unlock-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { transactionsToCsv, downloadCsv } from "@/lib/csv-export";
 import type { FailedTransaction } from "@/lib/transactions";
+import type { PaywallStatus } from "@/lib/paywall";
 import {
   TIME_RANGE_OPTIONS,
   TIME_RANGE_CAPTION,
@@ -27,6 +29,7 @@ type DashboardOverviewProps = {
   allTransactions: FailedTransaction[];
   dunningLogs: DunningLogEntry[];
   sequenceSteps: SequenceStepDefinition[];
+  paywall: PaywallStatus;
 };
 
 function conversionColorClass(reached: number, rate: number): string {
@@ -36,7 +39,7 @@ function conversionColorClass(reached: number, rate: number): string {
   return "text-rose-600";
 }
 
-export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps }: DashboardOverviewProps) {
+export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps, paywall }: DashboardOverviewProps) {
   const [range, setRange] = useState<TimeRange>("30d");
 
   const filtered = useMemo(() => filterTransactionsByRange(allTransactions, range), [allTransactions, range]);
@@ -116,82 +119,88 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps 
         />
       </div>
 
-      <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-900">Fatturato Recuperato vs Pagamenti Falliti</h2>
-              <p className="mt-1 text-sm text-zinc-600">
-                {TIME_RANGE_CAPTION[range]}, aggiornato in tempo reale via webhook Stripe.
-              </p>
+      {paywall.locked ? (
+        <PaywallUnlockCard trial={paywall.trial} />
+      ) : (
+        <>
+          <section className="mt-10 scroll-mt-20">
+            <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-zinc-900">Fatturato Recuperato vs Pagamenti Falliti</h2>
+                  <p className="mt-1 text-sm text-zinc-600">
+                    {TIME_RANGE_CAPTION[range]}, aggiornato in tempo reale via webhook Stripe.
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-zinc-600">
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-emerald-500" />
+                    Fatturato Recuperato
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="size-2 rounded-full bg-rose-500" />
+                    Pagamenti Falliti
+                  </span>
+                </div>
+              </div>
+              <div className="mt-6">
+                <RecoveryChart data={chartData} />
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-zinc-600">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-emerald-500" />
-                Fatturato Recuperato
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-rose-500" />
-                Pagamenti Falliti
-              </span>
-            </div>
-          </div>
-          <div className="mt-6">
-            <RecoveryChart data={chartData} />
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section className="mt-10 scroll-mt-20">
-        <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Performance Sequenze</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Tasso di conversione per step della sequenza dunning ({TIME_RANGE_CAPTION[range].toLowerCase()}).
-            </p>
-          </div>
+          <section className="mt-10 scroll-mt-20">
+            <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-900">Performance Sequenze</h2>
+                <p className="mt-1 text-sm text-zinc-600">
+                  Tasso di conversione per step della sequenza dunning ({TIME_RANGE_CAPTION[range].toLowerCase()}).
+                </p>
+              </div>
 
-          {sequencePerformance.length === 0 ? (
-            <p className="mt-6 py-4 text-center text-sm text-zinc-600">
-              Nessuno step di dunning configurato in /dashboard/dunning.
-            </p>
-          ) : (
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[520px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
-                    <th className="px-3 pb-3 font-medium first:pl-0">Step</th>
-                    <th className="px-3 pb-3 font-medium">Ritardo</th>
-                    <th className="px-3 pb-3 font-medium">Fatture Raggiunte</th>
-                    <th className="px-3 pb-3 font-medium">Recuperate</th>
-                    <th className="px-3 pb-3 text-right font-medium last:pr-0">Tasso di Conversione</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-200">
-                  {sequencePerformance.map((step) => (
-                    <tr key={step.id} className="transition-colors hover:bg-zinc-100">
-                      <td className="px-3 py-3 font-medium text-zinc-900 first:pl-0">{step.label}</td>
-                      <td className="px-3 py-3 text-zinc-600">
-                        {step.delayDays === 0 ? "Immediato" : `T+${step.delayDays} giorni`}
-                      </td>
-                      <td className="px-3 py-3 text-zinc-600">{step.reached}</td>
-                      <td className="px-3 py-3 text-zinc-600">{step.recovered}</td>
-                      <td
-                        className={cn(
-                          "px-3 py-3 text-right font-semibold last:pr-0",
-                          conversionColorClass(step.reached, step.conversionRate)
-                        )}
-                      >
-                        {step.reached > 0 ? `${step.conversionRate}%` : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {sequencePerformance.length === 0 ? (
+                <p className="mt-6 py-4 text-center text-sm text-zinc-600">
+                  Nessuno step di dunning configurato in /dashboard/dunning.
+                </p>
+              ) : (
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
+                        <th className="px-3 pb-3 font-medium first:pl-0">Step</th>
+                        <th className="px-3 pb-3 font-medium">Ritardo</th>
+                        <th className="px-3 pb-3 font-medium">Fatture Raggiunte</th>
+                        <th className="px-3 pb-3 font-medium">Recuperate</th>
+                        <th className="px-3 pb-3 text-right font-medium last:pr-0">Tasso di Conversione</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-200">
+                      {sequencePerformance.map((step) => (
+                        <tr key={step.id} className="transition-colors hover:bg-zinc-100">
+                          <td className="px-3 py-3 font-medium text-zinc-900 first:pl-0">{step.label}</td>
+                          <td className="px-3 py-3 text-zinc-600">
+                            {step.delayDays === 0 ? "Immediato" : `T+${step.delayDays} giorni`}
+                          </td>
+                          <td className="px-3 py-3 text-zinc-600">{step.reached}</td>
+                          <td className="px-3 py-3 text-zinc-600">{step.recovered}</td>
+                          <td
+                            className={cn(
+                              "px-3 py-3 text-right font-semibold last:pr-0",
+                              conversionColorClass(step.reached, step.conversionRate)
+                            )}
+                          >
+                            {step.reached > 0 ? `${step.conversionRate}%` : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </section>
+          </section>
+        </>
+      )}
 
       <section id="transazioni" className="mt-10 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-3">

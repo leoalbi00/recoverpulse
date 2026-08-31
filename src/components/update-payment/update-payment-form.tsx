@@ -20,17 +20,21 @@ type UpdatePaymentFormProps = {
   amountFormatted: string;
   primaryColor: string;
   stripePublishableKey: string;
+  /** "update": aggiornamento preventivo della carta (nessun importo da mostrare/riaddebitare). */
+  mode?: "payment" | "update";
 };
 
 function CardStep({
   token,
   amountFormatted,
   primaryColor,
+  mode = "payment",
   onSuccess,
 }: {
   token: string;
   amountFormatted: string;
   primaryColor: string;
+  mode?: "payment" | "update";
   onSuccess: () => void;
 }) {
   const stripe = useStripe();
@@ -101,7 +105,11 @@ function CardStep({
         className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
-        {submitting ? "Verifica in corso…" : `Paga e Aggiorna Carta (${amountFormatted})`}
+        {submitting
+          ? "Verifica in corso…"
+          : mode === "update"
+            ? "Aggiorna Carta"
+            : `Paga e Aggiorna Carta (${amountFormatted})`}
       </button>
 
       <p className="flex items-center justify-center gap-1.5 text-xs text-zinc-500">
@@ -119,11 +127,12 @@ export function UpdatePaymentForm({
   amountFormatted,
   primaryColor,
   stripePublishableKey,
+  mode = "payment",
 }: UpdatePaymentFormProps) {
   const [success, setSuccess] = useState(false);
 
   if (success) {
-    return <PaymentSuccessStep planName={planName} amountFormatted={amountFormatted} />;
+    return <PaymentSuccessStep planName={planName} amountFormatted={amountFormatted} mode={mode} />;
   }
 
   return (
@@ -179,6 +188,7 @@ export function UpdatePaymentForm({
         token={token}
         amountFormatted={amountFormatted}
         primaryColor={primaryColor}
+        mode={mode}
         onSuccess={() => setSuccess(true)}
       />
     </Elements>

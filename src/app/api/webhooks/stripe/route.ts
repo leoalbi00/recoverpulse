@@ -10,9 +10,11 @@ import {
   recordFailedPayment,
 } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
-import { setStripeCustomerForUser } from "@/lib/billing";
+import { setStripeCustomerForUser, setSubscriptionForUser, getUserIdForStripeCustomer } from "@/lib/billing";
 import { createPaymentToken } from "@/lib/tokens";
 import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications";
+import { sendCardExpiringEmail } from "@/lib/email";
+import { getAppBaseUrl } from "@/lib/app-url";
 
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
@@ -144,12 +146,63 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription, user
   }
 }
 
-function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+/**
+ * customer.source.expiring: Stripe la invia ~30 giorni prima che una carta
+ * salvata scada (solo integrazioni Card/Source legacy — se il merchant usa
+ * PaymentMethod questo evento non arriva mai, comportamento noto di Stripe).
+ * Riusa il portale /pay/[token] già costruito per il recupero pagamenti
+ * falliti: il token generato qui punta a un customer senza una fattura
+ * fallita associata, la pagina lo riconosce come "aggiornamento preventivo"
+ * (vedi src/app/pay/[token]/page.tsx).
+ */
+async function handleCustomerSourceExpiring(stripe: Stripe, source: Stripe.CustomerSource, userId: string) {
+  if (source.object !== "card") return; // BankAccount/Account non hanno exp_month/exp_year in questa forma
+
+  const customer = await resolveCustomer(stripe, source.customer ?? null);
+  if (!customer.id || !customer.email) {
+    console.warn(
+      `[stripe-webhook] customer.source.expiring: email non risolvibile per il customer ${customer.id || "sconosciuto"}, invio saltato.`
+    );
+    return;
+  }
+
+  const token = await createPaymentToken({ customerId: customer.id, userId });
+  await sendCardExpiringEmail({
+    userId,
+    to: customer.email,
+    customerName: customer.name,
+    last4: source.last4,
+    expMonth: source.exp_month,
+    expYear: source.exp_year,
+    updateLink: `${getAppBaseUrl()}/pay/${token}`,
+  });
+}
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const userId = session.client_reference_id;
   const customerId = session.customer;
   if (userId && typeof customerId === "string") {
-    setStripeCustomerForUser(userId, customerId);
+    await setStripeCustomerForUser(userId, customerId);
   }
+}
+
+/**
+ * customer.subscription.created/updated/deleted lato PIATTAFORMA (event.account
+ * assente): traccia l'abbonamento SaaS di RecoverPulse dell'utente (per il
+ * paywall, src/lib/paywall.ts), non va confuso con l'omonimo evento lato
+ * account collegato (handleSubscriptionDeleted sopra, chiamato solo dal ramo
+ * connectedAccountId, riguarda l'abbonamento di un CLIENTE del merchant).
+ */
+async function handlePlatformSubscriptionChange(subscription: Stripe.Subscription): Promise<void> {
+  const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
+  const userId = await getUserIdForStripeCustomer(customerId);
+  if (!userId) {
+    console.warn(
+      `[stripe-webhook] abbonamento piattaforma ${subscription.id} per il customer ${customerId} non associato a nessun utente RecoverPulse: ignorato.`
+    );
+    return;
+  }
+  await setSubscriptionForUser(userId, subscription.status, subscription.metadata?.planId ?? null);
 }
 
 /**
@@ -246,15 +299,28 @@ export async function POST(request: Request) {
         case "customer.subscription.deleted":
           await handleSubscriptionDeleted(event.data.object, userId);
           break;
+        case "customer.source.expiring":
+          await handleCustomerSourceExpiring(stripe, event.data.object, userId);
+          break;
         default:
           break;
       }
-    } else if (event.type === "checkout.session.completed") {
-      handleCheckoutSessionCompleted(event.data.object);
+    } else {
+      // Nessun event.account: evento della piattaforma RecoverPulse stessa
+      // (il proprio billing SaaS), non di un merchant collegato.
+      switch (event.type) {
+        case "checkout.session.completed":
+          await handleCheckoutSessionCompleted(event.data.object);
+          break;
+        case "customer.subscription.created":
+        case "customer.subscription.updated":
+        case "customer.subscription.deleted":
+          await handlePlatformSubscriptionChange(event.data.object);
+          break;
+        default:
+          break;
+      }
     }
-    // Altri tipi di evento senza event.account (es. invoice.payment_failed
-    // sganciato da qualunque account collegato) non sono azionabili: non
-    // c'è alcun merchant a cui associare la scrittura, vengono ignorati.
   } catch (error) {
     console.error(`Errore durante la gestione dell'evento Stripe ${event.type}:`, error);
     return NextResponse.json({ error: "Errore interno durante la gestione dell'evento." }, { status: 500 });

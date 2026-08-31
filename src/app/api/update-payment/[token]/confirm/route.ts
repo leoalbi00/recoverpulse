@@ -39,9 +39,10 @@ async function notifyRecovery(updated: FailedTransaction): Promise<void> {
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
 
-  let transaction;
+  let paymentToken: Awaited<ReturnType<typeof validatePaymentToken>>;
+  let transaction: FailedTransaction | null;
   try {
-    const paymentToken = await validatePaymentToken(token);
+    paymentToken = await validatePaymentToken(token);
     transaction = paymentToken
       ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
       : null;
@@ -53,12 +54,8 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     );
   }
 
-  if (!transaction) {
+  if (!paymentToken) {
     return NextResponse.json({ error: "Link non valido o scaduto." }, { status: 404 });
-  }
-
-  if (transaction.status === "recuperato") {
-    return NextResponse.json({ success: true, planName: transaction.planName });
   }
 
   const body = await request.json().catch(() => null);
@@ -67,13 +64,73 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     return NextResponse.json({ error: "Dati mancanti." }, { status: 400 });
   }
 
+  if (!transaction) {
+    // Token valido ma nessuna fattura fallita associata: caso "aggiornamento
+    // preventivo" (customer.source.expiring). Nessuna modalità simulata qui
+    // (v1 solo Stripe reale, vedi src/app/pay/[token]/page.tsx).
+    if (!("setupIntentId" in parsed.data)) {
+      return NextResponse.json({ error: "Dati mancanti." }, { status: 400 });
+    }
+    if (!paymentToken.userId) {
+      return NextResponse.json({ error: "Token non associato a un merchant." }, { status: 409 });
+    }
+
+    const stripeAccountId = await getStripeAccountIdForUser(paymentToken.userId);
+    if (!stripeAccountId) {
+      return NextResponse.json({ error: "Nessun account Stripe collegato per questo merchant." }, { status: 409 });
+    }
+
+    const stripe = await getStripeClientForAccount(stripeAccountId);
+    const setupIntent = await stripe.setupIntents.retrieve(parsed.data.setupIntentId);
+    const setupCustomerId =
+      typeof setupIntent.customer === "string" ? setupIntent.customer : setupIntent.customer?.id;
+
+    if (setupIntent.status !== "succeeded" || setupCustomerId !== paymentToken.customerId) {
+      return NextResponse.json({ error: "Verifica della carta non riuscita." }, { status: 400 });
+    }
+
+    const paymentMethodId =
+      typeof setupIntent.payment_method === "string"
+        ? setupIntent.payment_method
+        : setupIntent.payment_method?.id;
+    if (!paymentMethodId) {
+      return NextResponse.json({ error: "Nessun metodo di pagamento associato al SetupIntent." }, { status: 400 });
+    }
+
+    await stripe.customers.update(paymentToken.customerId, {
+      invoice_settings: { default_payment_method: paymentMethodId },
+    });
+
+    // Nessun transaction.subscriptionId disponibile qui: aggiorna il metodo
+    // di pagamento predefinito su tutte le sottoscrizioni attive del
+    // customer (in pratica quasi sempre una sola, per questo caso d'uso una
+    // singola pagina di risultati è sufficiente).
+    const activeSubscriptions = await stripe.subscriptions.list({
+      customer: paymentToken.customerId,
+      status: "active",
+    });
+    for (const subscription of activeSubscriptions.data) {
+      await stripe.subscriptions.update(subscription.id, { default_payment_method: paymentMethodId });
+    }
+
+    // Non tocca failed_transactions/notifiche/dunning: non esiste una
+    // fattura fallita da recuperare in questo ramo.
+    await markPaymentTokenUsed(token);
+
+    return NextResponse.json({ success: true, planName: "il tuo abbonamento" });
+  }
+
+  if (transaction.status === "recuperato") {
+    return NextResponse.json({ success: true, planName: transaction.planName });
+  }
+
   if ("simulate" in parsed.data) {
     // Consentita solo se un vero SetupIntent Stripe non è comunque ottenibile
     // per questa transazione (stessa verifica che la pagina /pay/[token] fa
     // per decidere se mostrare il form reale o quello simulato): impedisce di
     // usare la conferma simulata per saltare la verifica reale della carta su
     // una transazione per cui Stripe funziona correttamente.
-    const realClientSecret = await tryCreateSetupIntent(transaction);
+    const realClientSecret = await tryCreateSetupIntent({ userId: transaction.userId, customerId: transaction.customerId });
     if (realClientSecret) {
       return NextResponse.json(
         { error: "Stripe è disponibile per questa transazione: usa il modulo di pagamento reale." },

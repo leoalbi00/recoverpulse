@@ -5,6 +5,7 @@ import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { listTransactions, type FailedTransaction } from "@/lib/transactions";
 import { listAllDunningLogs } from "@/lib/dunning-logs";
 import { getDunningTemplates } from "@/lib/dunning-templates";
+import { getPaywallStatus } from "@/lib/paywall";
 import type { DunningLogEntry, SequenceStepDefinition } from "@/lib/dashboard-analytics";
 
 /**
@@ -50,6 +51,7 @@ export default async function DashboardPage() {
   const firstName = session.user.name?.split(" ")[0] ?? "Utente";
 
   const { allTransactions, dunningLogs, sequenceSteps } = await loadDashboardData(session.user.id);
+  const paywall = await getPaywallStatus(session.user.id);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -60,7 +62,12 @@ export default async function DashboardPage() {
         <p className="mt-1.5 text-sm text-zinc-400">Ecco lo stato del recupero abbonamenti.</p>
       </div>
 
-      <DashboardOverview allTransactions={allTransactions} dunningLogs={dunningLogs} sequenceSteps={sequenceSteps} />
+      <DashboardOverview
+        allTransactions={allTransactions}
+        dunningLogs={dunningLogs}
+        sequenceSteps={sequenceSteps}
+        paywall={paywall}
+      />
     </div>
   );
 }

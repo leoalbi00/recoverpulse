@@ -59,6 +59,13 @@ export async function POST(request: Request) {
       ],
       customer_email: session?.user?.email ?? undefined,
       client_reference_id: session?.user?.id,
+      // Propaga sull'abbonamento creato (subscription_data.metadata), letto
+      // dal webhook per popolare users.subscription_plan: senza questo, col
+      // fallback price_data inline non c'è un Price ID stabile da cui
+      // risalire al piano scelto (vedi src/app/api/webhooks/stripe/route.ts).
+      subscription_data: {
+        metadata: { planId: parsed.data.plan },
+      },
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: referer ?? `${origin}/#pricing`,
       allow_promotion_codes: true,

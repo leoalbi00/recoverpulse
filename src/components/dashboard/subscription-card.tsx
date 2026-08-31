@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 
 export function SubscriptionCard({
   hasSubscription,
+  planName,
 }: {
   hasSubscription: boolean;
+  planName?: string | null;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function SubscriptionCard({
               </p>
               {hasSubscription && (
                 <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">
-                  Attivo
+                  {planName ? `Attivo · ${planName}` : "Attivo"}
                 </Badge>
               )}
             </div>

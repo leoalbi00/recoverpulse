@@ -4,8 +4,9 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { authConfig } from "@/auth.config";
-import { findUserByEmail, verifyPassword } from "@/lib/users";
+import { findUserByEmail, findUserById, verifyPassword } from "@/lib/users";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { validateAuthToken, markAuthTokenUsed } from "@/lib/auth-tokens";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -48,6 +49,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const isValid = await verifyPassword(user, parsed.data.password);
         if (!isValid) return null;
 
+        return { id: user.id, name: user.name, email: user.email };
+      },
+    }),
+    // Secondo provider per il flusso Magic Link
+    // (src/app/api/auth/magic-link/callback/route.ts): quella route valida
+    // già il token in sola lettura prima di chiamare signIn(), quindi
+    // authorize() qui sotto lo ri-valida e lo consuma senza ambiguità sul
+    // fallimento (nessun password/email in gioco, solo il token monouso).
+    Credentials({
+      id: "magic-link",
+      name: "Magic Link",
+      credentials: { token: { label: "Token", type: "text" } },
+      async authorize(credentials) {
+        const token = typeof credentials?.token === "string" ? credentials.token : null;
+        if (!token) return null;
+
+        const authToken = await validateAuthToken(token, "magic_link");
+        if (!authToken) return null;
+
+        const user = await findUserById(authToken.userId);
+        if (!user) return null;
+
+        await markAuthTokenUsed(token);
         return { id: user.id, name: user.name, email: user.email };
       },
     }),

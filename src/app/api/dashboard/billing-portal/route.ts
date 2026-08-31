@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
-  const customerId = getStripeCustomerForUser(session.user.id);
+  const customerId = await getStripeCustomerForUser(session.user.id);
   if (!customerId) {
     return NextResponse.json(
       { error: "Nessun abbonamento attivo. Scegli un piano qui sotto per iniziare." },

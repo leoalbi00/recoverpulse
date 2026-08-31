@@ -10,7 +10,7 @@ import { PlanButton } from "@/components/billing/plan-button";
 import { getIntegrationSettings, maskSecret } from "@/lib/integration-settings";
 import { getMerchantSettings } from "@/lib/merchant-settings";
 import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
-import { getStripeCustomerForUser } from "@/lib/billing";
+import { getBillingInfoForUser } from "@/lib/billing";
 import { PLANS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,9 @@ export default async function ImpostazioniPage() {
     },
   };
 
-  const hasSubscription = getStripeCustomerForUser(session.user.id) !== null;
+  const billingInfo = await getBillingInfoForUser(session.user.id);
+  const hasActiveSubscription =
+    billingInfo.subscriptionStatus === "active" || billingInfo.subscriptionStatus === "trialing";
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -99,7 +101,10 @@ export default async function ImpostazioniPage() {
           e canali dunning.
         </p>
         <div className="mt-3">
-          <SubscriptionCard hasSubscription={hasSubscription} />
+          <SubscriptionCard
+            hasSubscription={hasActiveSubscription}
+            planName={PLANS.find((plan) => plan.id === billingInfo.subscriptionPlan)?.name ?? null}
+          />
         </div>
         <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-3">
           {PLANS.map((plan) => (

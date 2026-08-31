@@ -180,9 +180,10 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   // Un errore qui o nella lettura della transazione (es. Supabase irraggiungibile
   // o mal configurato in produzione) non deve far crashare la pagina con un 500:
   // mostriamo una schermata dedicata.
+  let paymentToken: Awaited<ReturnType<typeof validatePaymentToken>>;
   let transaction: FailedTransaction | null;
   try {
-    const paymentToken = await validatePaymentToken(token);
+    paymentToken = await validatePaymentToken(token);
     transaction = paymentToken
       ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
       : null;
@@ -191,8 +192,73 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return <ConnectionError merchant={DEFAULT_MERCHANT_SETTINGS} />;
   }
 
-  if (!transaction) {
+  if (!paymentToken) {
     return <InvalidLink merchant={DEFAULT_MERCHANT_SETTINGS} />;
+  }
+
+  if (!transaction) {
+    // Token valido ma nessuna fattura fallita associata: caso "aggiornamento
+    // preventivo" (es. da customer.source.expiring, src/app/api/webhooks/stripe/route.ts),
+    // non un link rotto.
+    const preventiveMerchant = paymentToken.userId
+      ? await getMerchantSettings(paymentToken.userId)
+      : DEFAULT_MERCHANT_SETTINGS;
+
+    const preventiveClientSecret = paymentToken.userId
+      ? await tryCreateSetupIntent({ userId: paymentToken.userId, customerId: paymentToken.customerId })
+      : null;
+
+    // v1: solo Stripe reale per l'aggiornamento preventivo, nessuna modalità
+    // simulata (eviterebbe di triplicare la logica demo/simulazione già
+    // esistente per un caso d'uso a basso traffico).
+    if (!preventiveClientSecret) {
+      return (
+        <Shell merchant={preventiveMerchant}>
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
+              <XCircle className="size-7 text-red-400" />
+            </span>
+            <div>
+              <p className="text-lg font-semibold text-white">Servizio non disponibile</p>
+              <p className="mt-1.5 text-sm text-zinc-400">
+                Non riusciamo ad aggiornare la carta in questo momento. Contatta il tuo fornitore per assistenza.
+              </p>
+            </div>
+          </div>
+        </Shell>
+      );
+    }
+
+    const preventiveStripeAccountId = paymentToken.userId
+      ? await getStripeAccountIdForUser(paymentToken.userId)
+      : null;
+    const preventiveStripePublishableKey = preventiveStripeAccountId
+      ? await getStripePublishableKeyForAccount(preventiveStripeAccountId)
+      : "";
+
+    return (
+      <Shell merchant={preventiveMerchant}>
+        <div className="mb-6 text-center">
+          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">Aggiornamento carta</p>
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            Aggiorna il tuo metodo di pagamento
+          </h1>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            La tua carta salvata sta per scadere: aggiornala per evitare interruzioni al prossimo rinnovo.
+          </p>
+        </div>
+
+        <UpdatePaymentForm
+          token={token}
+          clientSecret={preventiveClientSecret}
+          planName="il tuo abbonamento"
+          amountFormatted=""
+          primaryColor={preventiveMerchant.primaryColor}
+          stripePublishableKey={preventiveStripePublishableKey}
+          mode="update"
+        />
+      </Shell>
+    );
   }
 
   const merchant = await getMerchantSettings(transaction.userId);
@@ -202,7 +268,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   }
 
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
-  const clientSecret = await tryCreateSetupIntent(transaction);
+  const clientSecret = await tryCreateSetupIntent({ userId: transaction.userId, customerId: transaction.customerId });
 
   // Nessun vero SetupIntent Stripe ottenibile: transazione di test generata
   // da /api/test/generate-failed-payment (customer Stripe inesistente) o

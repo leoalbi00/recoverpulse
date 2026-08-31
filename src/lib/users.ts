@@ -41,6 +41,20 @@ export async function findUserByEmail(email: string): Promise<User | null> {
   return data ? fromRow(data) : null;
 }
 
+export async function findUserById(id: string): Promise<User | null> {
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select("id, name, email, password_hash")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Errore nel recupero dell'utente da Supabase: ${error.message}`);
+  }
+
+  return data ? fromRow(data) : null;
+}
+
 export async function createUser({
   name,
   email,
@@ -71,4 +85,12 @@ export async function createUser({
 
 export function verifyPassword(user: User, password: string) {
   return bcrypt.compare(password, user.passwordHash);
+}
+
+export async function updatePasswordHash(userId: string, newPasswordHash: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("users").update({ password_hash: newPasswordHash }).eq("id", userId);
+
+  if (error) {
+    throw new Error(`Errore nell'aggiornamento della password su Supabase: ${error.message}`);
+  }
 }
