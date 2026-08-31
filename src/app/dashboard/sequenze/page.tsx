@@ -1,8 +1,8 @@
 import { DunningSequencesPanel } from "@/components/dashboard/dunning-sequences-panel";
 import { getDunningSettings } from "@/lib/dunning-settings";
 
-export default function SequenzePage() {
-  const settings = getDunningSettings();
+export default async function SequenzePage() {
+  const settings = await getDunningSettings();
 
   return (
     <div className="mx-auto max-w-6xl">

@@ -1,3 +1,7 @@
+import "server-only";
+
+import { supabaseAdmin } from "@/lib/supabase-admin";
+
 export type DunningChannel = "whatsapp" | "sms" | "email";
 
 export type DunningStep = "step1" | "step2" | "step3";
@@ -7,6 +11,10 @@ export type DunningSettings = {
   /** Minuti di attesa dopo il pagamento fallito, per ciascun passaggio della sequenza. */
   timing: Record<DunningStep, number>;
 };
+
+// RecoverPulse è a singolo merchant per deploy (vedi la migration): un'unica
+// riga identificata da questo id fisso, sempre la stessa a ogni upsert.
+const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
 
 function defaultSettings(): DunningSettings {
   return {
@@ -20,23 +28,81 @@ function defaultSettings(): DunningSettings {
   };
 }
 
-declare global {
-  var __recoverpulseDunningSettings: DunningSettings | undefined;
+type DunningSettingsRow = {
+  channel_whatsapp: boolean;
+  channel_sms: boolean;
+  channel_email: boolean;
+  timing_step1_minutes: number;
+  timing_step2_minutes: number;
+  timing_step3_minutes: number;
+};
+
+function mapRow(row: DunningSettingsRow): DunningSettings {
+  return {
+    channels: {
+      whatsapp: row.channel_whatsapp,
+      sms: row.channel_sms,
+      email: row.channel_email,
+    },
+    timing: {
+      step1: row.timing_step1_minutes,
+      step2: row.timing_step2_minutes,
+      step3: row.timing_step3_minutes,
+    },
+  };
 }
 
-// In-memory demo store — sopravvive ai reload del dev server grazie a `globalThis`,
-// ma va sostituito con un database vero prima della produzione.
-const settings = globalThis.__recoverpulseDunningSettings ?? defaultSettings();
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__recoverpulseDunningSettings = settings;
+/**
+ * Legge canali attivi e timing della sequenza dunning da Supabase. Se la riga
+ * non esiste ancora o Supabase non è raggiungibile, ritorna i default invece
+ * di far fallire il webhook Stripe o la dashboard.
+ */
+export async function getDunningSettings(): Promise<DunningSettings> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("dunning_settings")
+      .select(
+        "channel_whatsapp, channel_sms, channel_email, timing_step1_minutes, timing_step2_minutes, timing_step3_minutes"
+      )
+      .eq("id", SETTINGS_ID)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[dunning-settings] errore nel recupero da Supabase:", error.message);
+      return defaultSettings();
+    }
+
+    return data ? mapRow(data) : defaultSettings();
+  } catch (error) {
+    console.error("[dunning-settings] eccezione imprevista nel recupero da Supabase:", error);
+    return defaultSettings();
+  }
 }
 
-export function getDunningSettings(): DunningSettings {
-  return settings;
-}
+export async function updateDunningSettings(next: DunningSettings): Promise<DunningSettings> {
+  const { data, error } = await supabaseAdmin
+    .from("dunning_settings")
+    .upsert(
+      {
+        id: SETTINGS_ID,
+        channel_whatsapp: next.channels.whatsapp,
+        channel_sms: next.channels.sms,
+        channel_email: next.channels.email,
+        timing_step1_minutes: next.timing.step1,
+        timing_step2_minutes: next.timing.step2,
+        timing_step3_minutes: next.timing.step3,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" }
+    )
+    .select(
+      "channel_whatsapp, channel_sms, channel_email, timing_step1_minutes, timing_step2_minutes, timing_step3_minutes"
+    )
+    .single();
 
-export function updateDunningSettings(next: DunningSettings): DunningSettings {
-  settings.channels = { ...next.channels };
-  settings.timing = { ...next.timing };
-  return settings;
+  if (error) {
+    throw new Error(`Errore nel salvataggio delle impostazioni dunning su Supabase: ${error.message}`);
+  }
+
+  return mapRow(data);
 }

@@ -97,7 +97,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
   }
 
-  const templates = getDunningTemplates();
+  const templates = await getDunningTemplates();
   if (!templates.automationEnabled) {
     console.log("[cron/dunning] automazione in pausa da /dashboard/dunning: esecuzione saltata.");
     return NextResponse.json({ success: true, paused: true, checked: 0, sent: 0, skipped: 0, failed: 0, lost: 0 });

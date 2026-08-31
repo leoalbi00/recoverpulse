@@ -33,7 +33,7 @@ export async function startDunningSequence(
   transaction: FailedTransaction,
   options: { skipAutomationGate?: boolean } = {}
 ) {
-  const templates = getDunningTemplates();
+  const templates = await getDunningTemplates();
   if (!options.skipAutomationGate) {
     if (!templates.automationEnabled) {
       console.log(
@@ -51,7 +51,7 @@ export async function startDunningSequence(
     }
   }
 
-  const settings = getDunningSettings();
+  const settings = await getDunningSettings();
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
   );

@@ -290,7 +290,8 @@ export async function sendDunningEmail({
   const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
   const isFinalNotice = stepId === "final_notice";
 
-  const step = getDunningTemplates().steps.find((candidate) => candidate.id === stepId);
+  const templates = await getDunningTemplates();
+  const step = templates.steps.find((candidate) => candidate.id === stepId);
   if (!step) {
     console.error(`[email] template dunning mancante per lo step "${stepId}": invio email saltato.`);
     return;

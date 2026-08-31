@@ -1,8 +1,8 @@
 import { DunningTemplatesManager } from "@/components/dashboard/dunning-templates-manager";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 
-export default function DunningPage() {
-  const settings = getDunningTemplates();
+export default async function DunningPage() {
+  const settings = await getDunningTemplates();
 
   return (
     <div className="mx-auto max-w-4xl">
