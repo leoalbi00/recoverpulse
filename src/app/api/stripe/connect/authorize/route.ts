@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Troppe richieste. Riprova tra qualche minuto." }, { status: 429 });
   }
 
-  const clientId = process.env.STRIPE_CONNECT_CLIENT_ID?.trim();
+  const clientId = process.env.STRIPE_CONNECT_CLIENT_ID?.replace(/[^a-zA-Z0-9_]/g, "");
   if (!clientId) {
     console.error("[stripe-connect] STRIPE_CONNECT_CLIENT_ID non configurato.");
     return NextResponse.json(
