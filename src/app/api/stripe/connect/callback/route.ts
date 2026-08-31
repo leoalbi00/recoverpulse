@@ -72,7 +72,7 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(`${settingsUrl}?connected=success`);
   } catch (error) {
-    console.error("[stripe-connect] errore nello scambio del codice OAuth:", error);
+    console.error('Stripe Connect Callback Error:', error);
     return NextResponse.redirect(`${settingsUrl}?connected=error`);
   }
 }
