@@ -70,14 +70,26 @@ export async function startDunningSequence(
   );
 
   if (channels.includes("email")) {
-    await sendDunningEmail({
-      to: transaction.customerEmail,
-      customerName: transaction.customerName,
-      planName: transaction.planName,
-      amountFormatted: formatAmount(transaction.amount, transaction.currency),
-      recoveryLink,
-      stepId: "immediate",
-    });
+    // La fattura è già registrata su Supabase a questo punto (vedi
+    // handleInvoicePaymentFailed nel webhook): un fallimento dell'invio non
+    // deve far fallire l'intero webhook e farlo ritentare da Stripe, il
+    // sollecito successivo del cron proverà comunque a raggiungere il
+    // cliente.
+    try {
+      await sendDunningEmail({
+        to: transaction.customerEmail,
+        customerName: transaction.customerName,
+        planName: transaction.planName,
+        amountFormatted: formatAmount(transaction.amount, transaction.currency),
+        recoveryLink,
+        stepId: "immediate",
+      });
+    } catch (error) {
+      console.error(
+        `[dunning] invio dell'email immediata fallito per la fattura ${transaction.invoiceId}: la fattura resta comunque registrata e recuperabile dal portale.`,
+        error
+      );
+    }
   }
 }
 
