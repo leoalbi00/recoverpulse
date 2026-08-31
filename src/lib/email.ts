@@ -251,6 +251,218 @@ function buildDunningEmailHtml({
 </html>`;
 }
 
+function buildRecoveryEmailHtml({
+  customerName,
+  planName,
+  amountFormatted,
+  companyName,
+  logoUrl,
+  primaryColor,
+  supportEmail,
+}: {
+  customerName: string;
+  planName: string;
+  amountFormatted: string;
+  companyName: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  supportEmail: string;
+}): string {
+  // Stessa cautela di buildDunningEmailHtml: customerName/planName arrivano
+  // da Stripe (input non fidato), companyName/supportEmail dal merchant.
+  const safeCustomerName = escapeHtml(customerName);
+  const safePlanName = escapeHtml(planName);
+  const safeAmountFormatted = escapeHtml(amountFormatted);
+  const safeCompanyName = escapeHtml(companyName);
+
+  const greeting =
+    customerName && customerName !== "Gentile cliente" ? `Ciao ${safeCustomerName}` : "Gentile cliente";
+  const preheader = `${greeting}, il pagamento di ${safeAmountFormatted} per ${safePlanName} è andato a buon fine.`;
+
+  const ctaTextColor = getReadableTextColor(primaryColor);
+  const logoMark = logoUrl
+    ? `<img src="${escapeHtml(logoUrl)}" alt="${safeCompanyName}" width="28" height="28" style="display:block; border-radius:8px; object-fit:contain;" />`
+    : `<table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${primaryColor}; border-radius:8px;">
+                        <tr><td align="center" valign="middle">${buildLogoMarkSvg(ctaTextColor)}</td></tr>
+                      </table>`;
+  const supportLine = supportEmail
+    ? `Domande? Scrivi a <a href="mailto:${escapeHtml(supportEmail)}" style="color:#71717a;">${escapeHtml(supportEmail)}</a>.`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Pagamento confermato</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f4f5; font-family:${FONT_STACK};">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      ${preheader}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%;">
+
+            <!-- Logo -->
+            <tr>
+              <td align="center" style="padding-bottom:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:8px; vertical-align:middle;">
+                      ${logoMark}
+                    </td>
+                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                      ${safeCompanyName}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Card -->
+            <tr>
+              <td style="background-color:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                  <tr>
+                    <td height="4" style="background-color:#10b981; line-height:4px; font-size:4px;">&nbsp;</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:32px 32px 0 32px;" align="center">
+                      <span style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:9999px; background-color:#d1fae5;">
+                        <span style="color:#059669; font-size:24px; line-height:1;">✓</span>
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:16px 32px 0 32px;" align="center">
+                      <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
+                        Pagamento completato con successo
+                      </h1>
+                      <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46; text-align:center;">
+                        ${greeting}, il pagamento è andato a buon fine e il tuo abbonamento
+                        <strong>${safePlanName}</strong> è di nuovo attivo. Nessuna ulteriore azione richiesta.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Importo pagato -->
+                  <tr>
+                    <td style="padding:0 32px 32px 32px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border:1px solid #e4e4e7; border-radius:10px;">
+                        <tr>
+                          <td style="padding:14px 16px;">
+                            <p style="margin:0; font-size:12px; color:#71717a; text-transform:uppercase; letter-spacing:0.04em;">${safePlanName}</p>
+                          </td>
+                          <td align="right" style="padding:14px 16px;">
+                            <p style="margin:0; font-size:16px; font-weight:700; color:#18181b;">${safeAmountFormatted}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:18px 32px; border-top:1px solid #e4e4e7; background-color:#fafafa;">
+                      <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                        Questa è una conferma automatica, non è richiesta alcuna risposta.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td align="center" style="padding:24px 16px 0 16px;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                  Inviato da ${safeCompanyName} per conto del fornitore del servizio ${safePlanName}.${supportLine ? ` ${supportLine}` : ""}
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+/**
+ * Invia l'email di conferma al cliente quando un pagamento fallito viene
+ * recuperato dal portale /pay/[token] (sia con Stripe reale sia in modalità
+ * simulazione). Non propaga mai errori — chiamata come effetto collaterale
+ * non critico dopo che la fattura è già stata marcata "recuperato" su
+ * Supabase (src/app/api/update-payment/[token]/confirm/route.ts), stesso
+ * principio di notifyPaymentRecovered/notifyPaymentFailed.
+ */
+export async function sendRecoveryConfirmationEmail({
+  to,
+  customerName,
+  planName,
+  amountFormatted,
+}: {
+  to: string;
+  customerName: string;
+  planName: string;
+  amountFormatted: string;
+}): Promise<void> {
+  if (!to) {
+    console.warn("[email] invio email di conferma recupero saltato: email cliente mancante.");
+    return;
+  }
+
+  try {
+    const resend = await getResendClient();
+    if (!resend) {
+      console.warn("[email] Resend API Key non configurata: invio email di conferma recupero saltato.");
+      return;
+    }
+
+    const merchant = await getMerchantSettings();
+    const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
+    const html = buildRecoveryEmailHtml({
+      customerName,
+      planName,
+      amountFormatted,
+      companyName,
+      logoUrl: merchant.logoUrl,
+      primaryColor: merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor,
+      supportEmail: merchant.supportEmail,
+    });
+    const subject = `Pagamento confermato: ${planName} è di nuovo attivo`;
+
+    console.log(
+      `[email] invio email di conferma recupero tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+    );
+
+    const { data, error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+
+    if (error) {
+      console.error(
+        `[email] Resend ha risposto con un errore per la conferma di recupero a "${to}":`,
+        JSON.stringify(error)
+      );
+      return;
+    }
+
+    console.log(
+      `[email] email di conferma recupero inviata con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`
+    );
+  } catch (error) {
+    console.error(`[email] eccezione imprevista nell'invio della conferma di recupero a "${to}":`, error);
+  }
+}
+
 /**
  * Invia l'email di dunning con il link monouso al portale di aggiornamento carta.
  * Oggetto e corpo vengono renderizzati dal template dello step configurato in

@@ -3,15 +3,36 @@ import { z } from "zod";
 
 import { getStripeClient } from "@/lib/stripe";
 import { validatePaymentToken, markPaymentTokenUsed } from "@/lib/tokens";
-import { getTransactionByCustomerId, markInvoiceRecovered } from "@/lib/transactions";
+import { getTransactionByCustomerId, markInvoiceRecovered, type FailedTransaction } from "@/lib/transactions";
 import { stopDunningSequence } from "@/lib/dunning";
 import { notifyPaymentRecovered } from "@/lib/notifications";
 import { tryCreateSetupIntent } from "@/lib/payment-portal";
+import { sendRecoveryConfirmationEmail } from "@/lib/email";
 
 const confirmSchema = z.union([
   z.object({ setupIntentId: z.string().min(1) }),
   z.object({ simulate: z.literal(true) }),
 ]);
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("it-IT", { style: "currency", currency: currency.toUpperCase() }).format(
+    amount / 100
+  );
+}
+
+/**
+ * Notifica interna in dashboard + email di conferma al cliente, condivise
+ * dai due percorsi di conferma (Stripe reale e simulazione).
+ */
+async function notifyRecovery(updated: FailedTransaction): Promise<void> {
+  await notifyPaymentRecovered(updated);
+  await sendRecoveryConfirmationEmail({
+    to: updated.customerEmail,
+    customerName: updated.customerName,
+    planName: updated.planName,
+    amountFormatted: formatAmount(updated.amount, updated.currency),
+  });
+}
 
 export async function POST(request: Request, context: RouteContext<"/api/update-payment/[token]/confirm">) {
   const { token } = await context.params;
@@ -61,7 +82,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     const updated = await markInvoiceRecovered(transaction.invoiceId);
     if (updated) {
       await stopDunningSequence(updated);
-      await notifyPaymentRecovered(updated);
+      await notifyRecovery(updated);
     }
 
     return NextResponse.json({ success: true, planName: transaction.planName, simulated: true });
@@ -113,6 +134,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   const updated = await markInvoiceRecovered(transaction.invoiceId);
   if (updated) {
     await stopDunningSequence(updated);
+    await notifyRecovery(updated);
   }
 
   return NextResponse.json({ success: true, planName: transaction.planName });
