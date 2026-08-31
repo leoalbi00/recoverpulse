@@ -1,6 +1,9 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { renderDunningTemplate, type DunningTemplateVariables } from "@/lib/template-variables";
+
+export { renderDunningTemplate, type DunningTemplateVariables };
 
 export type DunningTemplateStepId = "immediate" | "first_reminder" | "final_notice";
 
@@ -19,27 +22,6 @@ export type DunningTemplatesSettings = {
   automationEnabled: boolean;
   steps: DunningTemplateStep[];
 };
-
-export type DunningTemplateVariables = {
-  nome_cliente: string;
-  importo: string;
-  nome_piano: string;
-  nome_azienda: string;
-  link_recupero: string;
-};
-
-/**
- * Sostituisce i placeholder {{variabile}} di un template configurato in
- * /dashboard/dunning (oggetto o corpo email) con i valori reali della
- * fattura. Un placeholder senza un valore noto viene lasciato invariato
- * invece di sparire silenziosamente, così un typo nel nome della variabile
- * resta visibile nell'anteprima/nell'email inviata.
- */
-export function renderDunningTemplate(template: string, vars: DunningTemplateVariables): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
-    key in vars ? vars[key as keyof DunningTemplateVariables] : match
-  );
-}
 
 // label/description sono testo descrittivo mostrato in dashboard ma mai
 // modificabile dall'editor (nessun input per questi campi in

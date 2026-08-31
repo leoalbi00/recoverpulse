@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, ChevronDown, Mail, PenLine } from "lucide-react";
+import { Check, ChevronDown, Mail, MailOpen, PenLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { renderDunningTemplate } from "@/lib/template-variables";
 import type {
   DunningTemplateStep,
   DunningTemplatesSettings,
@@ -18,6 +19,17 @@ const VARIABLES = [
   { token: "{{nome_azienda}}", label: "Nome azienda" },
   { token: "{{link_recupero}}", label: "Link recupero" },
 ];
+
+// Dati d'esempio usati solo per l'anteprima live nell'editor: nessuna
+// fattura reale è coinvolta, servono solo a mostrare come apparirebbero le
+// variabili {{...}} una volta sostituite in un'email vera.
+const PREVIEW_VARS = {
+  nome_cliente: "Marco Rossi",
+  importo: "€49,00",
+  nome_piano: "Growth",
+  nome_azienda: "La Tua Azienda",
+  link_recupero: "https://tuoapp.com/pay/anteprima",
+};
 
 type Toast = { id: number; message: string };
 
@@ -206,73 +218,114 @@ export function DunningTemplatesManager({
                   </div>
 
                   {openStepId === step.id && (
-                    <div className="mt-4 rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
+                    <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50 p-4 sm:p-5">
                       <div className="flex items-center gap-2 text-xs font-medium text-zinc-600">
                         <Mail className="size-3.5" />
                         Variabili disponibili
+                        <span className="font-normal text-zinc-400">
+                          — clic per inserirle nel punto del cursore
+                        </span>
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {VARIABLES.map((variable) => (
                           <button
                             key={variable.token}
                             type="button"
-                            title={variable.label}
+                            title={`Inserisci ${variable.label}`}
                             onClick={() =>
                               insertVariable(step.id, variable.token)
                             }
-                            className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:bg-emerald-500/20"
+                            className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-mono text-[11px] text-emerald-700 transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/20 active:scale-95"
                           >
                             {variable.token}
                           </button>
                         ))}
                       </div>
 
-                      <div className="mt-4 flex flex-col gap-1.5">
-                        <label
-                          htmlFor={`subject-${step.id}`}
-                          className="text-xs font-medium text-zinc-600"
-                        >
-                          Oggetto email
-                        </label>
-                        <input
-                          id={`subject-${step.id}`}
-                          ref={(el) => {
-                            subjectRefs.current[step.id] = el;
-                          }}
-                          type="text"
-                          value={step.subject}
-                          onFocus={() => {
-                            lastFocusedField.current[step.id] = "subject";
-                          }}
-                          onChange={(event) =>
-                            updateStep(step.id, { subject: event.target.value })
-                          }
-                          className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                        />
-                      </div>
+                      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-col gap-1.5">
+                            <label
+                              htmlFor={`subject-${step.id}`}
+                              className="text-xs font-medium text-zinc-600"
+                            >
+                              Oggetto email
+                            </label>
+                            <input
+                              id={`subject-${step.id}`}
+                              ref={(el) => {
+                                subjectRefs.current[step.id] = el;
+                              }}
+                              type="text"
+                              value={step.subject}
+                              onFocus={() => {
+                                lastFocusedField.current[step.id] = "subject";
+                              }}
+                              onChange={(event) =>
+                                updateStep(step.id, { subject: event.target.value })
+                              }
+                              className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                            />
+                          </div>
 
-                      <div className="mt-4 flex flex-col gap-1.5">
-                        <label
-                          htmlFor={`body-${step.id}`}
-                          className="text-xs font-medium text-zinc-600"
-                        >
-                          Testo dell&apos;email
-                        </label>
-                        <textarea
-                          id={`body-${step.id}`}
-                          ref={(el) => {
-                            bodyRefs.current[step.id] = el;
-                          }}
-                          value={step.body}
-                          onFocus={() => {
-                            lastFocusedField.current[step.id] = "body";
-                          }}
-                          onChange={(event) =>
-                            updateStep(step.id, { body: event.target.value })
-                          }
-                          rows={8}
-                          className="w-full min-w-0 resize-y rounded-lg border border-zinc-200/80 bg-white p-3 font-mono text-xs leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                        />
+                          <div className="flex flex-1 flex-col gap-1.5">
+                            <label
+                              htmlFor={`body-${step.id}`}
+                              className="text-xs font-medium text-zinc-600"
+                            >
+                              Testo dell&apos;email
+                            </label>
+                            <textarea
+                              id={`body-${step.id}`}
+                              ref={(el) => {
+                                bodyRefs.current[step.id] = el;
+                              }}
+                              value={step.body}
+                              onFocus={() => {
+                                lastFocusedField.current[step.id] = "body";
+                              }}
+                              onChange={(event) =>
+                                updateStep(step.id, { body: event.target.value })
+                              }
+                              rows={10}
+                              className="w-full min-w-0 flex-1 resize-y rounded-lg border border-zinc-200/80 bg-white p-3.5 text-sm leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                            <MailOpen className="size-3.5" />
+                            Anteprima — dati di esempio
+                          </span>
+                          <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-zinc-200/80 bg-zinc-200/50">
+                            <div className="flex items-center gap-2 border-b border-zinc-200/80 bg-white px-4 py-2.5">
+                              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[11px] font-semibold text-emerald-700">
+                                {PREVIEW_VARS.nome_azienda.charAt(0)}
+                              </span>
+                              <div className="min-w-0 leading-tight">
+                                <p className="truncate text-xs font-medium text-zinc-900">
+                                  {PREVIEW_VARS.nome_azienda}
+                                </p>
+                                <p className="truncate text-[11px] text-zinc-500">
+                                  a {PREVIEW_VARS.nome_cliente.toLowerCase().replace(" ", ".")}@esempio.it
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex-1 bg-white p-4">
+                              <p className="mb-3 border-b border-zinc-100 pb-3 text-sm font-semibold text-zinc-900">
+                                {renderDunningTemplate(step.subject, PREVIEW_VARS) || (
+                                  <span className="font-normal text-zinc-400">(nessun oggetto)</span>
+                                )}
+                              </p>
+                              <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-700">
+                                {renderDunningTemplate(step.body, PREVIEW_VARS) || (
+                                  <span className="text-zinc-400">(nessun testo)</span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

@@ -1,4 +1,4 @@
-import { ArrowRight, AlertTriangle, CreditCard, Lock, ShieldCheck, TrendingUp } from "lucide-react";
+import { ArrowRight, AlertTriangle, Bell, CreditCard, Lock, ShieldCheck, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,12 @@ const MOCK_TRANSACTIONS = [
   { name: "Marco Rossi Consulting", amount: "€39,00", status: "in_corso" as const },
 ];
 
+const AVATAR_STYLES = [
+  "bg-emerald-500/15 text-emerald-400",
+  "bg-sky-500/15 text-sky-400",
+  "bg-violet-500/15 text-violet-400",
+];
+
 const STATUS_STYLES = {
   recuperato: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
   in_corso: "bg-amber-400/10 text-amber-400 ring-amber-400/20",
@@ -33,13 +39,20 @@ const STATUS_LABEL = {
 
 function DashboardMockup() {
   return (
-    <div className="relative w-full max-w-md lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-md py-6 lg:mx-0 lg:max-w-none lg:py-8">
       <div
         aria-hidden
-        className="absolute -inset-4 -z-10 rounded-[2rem] bg-emerald-500/10 blur-2xl"
+        className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-emerald-500/10 blur-3xl"
       />
 
-      <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-2xl shadow-black/50 backdrop-blur-sm">
+      {/* Carta "fantasma" leggermente ruotata dietro la carta principale, per
+          dare un effetto di profondità a strati senza usare immagini. */}
+      <div
+        aria-hidden
+        className="absolute inset-x-5 top-8 bottom-2 -z-10 rotate-2 rounded-2xl border border-zinc-800/60 bg-zinc-900/40"
+      />
+
+      <div className="-rotate-1 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-2xl shadow-black/50 backdrop-blur-sm transition-transform duration-500 ease-out hover:rotate-0">
         <div className="flex items-center gap-1.5 border-b border-zinc-800 bg-zinc-950/60 px-4 py-3">
           <span className="size-2.5 rounded-full bg-zinc-700" />
           <span className="size-2.5 rounded-full bg-zinc-700" />
@@ -77,12 +90,17 @@ function DashboardMockup() {
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
-            {MOCK_TRANSACTIONS.map((tx) => (
+            {MOCK_TRANSACTIONS.map((tx, index) => (
               <div
                 key={tx.name}
-                className="flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2"
+                className="flex items-center gap-2.5 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2"
               >
-                <span className="truncate text-xs font-medium text-zinc-300">{tx.name}</span>
+                <span
+                  className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${AVATAR_STYLES[index % AVATAR_STYLES.length]}`}
+                >
+                  {tx.name.charAt(0)}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-300">{tx.name}</span>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-xs text-zinc-400">{tx.amount}</span>
                   <span
@@ -96,17 +114,41 @@ function DashboardMockup() {
           </div>
         </div>
 
-        {/* Footer interno, nel normale flusso del documento: non è più un
+        {/* Footer interno, nel normale flusso del documento: non è un
             elemento "absolute" fluttuante, quindi non può mai sovrapporsi
             alla lista transazioni qui sopra a nessuna larghezza di schermo. */}
         <div className="flex items-center gap-3 border-t border-zinc-800 bg-zinc-950/60 px-5 py-4">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-            <TrendingUp className="size-4 text-emerald-400" />
+          <span className="relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+            <span className="absolute inline-flex size-2 animate-ping rounded-full bg-emerald-400 -top-0.5 -right-0.5" />
+            <span className="absolute size-2 rounded-full bg-emerald-400 -top-0.5 -right-0.5" />
+            <ShieldCheck className="size-4 text-emerald-400" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] text-zinc-500">Questo mese</p>
-            <p className="truncate text-sm font-semibold text-zinc-100">+€3.240 recuperati</p>
+            <p className="text-[10px] text-zinc-500">Automazione</p>
+            <p className="truncate text-sm font-semibold text-zinc-100">Attiva su Email · SMS · WhatsApp</p>
           </div>
+        </div>
+      </div>
+
+      {/* Badge fluttuanti fuori dalla carta: rinforzano il messaggio
+          "recupero automatico" con un tocco di profondità, senza immagini. */}
+      <div className="absolute top-2 -right-2 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-right-6">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
+          <TrendingUp className="size-3.5 text-emerald-400" />
+        </span>
+        <div className="leading-tight">
+          <p className="text-[10px] text-zinc-500">Questo mese</p>
+          <p className="text-xs font-semibold text-zinc-100">+€3.240 recuperati</p>
+        </div>
+      </div>
+
+      <div className="absolute -bottom-2 -left-2 hidden items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-left-6 sm:flex">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-400/15">
+          <Bell className="size-3.5 text-amber-400" />
+        </span>
+        <div className="leading-tight">
+          <p className="text-[10px] text-zinc-500">Sollecito inviato</p>
+          <p className="text-xs font-semibold text-zinc-100">Blue Ocean Agency</p>
         </div>
       </div>
     </div>
@@ -141,7 +183,7 @@ export function Hero() {
 
           <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-100 sm:text-6xl">
             Recupera fino al{" "}
-            <span className="text-emerald-500">40% del fatturato perso</span>
+            <span className="text-emerald-500">40% del fatturato perso</span>{" "}
             <br className="hidden sm:block" />
             per carte di credito scadute.
           </h1>

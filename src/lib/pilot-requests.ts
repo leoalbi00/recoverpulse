@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { createNotification } from "@/lib/notifications";
+import { sendPilotRequestConfirmationEmail } from "@/lib/email";
 
 export async function createPilotRequest(input: {
   name: string;
@@ -39,5 +40,15 @@ export async function createPilotRequest(input: {
     });
   } catch (notificationError) {
     console.error("[pilot-requests] errore nella creazione della notifica:", notificationError);
+  }
+
+  // Email di conferma al lead: come la notifica in-app sopra, è un effetto
+  // collaterale non critico e non deve far fallire la richiesta pilota, già
+  // salvata con successo. sendPilotRequestConfirmationEmail non propaga mai
+  // errori di suo, ma resta wrappata per coerenza con la notifica sopra.
+  try {
+    await sendPilotRequestConfirmationEmail({ to: input.email, name: input.name });
+  } catch (emailError) {
+    console.error("[pilot-requests] errore nell'invio dell'email di conferma:", emailError);
   }
 }

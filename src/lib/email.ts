@@ -397,6 +397,157 @@ function buildRecoveryEmailHtml({
 </html>`;
 }
 
+const RECOVERPULSE_BRAND_COLOR = "#10b981";
+
+/**
+ * Email di conferma inviata a chi compila il form "Integrazione Pilota" in
+ * Home. A differenza delle altre email qui sotto non riguarda un merchant
+ * cliente (nessun logo/colore/nome azienda personalizzato): è RecoverPulse
+ * stesso a scrivere al lead, quindi il brand è fisso invece di venire da
+ * getMerchantSettings() (quello è il brand del *cliente* RecoverPulse, usato
+ * nelle sue email di dunning verso i propri utenti finali).
+ */
+function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): string {
+  const safeName = escapeHtml(name);
+  const firstName = safeName.split(" ")[0] || safeName;
+  const preheader = "Grazie per la richiesta: ti contattiamo entro 1 giorno lavorativo.";
+
+  return `<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Richiesta pilota ricevuta</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f4f5; font-family:${FONT_STACK};">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      ${preheader}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%;">
+
+            <tr>
+              <td align="center" style="padding-bottom:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:8px; vertical-align:middle;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${RECOVERPULSE_BRAND_COLOR}; border-radius:8px;">
+                        <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
+                      </table>
+                    </td>
+                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                      RecoverPulse
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="background-color:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                  <tr>
+                    <td height="4" style="background-color:${RECOVERPULSE_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:32px 32px 0 32px;">
+                      <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
+                        Richiesta ricevuta, ${firstName}!
+                      </h1>
+                      <p style="margin:0 0 16px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
+                        Grazie per aver richiesto l&#39;integrazione pilota di RecoverPulse. Il nostro
+                        team esaminerà i dettagli e ti contatterà entro <strong>1 giorno lavorativo</strong>
+                        per organizzare il collegamento del tuo account Stripe di test.
+                      </p>
+                      <p style="margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
+                        Nel frattempo, se vuoi farti un&#39;idea di quanto fatturato potresti recuperare,
+                        puoi usare il calcolatore ROI sul nostro sito.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:0 32px 32px 32px;">
+                      <p style="margin:0; font-size:12.5px; line-height:1.6; color:#a1a1aa;">
+                        Questa è una conferma automatica: non è richiesta alcuna risposta a questa email.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding:24px 16px 0 16px;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                  Inviato da RecoverPulse in seguito alla tua richiesta su recoverpulse.app.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+/**
+ * Invia l'email di conferma al lead subito dopo l'invio del form "Integrazione
+ * Pilota" (src/components/landing/pilot-request-form.tsx). Non propaga mai
+ * errori — chiamata come effetto collaterale non critico dopo che la
+ * richiesta è già stata salvata su Supabase (src/lib/pilot-requests.ts),
+ * stesso principio di sendRecoveryConfirmationEmail.
+ */
+export async function sendPilotRequestConfirmationEmail({
+  to,
+  name,
+}: {
+  to: string;
+  name: string;
+}): Promise<void> {
+  if (!to) return;
+
+  try {
+    const resend = await getResendClient();
+    if (!resend) {
+      console.warn("[email] Resend API Key non configurata: invio conferma richiesta pilota saltato.");
+      return;
+    }
+
+    const html = buildPilotRequestConfirmationEmailHtml({ name });
+    const subject = "Richiesta pilota ricevuta — ti contattiamo a breve";
+
+    console.log(
+      `[email] invio email di conferma richiesta pilota tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+    );
+
+    const { data, error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+
+    if (error) {
+      console.error(
+        `[email] Resend ha risposto con un errore per la conferma richiesta pilota a "${to}":`,
+        JSON.stringify(error)
+      );
+      return;
+    }
+
+    console.log(
+      `[email] email di conferma richiesta pilota inviata con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`
+    );
+  } catch (error) {
+    console.error(`[email] eccezione imprevista nell'invio della conferma richiesta pilota a "${to}":`, error);
+  }
+}
+
 /**
  * Invia l'email di conferma al cliente quando un pagamento fallito viene
  * recuperato dal portale /pay/[token] (sia con Stripe reale sia in modalità
