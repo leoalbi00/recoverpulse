@@ -113,15 +113,9 @@ export function NotificationBell() {
     }
   }
 
-  // Il tipo Notification espone solo `read` (l'unica colonna DB è `is_read`,
-  // già normalizzata in `read` da src/lib/notifications.ts). Il controllo su
-  // `n.is_read` è quindi sempre un no-op innocuo (mai vero), mantenuto come
-  // fallback ridondante esplicitamente richiesto senza cast a `any`.
-  const hasUnread =
-    unreadCount > 0 ||
-    notifications.some(
-      (n) => n.read === false || (n as { is_read?: boolean }).is_read === false,
-    );
+  // Badge numerico: mostra il conteggio esatto delle notifiche non lette
+  // (fino a 99, oltre le quali "99+" evita che il pallino si deformi).
+  const badgeLabel = unreadCount > 99 ? "99+" : String(unreadCount);
 
   return (
     <div className="relative" ref={containerRef}>
@@ -134,8 +128,10 @@ export function NotificationBell() {
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
       >
         <Bell className="size-4.5" />
-        {hasUnread && (
-          <span className="absolute top-0.5 right-0.5 z-50 h-3.5 w-3.5 animate-pulse rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,1)] ring-2 ring-zinc-900" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 z-50 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white shadow-[0_0_12px_rgba(244,63,94,0.8)] ring-2 ring-zinc-900">
+            {badgeLabel}
+          </span>
         )}
       </button>
 

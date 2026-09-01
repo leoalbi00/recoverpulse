@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { TrialBanner } from "@/components/dashboard/trial-banner";
 import { getTrialStatus } from "@/lib/trial";
+import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +16,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const trial = await getTrialStatus(session.user.id);
+  const [trial, connectedAccount] = await Promise.all([
+    getTrialStatus(session.user.id),
+    getConnectedAccountForUser(session.user.id),
+  ]);
 
   // Cornice bicolore: pagina, header e sidebar restano scuri (bg-zinc-950,
   // testo text-zinc-100), mentre ogni card/tabella/modulo al loro interno è
@@ -25,7 +29,14 @@ export default async function DashboardLayout({
   // semi-trasparente bg-zinc-950/80 + backdrop-blur-md).
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <DashboardSidebar user={session.user} />
+      <DashboardSidebar
+        user={session.user}
+        connectedStripeAccount={
+          connectedAccount
+            ? { stripeAccountId: connectedAccount.stripeAccountId, livemode: connectedAccount.livemode }
+            : null
+        }
+      />
       <div className="flex flex-col md:pl-64">
         <TrialBanner trial={trial} />
         <header className="sticky top-0 z-50 hidden w-full items-center justify-end border-b border-zinc-800/60 bg-zinc-950/80 p-4 backdrop-blur-md transition-all md:flex">

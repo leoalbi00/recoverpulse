@@ -128,3 +128,43 @@ export async function listAllDunningLogs(
     status: row.status,
   }));
 }
+
+export type GlobalDunningLogEntry = {
+  id: string;
+  userId: string | null;
+  invoiceId: string;
+  stepDays: number;
+  customerEmail: string;
+  channel: DunningLogChannel;
+  status: DunningLogStatus;
+  sentAt: string;
+};
+
+/**
+ * Log dei solleciti di TUTTI gli account, senza filtro per `user_id`: a
+ * differenza di listAllDunningLogs (scoped per merchant, usata dalla
+ * dashboard cliente) questa alimenta la sezione "Log di sistema" della vista
+ * Sviluppatore (/dashboard/developer), riservata all'account admin.
+ */
+export async function listGlobalDunningLogs(limit: number): Promise<GlobalDunningLogEntry[]> {
+  const { data, error } = await supabaseAdmin
+    .from("dunning_logs")
+    .select("id, user_id, invoice_id, step_days, customer_email, channel, status, sent_at")
+    .order("sent_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Errore nel recupero del log di sistema su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    invoiceId: row.invoice_id,
+    stepDays: row.step_days,
+    customerEmail: row.customer_email,
+    channel: row.channel,
+    status: row.status,
+    sentAt: row.sent_at,
+  }));
+}
