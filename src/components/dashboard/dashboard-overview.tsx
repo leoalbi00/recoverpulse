@@ -1,21 +1,19 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertTriangle, DollarSign, Download, TrendingUp } from "lucide-react";
+import { AlertTriangle, DollarSign, TrendingUp, Wallet } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
-import { FailedTransactionsTable } from "@/components/dashboard/failed-transactions-table";
 import { PaywallUnlockCard } from "@/components/dashboard/paywall-unlock-card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { transactionsToCsv, downloadCsv } from "@/lib/csv-export";
 import type { FailedTransaction } from "@/lib/transactions";
 import type { PaywallStatus } from "@/lib/paywall";
 import {
   computeDashboardStats,
   computeMonthlyRecoveryChartData,
   computeMrrRecovered,
+  computeTotalRevenue,
   computeVolumeAtRisk,
   computeSequencePerformance,
   type DunningLogEntry,
@@ -27,7 +25,6 @@ type DashboardOverviewProps = {
   dunningLogs: DunningLogEntry[];
   sequenceSteps: SequenceStepDefinition[];
   paywall: PaywallStatus;
-  appBaseUrl: string;
 };
 
 function conversionColorClass(reached: number, rate: number): string {
@@ -42,14 +39,15 @@ export function DashboardOverview({
   dunningLogs,
   sequenceSteps,
   paywall,
-  appBaseUrl,
 }: DashboardOverviewProps) {
   // Le card KPI e il grafico mensile sono sempre calcolati su tutto lo
   // storico (non su un periodo selezionabile): sono numeri di sintesi
   // "quanto abbiamo recuperato in totale / questo mese / a rischio ora", non
-  // un'analisi per coorte. Il filtro per periodo resta solo sulla tabella
-  // delle transazioni sotto, dove ha senso restringere la vista storica.
+  // un'analisi per coorte. Il filtro per periodo vive solo in /dashboard/transazioni
+  // (src/components/dashboard/transactions-explorer.tsx), dove ha senso
+  // restringere la vista storica.
   const stats = useMemo(() => computeDashboardStats(allTransactions), [allTransactions]);
+  const totalRevenue = useMemo(() => computeTotalRevenue(allTransactions), [allTransactions]);
   const mrr = useMemo(() => computeMrrRecovered(allTransactions), [allTransactions]);
   const volumeAtRisk = useMemo(() => computeVolumeAtRisk(allTransactions), [allTransactions]);
   const chartData = useMemo(() => computeMonthlyRecoveryChartData(allTransactions, 6), [allTransactions]);
@@ -57,22 +55,20 @@ export function DashboardOverview({
     () => computeSequencePerformance(allTransactions, dunningLogs, sequenceSteps),
     [allTransactions, dunningLogs, sequenceSteps]
   );
-  const exportableTransactions = useMemo(
-    () => allTransactions.filter((t) => t.status === "recuperato" || t.status === "perso"),
-    [allTransactions]
-  );
 
   const formatCurrency = (amount: number, currency: string) =>
     new Intl.NumberFormat("it-IT", { style: "currency", currency: currency.toUpperCase() }).format(amount / 100);
 
-  function handleExportCsv() {
-    const csv = transactionsToCsv(exportableTransactions);
-    downloadCsv(`dashboard-transazioni-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-  }
-
   return (
     <>
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={Wallet}
+          label="Totale Fatturato"
+          value={formatCurrency(totalRevenue.amount, totalRevenue.currency)}
+          delta={totalRevenue.count > 0 ? `${totalRevenue.count} fatture totali` : "Nessun dato"}
+          trend={totalRevenue.amount > 0 ? "up" : "neutral"}
+        />
         <StatCard
           icon={DollarSign}
           label="MRR Recuperato"
@@ -178,31 +174,6 @@ export function DashboardOverview({
           </section>
         </>
       )}
-
-      <section id="transazioni" className="mt-10 scroll-mt-20">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-zinc-100">Transazioni Fallite</h2>
-          <div className="flex items-center gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-              disabled={exportableTransactions.length === 0}
-              onClick={handleExportCsv}
-            >
-              <Download className="size-3.5" />
-              Esporta CSV
-            </Button>
-            <a href="/dashboard/transazioni" className="text-sm font-medium text-emerald-500 hover:text-emerald-400">
-              Vedi tutte
-            </a>
-          </div>
-        </div>
-        <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
-          <FailedTransactionsTable transactions={allTransactions} appBaseUrl={appBaseUrl} />
-        </div>
-      </section>
     </>
   );
 }

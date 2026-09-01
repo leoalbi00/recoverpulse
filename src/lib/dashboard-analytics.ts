@@ -69,6 +69,27 @@ export function computeDashboardStats(all: FailedTransaction[]): DashboardStats 
   };
 }
 
+export type TotalRevenueStats = {
+  /** Somma degli importi di tutto lo storico transazioni, indipendentemente dallo stato. */
+  amount: number;
+  count: number;
+  currency: string;
+};
+
+/**
+ * Totale Fatturato: volume complessivo gestito dal sistema di recupero
+ * (somma di tutte le fatture fallite intercettate, recuperate o meno) —
+ * fotografia dell'intero storico, non solo della quota già recuperata
+ * (a differenza di computeMrrRecovered).
+ */
+export function computeTotalRevenue(all: FailedTransaction[]): TotalRevenueStats {
+  return {
+    amount: all.reduce((sum, t) => sum + t.amount, 0),
+    count: all.length,
+    currency: all[0]?.currency ?? "usd",
+  };
+}
+
 export type MrrRecoveredStats = {
   /** Somma di tutti i pagamenti recuperati, indipendentemente da quando. */
   totalAmount: number;
