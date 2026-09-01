@@ -58,7 +58,12 @@ function resolveSubscriptionId(invoice: Stripe.Invoice): string | null {
   return typeof subscription === "string" ? subscription : subscription.id;
 }
 
-async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoice, userId: string) {
+async function handleInvoicePaymentFailed(
+  stripe: Stripe,
+  invoice: Stripe.Invoice,
+  userId: string,
+  connectedAccountId: string
+) {
   console.log(
     `[stripe-webhook] invoice.payment_failed: invoice.customer_email (raw dall'evento) = "${invoice.customer_email ?? ""}"`
   );
@@ -77,6 +82,14 @@ async function handleInvoicePaymentFailed(stripe: Stripe, invoice: Stripe.Invoic
     "Pagamento rifiutato dall'istituto emittente della carta.";
   const planName = invoice.lines.data[0]?.description ?? "Abbonamento";
   const invoiceId = invoice.id ?? crypto.randomUUID();
+
+  // Log dettagliato di conferma ricezione evento, visibile sia nei log di
+  // Vercel (Functions > Logs) sia in locale con `stripe listen` + `next dev`:
+  // riporta tutti i dati chiave estratti dal payload prima di procedere con
+  // la registrazione su Supabase e l'avvio del dunning.
+  console.log(
+    `[stripe-webhook] === invoice.payment_failed ricevuto === accountId=${connectedAccountId} invoiceId=${invoiceId} customerEmail="${customer.email}" amount=${invoice.amount_due} ${invoice.currency.toUpperCase()}`
+  );
 
   // Token monouso valido 7 giorni per il portale 1-click di aggiornamento carta:
   // generato e salvato (hashato) su Supabase ad ogni fallimento di pagamento, così
@@ -289,7 +302,7 @@ export async function POST(request: Request) {
 
       switch (event.type) {
         case "invoice.payment_failed":
-          await handleInvoicePaymentFailed(stripe, event.data.object, userId);
+          await handleInvoicePaymentFailed(stripe, event.data.object, userId, connectedAccountId);
           break;
         case "invoice.payment_succeeded":
         case "invoice.paid":
