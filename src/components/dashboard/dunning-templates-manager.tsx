@@ -1,12 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, ChevronDown, Mail, MailOpen, PenLine } from "lucide-react";
+import { Check, ChevronDown, Eye, Mail, PenLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { renderDunningTemplate } from "@/lib/template-variables";
+import { EmailPreviewModal } from "@/components/dashboard/email-preview-modal";
 import type {
   DunningTemplateStep,
   DunningTemplatesSettings,
@@ -31,18 +33,25 @@ const PREVIEW_VARS = {
   link_recupero: "https://tuoapp.com/pay/anteprima",
 };
 
+const PREVIEW_RECIPIENT = `${PREVIEW_VARS.nome_cliente.toLowerCase().replace(" ", ".")}@esempio.it`;
+
 type Toast = { id: number; message: string };
 
 export function DunningTemplatesManager({
   initialSettings,
+  initialChannelEnabled,
 }: {
   initialSettings: DunningTemplatesSettings;
+  /** Stato di `dunning_settings.channel_email` (src/lib/dunning-settings.ts): gate reale usato da startDunningSequence, non solo un flag di UI. */
+  initialChannelEnabled: boolean;
 }) {
   const [automationEnabled, setAutomationEnabled] = useState(
     initialSettings.automationEnabled,
   );
+  const [channelEnabled, setChannelEnabled] = useState(initialChannelEnabled);
   const [steps, setSteps] = useState(initialSettings.steps);
   const [openStepId, setOpenStepId] = useState<string | null>(null);
+  const [previewStepId, setPreviewStepId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -96,6 +105,15 @@ export function DunningTemplatesManager({
     }
   }
 
+  async function toggleChannel(next: boolean) {
+    setChannelEnabled(next);
+    await fetch("/api/dashboard/dunning-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ channels: { whatsapp: false, sms: false, email: next } }),
+    });
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -113,23 +131,46 @@ export function DunningTemplatesManager({
     }
   }
 
+  const previewStep = steps.find((step) => step.id === previewStepId) ?? null;
+
   return (
-    <div className="mt-8 flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
-        <div>
-          <p className="text-sm font-medium text-zinc-900">
-            Automazione {automationEnabled ? "Attiva" : "In Pausa"}
-          </p>
-          <p className="mt-1 text-xs text-zinc-600">
-            Quando è attiva, ogni pagamento fallito avvia automaticamente la
-            sequenza di solleciti qui sotto.
-          </p>
+    <div className="flex flex-col gap-6">
+      <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-zinc-900">
+              Automazione {automationEnabled ? "Attiva" : "In Pausa"}
+            </p>
+            <p className="mt-1 text-xs text-zinc-600">
+              Quando è attiva, ogni pagamento fallito avvia automaticamente la
+              sequenza di solleciti qui sotto.
+            </p>
+          </div>
+          <Switch
+            checked={automationEnabled}
+            onCheckedChange={setAutomationEnabled}
+            aria-label="Attiva o metti in pausa l'automazione dunning"
+          />
         </div>
-        <Switch
-          checked={automationEnabled}
-          onCheckedChange={setAutomationEnabled}
-          aria-label="Attiva o metti in pausa l'automazione dunning"
-        />
+
+        <Separator className="my-4" />
+
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-zinc-900">
+              Canale Email {channelEnabled ? "Attivo" : "Disattivato"}
+            </p>
+            <p className="mt-1 text-xs text-zinc-600">
+              Disattivalo per sospendere l&apos;invio via email senza toccare
+              i singoli step qui sotto.
+            </p>
+          </div>
+          <Switch
+            checked={channelEnabled}
+            onCheckedChange={toggleChannel}
+            aria-label="Attiva o disattiva il canale email"
+          />
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
@@ -159,14 +200,14 @@ export function DunningTemplatesManager({
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-zinc-900">
-                        {step.label}
+                        Step {index + 1}: {step.label}
                       </p>
                       <p className="mt-0.5 text-xs text-zinc-600">
                         {step.description}
                       </p>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-3">
+                    <div className="flex shrink-0 flex-wrap items-center gap-3">
                       {step.delayDays > 0 && (
                         <label className="flex items-center gap-1.5 text-xs text-zinc-600">
                           T+
@@ -199,6 +240,17 @@ export function DunningTemplatesManager({
                         variant="outline"
                         size="sm"
                         className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+                        onClick={() => setPreviewStepId(step.id)}
+                      >
+                        <Eye className="size-3.5" />
+                        Anteprima
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
                         onClick={() =>
                           setOpenStepId((current) =>
                             current === step.id ? null : step.id,
@@ -206,7 +258,7 @@ export function DunningTemplatesManager({
                         }
                       >
                         <PenLine className="size-3.5" />
-                        Modifica modello email
+                        Modifica modello
                         <ChevronDown
                           className={cn(
                             "size-3.5 transition-transform",
@@ -242,89 +294,53 @@ export function DunningTemplatesManager({
                         ))}
                       </div>
 
-                      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
-                        <div className="flex flex-col gap-4">
-                          <div className="flex flex-col gap-1.5">
-                            <label
-                              htmlFor={`subject-${step.id}`}
-                              className="text-xs font-medium text-zinc-600"
-                            >
-                              Oggetto email
-                            </label>
-                            <input
-                              id={`subject-${step.id}`}
-                              ref={(el) => {
-                                subjectRefs.current[step.id] = el;
-                              }}
-                              type="text"
-                              value={step.subject}
-                              onFocus={() => {
-                                lastFocusedField.current[step.id] = "subject";
-                              }}
-                              onChange={(event) =>
-                                updateStep(step.id, { subject: event.target.value })
-                              }
-                              className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                            />
-                          </div>
-
-                          <div className="flex flex-1 flex-col gap-1.5">
-                            <label
-                              htmlFor={`body-${step.id}`}
-                              className="text-xs font-medium text-zinc-600"
-                            >
-                              Testo dell&apos;email
-                            </label>
-                            <textarea
-                              id={`body-${step.id}`}
-                              ref={(el) => {
-                                bodyRefs.current[step.id] = el;
-                              }}
-                              value={step.body}
-                              onFocus={() => {
-                                lastFocusedField.current[step.id] = "body";
-                              }}
-                              onChange={(event) =>
-                                updateStep(step.id, { body: event.target.value })
-                              }
-                              rows={10}
-                              className="w-full min-w-0 flex-1 resize-y rounded-lg border border-zinc-200/80 bg-white p-3.5 text-sm leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-                            />
-                          </div>
+                      <div className="mt-5 flex flex-col gap-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label
+                            htmlFor={`subject-${step.id}`}
+                            className="text-xs font-medium text-zinc-600"
+                          >
+                            Oggetto email
+                          </label>
+                          <input
+                            id={`subject-${step.id}`}
+                            ref={(el) => {
+                              subjectRefs.current[step.id] = el;
+                            }}
+                            type="text"
+                            value={step.subject}
+                            onFocus={() => {
+                              lastFocusedField.current[step.id] = "subject";
+                            }}
+                            onChange={(event) =>
+                              updateStep(step.id, { subject: event.target.value })
+                            }
+                            className="h-10 w-full min-w-0 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                          />
                         </div>
 
-                        <div className="flex flex-col gap-1.5">
-                          <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
-                            <MailOpen className="size-3.5" />
-                            Anteprima — dati di esempio
-                          </span>
-                          <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-zinc-200/80 bg-zinc-200/50">
-                            <div className="flex items-center gap-2 border-b border-zinc-200/80 bg-white px-4 py-2.5">
-                              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[11px] font-semibold text-emerald-700">
-                                {PREVIEW_VARS.nome_azienda.charAt(0)}
-                              </span>
-                              <div className="min-w-0 leading-tight">
-                                <p className="truncate text-xs font-medium text-zinc-900">
-                                  {PREVIEW_VARS.nome_azienda}
-                                </p>
-                                <p className="truncate text-[11px] text-zinc-500">
-                                  a {PREVIEW_VARS.nome_cliente.toLowerCase().replace(" ", ".")}@esempio.it
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex-1 bg-white p-4">
-                              <p className="mb-3 border-b border-zinc-100 pb-3 text-sm font-semibold text-zinc-900">
-                                {renderDunningTemplate(step.subject, PREVIEW_VARS) || (
-                                  <span className="font-normal text-zinc-400">(nessun oggetto)</span>
-                                )}
-                              </p>
-                              <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-700">
-                                {renderDunningTemplate(step.body, PREVIEW_VARS) || (
-                                  <span className="text-zinc-400">(nessun testo)</span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
+                        <div className="flex flex-1 flex-col gap-1.5">
+                          <label
+                            htmlFor={`body-${step.id}`}
+                            className="text-xs font-medium text-zinc-600"
+                          >
+                            Testo dell&apos;email
+                          </label>
+                          <textarea
+                            id={`body-${step.id}`}
+                            ref={(el) => {
+                              bodyRefs.current[step.id] = el;
+                            }}
+                            value={step.body}
+                            onFocus={() => {
+                              lastFocusedField.current[step.id] = "body";
+                            }}
+                            onChange={(event) =>
+                              updateStep(step.id, { body: event.target.value })
+                            }
+                            rows={10}
+                            className="w-full min-w-0 resize-y rounded-lg border border-zinc-200/80 bg-white p-3.5 text-sm leading-relaxed text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+                          />
                         </div>
                       </div>
                     </div>
@@ -341,6 +357,16 @@ export function DunningTemplatesManager({
           {saving ? "Salvataggio…" : "Salva Sequenza"}
         </Button>
       </div>
+
+      {previewStep && (
+        <EmailPreviewModal
+          companyName={PREVIEW_VARS.nome_azienda}
+          recipientLabel={PREVIEW_RECIPIENT}
+          subject={renderDunningTemplate(previewStep.subject, PREVIEW_VARS)}
+          body={renderDunningTemplate(previewStep.body, PREVIEW_VARS)}
+          onClose={() => setPreviewStepId(null)}
+        />
+      )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 sm:items-end sm:pr-6">
         {toasts.map((toast) => (

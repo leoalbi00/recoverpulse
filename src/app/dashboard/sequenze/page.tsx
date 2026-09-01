@@ -1,27 +1,11 @@
 import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
-import { DunningSequencesPanel } from "@/components/dashboard/dunning-sequences-panel";
-import { getDunningSettings } from "@/lib/dunning-settings";
-
-export default async function SequenzePage() {
-  const session = await auth();
-  if (!session?.user) redirect("/login");
-
-  const settings = await getDunningSettings(session.user.id);
-
-  return (
-    <div className="mx-auto max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
-          Sequenze Dunning
-        </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
-          Recupero automatico dei pagamenti falliti su WhatsApp, SMS ed Email.
-        </p>
-      </div>
-
-      <DunningSequencesPanel initialSettings={settings} />
-    </div>
-  );
+/**
+ * La gestione canali (Email/SMS/WhatsApp) è confluita nei tab di
+ * /dashboard/dunning (src/components/dashboard/dunning-channel-tabs.tsx):
+ * questo redirect mantiene validi eventuali link/segnalibri verso la vecchia
+ * rotta invece di restituire un 404.
+ */
+export default function SequenzePage() {
+  redirect("/dashboard/dunning");
 }

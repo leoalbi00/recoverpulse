@@ -29,11 +29,11 @@ export type DunningTemplatesSettings = {
 // su Supabase, per non trattare come "dato" un testo di UI immutabile.
 const STEP_METADATA: Record<DunningTemplateStepId, { label: string; description: string }> = {
   immediate: {
-    label: "Sollecito Immediato",
-    description: "Inviato subito dopo il primo fallimento di pagamento.",
+    label: "Primo Sollecito",
+    description: "Innescato subito dopo il fallimento del pagamento.",
   },
   first_reminder: {
-    label: "Primo Reminder",
+    label: "Secondo Sollecito",
     description: "Ritardo personalizzabile: es. 3 giorni dopo.",
   },
   final_notice: {

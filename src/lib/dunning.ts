@@ -14,14 +14,14 @@ function formatAmount(amount: number, currency: string): string {
 
 /**
  * Avvia il primo step ("immediate") della sequenza dunning per una fattura
- * fallita, rispettando sia il toggle "Automazione" sia lo step stesso
- * configurati in /dashboard/dunning, oltre ai canali attivati in
- * Impostazioni > Sequenze Dunning.
+ * fallita, rispettando sia il toggle "Automazione" sia lo step stesso, oltre
+ * al canale Email attivato, tutti configurati nei tab di /dashboard/dunning
+ * (src/components/dashboard/dunning-channel-tabs.tsx).
  *
- * Solo il canale email è realmente implementato: WhatsApp e SMS non sono
- * ancora disponibili (nessuna integrazione Twilio/WhatsApp Business API), per
- * questo il relativo toggle in /dashboard/sequenze è disabilitato — vedi
- * DunningChannel e src/components/dashboard/dunning-sequences-panel.tsx.
+ * Solo il canale email è realmente implementato: WhatsApp e SMS restano tab
+ * di anteprima ("In arrivo") perché non esiste ancora un'integrazione
+ * Twilio/WhatsApp Business API — vedi DunningChannel e
+ * src/components/dashboard/dunning-channel-tabs.tsx.
  *
  * `skipAutomationGate` bypassa i controlli su automazione/step attivo: usato
  * dal pulsante "Sollecito" della dashboard transazioni
@@ -45,7 +45,7 @@ export async function startDunningSequence(
     const immediateStep = templates.steps.find((step) => step.id === "immediate");
     if (!immediateStep?.enabled) {
       console.log(
-        `[dunning] step "Sollecito Immediato" disattivato da /dashboard/dunning: nessuna email inviata subito per la fattura ${transaction.invoiceId}.`
+        `[dunning] step "Primo Sollecito" disattivato da /dashboard/dunning: nessuna email inviata subito per la fattura ${transaction.invoiceId}.`
       );
       return;
     }

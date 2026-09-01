@@ -13,8 +13,8 @@ function defaultSettings(): DunningSettings {
     // whatsapp/sms restano false: nessuna integrazione Twilio/WhatsApp
     // Business API è ancora implementata (vedi src/lib/dunning.ts), quindi
     // attivarli di default mostrerebbe un canale che in realtà non invia
-    // nulla. Il toggle relativo è disabilitato anche in dashboard (vedi
-    // src/components/dashboard/dunning-sequences-panel.tsx).
+    // nulla. I relativi tab sono anteprime disabilitate anche in dashboard
+    // (vedi src/components/dashboard/dunning-channel-tabs.tsx).
     channels: { whatsapp: false, sms: false, email: true },
   };
 }

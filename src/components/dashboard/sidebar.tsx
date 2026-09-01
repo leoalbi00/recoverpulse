@@ -13,7 +13,6 @@ import {
   CreditCard,
   LayoutDashboard,
   LogOut,
-  Mail,
   Menu,
   MessagesSquare,
   Receipt,
@@ -34,10 +33,9 @@ const NAV_ITEMS = [
   { label: "Notifiche", href: "/dashboard/notifiche", icon: Bell },
   {
     label: "Sequenze Dunning",
-    href: "/dashboard/sequenze",
+    href: "/dashboard/dunning",
     icon: MessagesSquare,
   },
-  { label: "Modelli Email", href: "/dashboard/dunning", icon: Mail },
   { label: "Transazioni", href: "/dashboard/transazioni", icon: Receipt },
   { label: "Impostazioni", href: "/dashboard/impostazioni", icon: Settings },
 ];
