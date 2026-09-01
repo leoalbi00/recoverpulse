@@ -22,6 +22,8 @@ export type FailedTransaction = {
   hostedInvoiceUrl: string | null;
   createdAt: string;
   recoveredAt: string | null;
+  /** Timestamp del primo sollecito ("immediate") inviato con successo, null finché non è ancora partito. */
+  firstNoticeSentAt: string | null;
 };
 
 type FailedTransactionRow = {
@@ -41,6 +43,7 @@ type FailedTransactionRow = {
   hosted_invoice_url: string | null;
   created_at: string;
   recovered_at: string | null;
+  first_notice_sent_at: string | null;
 };
 
 function mapRow(row: FailedTransactionRow): FailedTransaction {
@@ -61,6 +64,7 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
     hostedInvoiceUrl: row.hosted_invoice_url,
     createdAt: row.created_at,
     recoveredAt: row.recovered_at,
+    firstNoticeSentAt: row.first_notice_sent_at,
   };
 }
 
@@ -106,6 +110,7 @@ export async function recordFailedPayment(input: {
         hosted_invoice_url: input.hostedInvoiceUrl ?? null,
         status: "in_corso" satisfies TransactionStatus,
         recovered_at: null,
+        first_notice_sent_at: null,
       },
       { onConflict: "invoice_id" }
     )
@@ -139,6 +144,28 @@ export async function markInvoiceRecovered(invoiceId: string, userId?: string): 
   }
 
   return data ? mapRow(data) : null;
+}
+
+/**
+ * Registra il timestamp del primo sollecito ("immediate") inviato con
+ * successo, senza toccare `status`: quest'ultimo resta "in_corso" così il
+ * cron di dunning (listActiveFailedTransactions) continua a considerare la
+ * fattura per i solleciti successivi. L'update è condizionato a
+ * first_notice_sent_at ancora nullo, per non sovrascrivere la data del primo
+ * invio in caso di reinvii manuali dalla dashboard (resend/route.ts) che
+ * riusano lo stesso step "immediate".
+ */
+export async function markFirstNoticeSent(invoiceId: string, userId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ first_notice_sent_at: new Date().toISOString() })
+    .eq("invoice_id", invoiceId)
+    .eq("user_id", userId)
+    .is("first_notice_sent_at", null);
+
+  if (error) {
+    throw new Error(`Errore nell'aggiornamento di first_notice_sent_at su Supabase: ${error.message}`);
+  }
 }
 
 /**

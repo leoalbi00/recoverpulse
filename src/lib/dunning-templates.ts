@@ -54,8 +54,10 @@ function defaultSteps(): DunningTemplateStep[] {
       ...STEP_METADATA.immediate,
       enabled: true,
       delayDays: 0,
-      subject: "Il pagamento per {{nome_piano}} non è andato a buon fine",
-      body: VARIABLE_PLACEHOLDER_BODY("Abbiamo riscontrato un problema con il tuo ultimo pagamento."),
+      subject: "Azione richiesta: aggiorna il metodo di pagamento",
+      body: VARIABLE_PLACEHOLDER_BODY(
+        "Il pagamento del tuo abbonamento non è andato a buon fine: è necessaria un'azione da parte tua per evitare l'interruzione del servizio."
+      ),
     },
     {
       id: "first_reminder",

@@ -1,4 +1,4 @@
-import type { FailedTransaction } from "@/lib/transactions";
+import { markFirstNoticeSent, type FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 import { sendDunningEmail } from "@/lib/email";
@@ -55,8 +55,14 @@ export async function startDunningSequence(
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
   );
-  const portalPath = `/pay/${transaction.paymentLinkToken}`;
-  const recoveryLink = `${getAppBaseUrl()}${portalPath}`;
+  // Link di recupero: il portale RecoverPulse (1-click, monouso, tracciato)
+  // resta la scelta primaria; il link Stripe hosted_invoice_url è solo un
+  // fallback per il raro caso in cui il token del portale non sia
+  // disponibile (createPaymentToken fallito a monte).
+  const portalPath = transaction.paymentLinkToken ? `/pay/${transaction.paymentLinkToken}` : null;
+  const recoveryLink = portalPath
+    ? `${getAppBaseUrl()}${portalPath}`
+    : (transaction.hostedInvoiceUrl ?? getAppBaseUrl());
 
   if (channels.length === 0) {
     console.log(
@@ -66,7 +72,7 @@ export async function startDunningSequence(
   }
 
   console.log(
-    `[dunning] avvio sequenza per fattura ${transaction.invoiceId} (${transaction.customerEmail}) su canali: ${channels.join(", ")} — link portale: ${portalPath}`
+    `[dunning] avvio sequenza per fattura ${transaction.invoiceId} (${transaction.customerEmail}) su canali: ${channels.join(", ")} — link di recupero: ${recoveryLink}`
   );
 
   if (channels.includes("email")) {
@@ -88,6 +94,22 @@ export async function startDunningSequence(
     } catch (error) {
       console.error(
         `[dunning] invio dell'email immediata fallito per la fattura ${transaction.invoiceId}: la fattura resta comunque registrata e recuperabile dal portale.`,
+        error
+      );
+      return;
+    }
+
+    // first_notice_sent_at è puramente informativo (dashboard/audit): non
+    // tocca `status`, che resta "in_corso" perché continua a guidare il cron
+    // di dunning per i solleciti successivi (first_reminder, final_notice) e
+    // il portale /pay. Un fallimento qui non deve far fallire il webhook: la
+    // mail è già stata inviata, l'unico effetto è una data mancante in
+    // dashboard.
+    try {
+      await markFirstNoticeSent(transaction.invoiceId, transaction.userId);
+    } catch (error) {
+      console.error(
+        `[dunning] impossibile registrare first_notice_sent_at per la fattura ${transaction.invoiceId}:`,
         error
       );
     }
