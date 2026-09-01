@@ -18,6 +18,7 @@ import {
   Receipt,
   Settings,
   ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
     icon: MessagesSquare,
   },
   { label: "Transazioni", href: "/dashboard/transazioni", icon: Receipt },
+  { label: "Clienti", href: "/dashboard/customers", icon: Users },
   { label: "Impostazioni", href: "/dashboard/impostazioni", icon: Settings },
 ];
 

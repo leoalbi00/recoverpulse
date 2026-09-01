@@ -9,6 +9,8 @@ export type Plan = {
   description: string;
   features: string[];
   popular?: boolean;
+  /** Fatture fallite/mese coperte dal piano (vedi features sopra); null = illimitate. Usata dal recommendation engine, src/lib/plan-recommendation.ts. */
+  monthlyFailedInvoiceLimit: number | null;
 };
 
 export const PLANS: Plan[] = [
@@ -26,6 +28,7 @@ export const PLANS: Plan[] = [
       "Dashboard Analytics",
       "Supporto via email",
     ],
+    monthlyFailedInvoiceLimit: 100,
   },
   {
     id: "growth",
@@ -43,6 +46,7 @@ export const PLANS: Plan[] = [
       "Supporto prioritario",
     ],
     popular: true,
+    monthlyFailedInvoiceLimit: 500,
   },
   {
     id: "scale",
@@ -59,5 +63,6 @@ export const PLANS: Plan[] = [
       "Account manager dedicato",
       "SLA e supporto white-glove",
     ],
+    monthlyFailedInvoiceLimit: null,
   },
 ];

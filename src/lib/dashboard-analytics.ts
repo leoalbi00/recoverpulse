@@ -69,6 +69,59 @@ export function computeDashboardStats(all: FailedTransaction[]): DashboardStats 
   };
 }
 
+export type CustomerProfile = {
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  currency: string;
+  /** Somma di tutte le fatture fallite del cliente, indipendentemente dallo stato. */
+  totalInvoicedAmount: number;
+  /** Somma delle sole fatture con stato "recuperato". */
+  totalRecoveredAmount: number;
+  totalInvoiceCount: number;
+  /** Fatture con stato "perso" (non "in_corso"+"perso": quelle ancora attive non sono "fallite" in senso definitivo). */
+  failedInvoiceCount: number;
+  /** Tutte le fatture del cliente, più recente prima — usate dal drawer di dettaglio in /dashboard/customers. */
+  transactions: FailedTransaction[];
+};
+
+/**
+ * Profilazione economica per cliente (/dashboard/customers): raggruppa lo
+ * storico transazioni per `customerId`. Si affida all'ordinamento già
+ * decrescente per data di `listTransactions` (src/lib/transactions.ts) per
+ * usare la prima occorrenza di ogni cliente come nome/email più recenti,
+ * invece di ricalcolare un confronto di date qui.
+ */
+export function computeCustomerProfiles(all: FailedTransaction[]): CustomerProfile[] {
+  const byCustomer = new Map<string, CustomerProfile>();
+
+  for (const transaction of all) {
+    let profile = byCustomer.get(transaction.customerId);
+    if (!profile) {
+      profile = {
+        customerId: transaction.customerId,
+        customerName: transaction.customerName,
+        customerEmail: transaction.customerEmail,
+        currency: transaction.currency,
+        totalInvoicedAmount: 0,
+        totalRecoveredAmount: 0,
+        totalInvoiceCount: 0,
+        failedInvoiceCount: 0,
+        transactions: [],
+      };
+      byCustomer.set(transaction.customerId, profile);
+    }
+
+    profile.totalInvoicedAmount += transaction.amount;
+    profile.totalInvoiceCount += 1;
+    if (transaction.status === "recuperato") profile.totalRecoveredAmount += transaction.amount;
+    if (transaction.status === "perso") profile.failedInvoiceCount += 1;
+    profile.transactions.push(transaction);
+  }
+
+  return [...byCustomer.values()].sort((a, b) => b.totalInvoicedAmount - a.totalInvoicedAmount);
+}
+
 export type TotalRevenueStats = {
   /** Somma degli importi di tutto lo storico transazioni, indipendentemente dallo stato. */
   amount: number;

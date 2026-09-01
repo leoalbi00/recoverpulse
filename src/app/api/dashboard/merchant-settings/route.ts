@@ -6,7 +6,8 @@ import { getMerchantSettings, updateMerchantSettings } from "@/lib/merchant-sett
 
 const merchantSettingsSchema = z.object({
   companyName: z.string().trim().min(1, "Il nome azienda è obbligatorio.").max(120),
-  supportEmail: z.string().trim().email("Inserisci un'email di supporto valida."),
+  supportEmail: z.string().trim().email("Inserisci un'email aziendale valida."),
+  phone: z.string().trim().min(1, "Il numero di telefono è obbligatorio.").max(40),
   logoUrl: z
     .string()
     .trim()
@@ -46,6 +47,7 @@ export async function PATCH(request: Request) {
       {
         companyName: parsed.data.companyName,
         supportEmail: parsed.data.supportEmail,
+        phone: parsed.data.phone,
         logoUrl: parsed.data.logoUrl ? parsed.data.logoUrl : null,
         primaryColor: parsed.data.primaryColor,
       },

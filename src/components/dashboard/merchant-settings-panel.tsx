@@ -24,6 +24,7 @@ export function MerchantSettingsPanel({
   const [supportEmail, setSupportEmail] = useState(
     initialSettings.supportEmail,
   );
+  const [phone, setPhone] = useState(initialSettings.phone);
   const [logoUrl, setLogoUrl] = useState(initialSettings.logoUrl ?? "");
   const [primaryColor, setPrimaryColor] = useState(
     initialSettings.primaryColor,
@@ -49,6 +50,7 @@ export function MerchantSettingsPanel({
       body: JSON.stringify({
         companyName,
         supportEmail,
+        phone,
         primaryColor,
         logoUrl: overrides.logoUrl ?? logoUrl,
       }),
@@ -192,7 +194,7 @@ export function MerchantSettingsPanel({
               htmlFor="supportEmail"
               className="text-sm font-medium text-zinc-700"
             >
-              Email di supporto
+              Email aziendale
             </label>
             <input
               id="supportEmail"
@@ -200,7 +202,25 @@ export function MerchantSettingsPanel({
               required
               value={supportEmail}
               onChange={(event) => setSupportEmail(event.target.value)}
-              placeholder="supporto@tuaazienda.com"
+              placeholder="info@tuaazienda.com"
+              className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="phone"
+              className="text-sm font-medium text-zinc-700"
+            >
+              Numero di telefono
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              required
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+39 02 1234567"
               className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
