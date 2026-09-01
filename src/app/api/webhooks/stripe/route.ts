@@ -275,9 +275,16 @@ export async function POST(request: Request) {
       console.error("Payload webhook Stripe non valido (JSON malformato):", error);
       return NextResponse.json({ error: "Payload non valido." }, { status: 400 });
     }
-  } else {
+  } else if (!hasAnySecret) {
     console.error("Nessuna STRIPE_WEBHOOK_SECRET/STRIPE_CONNECT_WEBHOOK_SECRET configurata.");
     return NextResponse.json({ error: "Webhook Stripe non configurato." }, { status: 500 });
+  } else {
+    // Secret configurato ma richiesta priva dell'header stripe-signature:
+    // capita con chiamate "a mano" (curl/Postman) che non firmano il payload
+    // come farebbe Stripe. Distinto dal caso sopra per non far credere che il
+    // webhook non sia configurato quando in realtà lo è.
+    console.error("[stripe-webhook] richiesta priva dell'header stripe-signature.");
+    return NextResponse.json({ error: "Firma webhook mancante." }, { status: 400 });
   }
 
   // event.account presente = evento generato da un account collegato via
