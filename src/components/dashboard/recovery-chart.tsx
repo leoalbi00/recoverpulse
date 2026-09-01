@@ -86,7 +86,7 @@ export function RecoveryChart({ data }: { data: RecoveryChartPoint[] }) {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value: number) => `$${value}`}
+            tickFormatter={(value: number) => `€${value}`}
           />
           <Tooltip
             content={<ChartTooltip />}
@@ -95,7 +95,7 @@ export function RecoveryChart({ data }: { data: RecoveryChartPoint[] }) {
           <Area
             type="monotone"
             dataKey="recovered"
-            name="Fatturato Recuperato ($)"
+            name="Fatturato Recuperato (€)"
             stroke="#10b981"
             strokeWidth={2}
             fill="url(#recoveredGradient)"
@@ -103,7 +103,7 @@ export function RecoveryChart({ data }: { data: RecoveryChartPoint[] }) {
           <Area
             type="monotone"
             dataKey="failed"
-            name="Pagamenti Falliti ($)"
+            name="Pagamenti Falliti (€)"
             stroke="#f43f5e"
             strokeWidth={2}
             fill="url(#failedGradient)"

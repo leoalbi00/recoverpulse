@@ -17,13 +17,6 @@ export const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "all", label: "Tutto" },
 ];
 
-export const TIME_RANGE_CAPTION: Record<TimeRange, string> = {
-  "7d": "Ultimi 7 giorni",
-  "30d": "Ultimi 30 giorni",
-  month: "Da inizio mese",
-  all: "Dall'inizio",
-};
-
 /**
  * Filtra le transazioni in base alla data di fallimento (`createdAt`): le
  * metriche restano un'analisi per coorte ("delle fatture fallite in questo
@@ -48,33 +41,6 @@ export function filterTransactionsByRange(
   }
 
   return transactions.filter((transaction) => new Date(transaction.createdAt).getTime() >= startTime);
-}
-
-/** Numero di bucket giornalieri più adatto al grafico per il periodo selezionato. */
-export function daysForRange(
-  range: TimeRange,
-  transactions: FailedTransaction[],
-  now: Date = new Date()
-): number {
-  switch (range) {
-    case "7d":
-      return 7;
-    case "30d":
-      return 30;
-    case "month":
-      return now.getDate();
-    case "all": {
-      if (transactions.length === 0) return 14;
-      const oldest = transactions.reduce(
-        (min, transaction) => Math.min(min, new Date(transaction.createdAt).getTime()),
-        Date.now()
-      );
-      const spanDays = Math.ceil((Date.now() - oldest) / DAY_MS) + 1;
-      // Limite a 90 giorni: oltre, i bucket giornalieri diventano illeggibili
-      // in un'area chart di questa dimensione.
-      return Math.min(Math.max(spanDays, 7), 90);
-    }
-  }
 }
 
 export type DashboardStats = {
@@ -103,34 +69,85 @@ export function computeDashboardStats(all: FailedTransaction[]): DashboardStats 
   };
 }
 
+export type MrrRecoveredStats = {
+  /** Somma di tutti i pagamenti recuperati, indipendentemente da quando. */
+  totalAmount: number;
+  /** Solo i recuperi avvenuti nel mese solare corrente (recoveredAt). */
+  monthAmount: number;
+  currency: string;
+};
+
+/**
+ * MRR Recuperato: calcolato sempre su tutte le transazioni (non sul periodo
+ * selezionato in dashboard), perché è un KPI di sintesi "quanto abbiamo
+ * recuperato in totale / questo mese", non un'analisi per coorte come
+ * computeDashboardStats.
+ */
+export function computeMrrRecovered(all: FailedTransaction[], now: Date = new Date()): MrrRecoveredStats {
+  const recovered = all.filter((t) => t.status === "recuperato");
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
+
+  const totalAmount = recovered.reduce((sum, t) => sum + t.amount, 0);
+  const monthAmount = recovered
+    .filter((t) => t.recoveredAt && new Date(t.recoveredAt).getTime() >= monthStart)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  return { totalAmount, monthAmount, currency: all[0]?.currency ?? "usd" };
+}
+
+export type VolumeAtRiskStats = {
+  /** Somma degli importi delle fatture ancora "in_corso" (non recuperate né perse). */
+  amount: number;
+  count: number;
+  currency: string;
+};
+
+/** Volume a Rischio: fotografia dello stato attuale, non scoperta a un periodo storico. */
+export function computeVolumeAtRisk(all: FailedTransaction[]): VolumeAtRiskStats {
+  const active = all.filter((t) => t.status === "in_corso");
+  return {
+    amount: active.reduce((sum, t) => sum + t.amount, 0),
+    count: active.length,
+    currency: all[0]?.currency ?? "usd",
+  };
+}
+
 export type RecoveryChartPoint = {
   day: string;
   recovered: number;
   failed: number;
 };
 
-export function computeRecoveryChartData(all: FailedTransaction[], days = 14): RecoveryChartPoint[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const buckets = Array.from({ length: days }, (_, index) => {
-    const date = new Date(today.getTime() - (days - 1 - index) * DAY_MS);
+/**
+ * Andamento mensile (recuperi vs fallimenti) per il grafico principale della
+ * dashboard: bucket per mese solare invece che per giorno, sempre su tutte le
+ * transazioni (non sul periodo selezionato altrove in dashboard) — è la vista
+ * "trend" di lungo periodo, complementare alle card KPI.
+ */
+export function computeMonthlyRecoveryChartData(
+  all: FailedTransaction[],
+  monthsCount = 6,
+  now: Date = new Date()
+): RecoveryChartPoint[] {
+  const buckets = Array.from({ length: monthsCount }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (monthsCount - 1 - index), 1);
     return {
-      key: date.toISOString().slice(0, 10),
-      day: new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "short" }).format(date),
+      key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`,
+      day: new Intl.DateTimeFormat("it-IT", { month: "short", year: "numeric" }).format(date),
       recovered: 0,
       failed: 0,
     };
   });
 
   const byKey = new Map(buckets.map((bucket) => [bucket.key, bucket]));
+  const monthKey = (iso: string) => iso.slice(0, 7);
 
   for (const transaction of all) {
-    const failedBucket = byKey.get(transaction.createdAt.slice(0, 10));
+    const failedBucket = byKey.get(monthKey(transaction.createdAt));
     if (failedBucket) failedBucket.failed += Math.round((transaction.amount / 100) * 100) / 100;
 
     if (transaction.status === "recuperato" && transaction.recoveredAt) {
-      const recoveredBucket = byKey.get(transaction.recoveredAt.slice(0, 10));
+      const recoveredBucket = byKey.get(monthKey(transaction.recoveredAt));
       if (recoveredBucket) recoveredBucket.recovered += Math.round((transaction.amount / 100) * 100) / 100;
     }
   }

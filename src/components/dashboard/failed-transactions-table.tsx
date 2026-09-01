@@ -1,11 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, Search, Send } from "lucide-react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { FailedTransaction, TransactionStatus } from "@/lib/transactions";
+import {
+  TIME_RANGE_OPTIONS,
+  filterTransactionsByRange,
+  type TimeRange,
+} from "@/lib/dashboard-analytics";
 
 const STATUS_LABEL: Record<TransactionStatus, string> = {
   in_corso: "In recupero",
@@ -19,13 +23,12 @@ const STATUS_BADGE_CLASS: Record<TransactionStatus, string> = {
   perso: "bg-rose-100 text-rose-800",
 };
 
-const STATUS_FILTERS: { value: TransactionStatus | "tutti"; label: string }[] =
-  [
-    { value: "tutti", label: "Tutti gli stati" },
-    { value: "in_corso", label: STATUS_LABEL.in_corso },
-    { value: "recuperato", label: STATUS_LABEL.recuperato },
-    { value: "perso", label: STATUS_LABEL.perso },
-  ];
+const STATUS_FILTERS: { value: TransactionStatus | "tutti"; label: string }[] = [
+  { value: "tutti", label: "Tutti gli stati" },
+  { value: "in_corso", label: STATUS_LABEL.in_corso },
+  { value: "recuperato", label: STATUS_LABEL.recuperato },
+  { value: "perso", label: STATUS_LABEL.perso },
+];
 
 function formatAmount(amount: number, currency: string) {
   return new Intl.NumberFormat("it-IT", {
@@ -43,66 +46,46 @@ function formatDate(iso: string) {
 
 type FailedTransactionsTableProps = {
   transactions: FailedTransaction[];
-  interactive?: boolean;
+  /** Dominio di produzione per costruire il link assoluto del portale /pay (src/lib/app-url.ts). */
+  appBaseUrl: string;
 };
 
-export function FailedTransactionsTable({
-  transactions,
-  interactive = false,
-}: FailedTransactionsTableProps) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "tutti">(
-    "tutti",
-  );
+export function FailedTransactionsTable({ transactions, appBaseUrl }: FailedTransactionsTableProps) {
+  const [statusFilter, setStatusFilter] = useState<TransactionStatus | "tutti">("tutti");
+  const [range, setRange] = useState<TimeRange>("all");
 
   const filtered = useMemo(() => {
-    if (!interactive) return transactions;
-
-    const query = search.trim().toLowerCase();
-    return transactions.filter((tx) => {
-      const matchesStatus =
-        statusFilter === "tutti" || tx.status === statusFilter;
-      const matchesQuery =
-        query.length === 0 ||
-        tx.customerName.toLowerCase().includes(query) ||
-        tx.customerEmail.toLowerCase().includes(query);
-      return matchesStatus && matchesQuery;
-    });
-  }, [transactions, interactive, search, statusFilter]);
+    const byRange = filterTransactionsByRange(transactions, range);
+    if (statusFilter === "tutti") return byRange;
+    return byRange.filter((tx) => tx.status === statusFilter);
+  }, [transactions, statusFilter, range]);
 
   return (
     <div>
-      {interactive && (
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-600" />
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cerca per cliente o email…"
-              className="h-9 w-full rounded-lg border border-zinc-200/80 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-            />
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as TransactionStatus | "tutti")
-            }
-            className="relative z-10 h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
-          >
-            {STATUS_FILTERS.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                className="bg-white text-zinc-900"
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <select
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value as TransactionStatus | "tutti")}
+          className="h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
+        >
+          {STATUS_FILTERS.map((option) => (
+            <option key={option.value} value={option.value} className="bg-white text-zinc-900">
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={range}
+          onChange={(event) => setRange(event.target.value as TimeRange)}
+          className="h-9 rounded-lg border border-zinc-200/80 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:w-48"
+        >
+          {TIME_RANGE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value} className="bg-white text-zinc-900">
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {filtered.length === 0 ? (
         <p className="py-8 text-center text-sm text-zinc-600">
@@ -112,28 +95,19 @@ export function FailedTransactionsTable({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[680px] text-left text-sm">
             <thead>
               <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
                 <th className="px-3 pb-3 font-medium first:pl-0">Cliente</th>
                 <th className="px-3 pb-3 font-medium">Importo</th>
-                <th className="px-3 pb-3 font-medium">Motivo</th>
                 <th className="px-3 pb-3 font-medium">Stato</th>
-                <th className="px-3 pb-3 font-medium">Data</th>
-                {interactive && (
-                  <th className="px-3 pb-3 text-right font-medium last:pr-0">
-                    Azioni
-                  </th>
-                )}
+                <th className="px-3 pb-3 font-medium">Data Notifica</th>
+                <th className="px-3 pb-3 font-medium last:pr-0">Link /pay</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200">
               {filtered.map((tx) => (
-                <TransactionRow
-                  key={tx.id}
-                  transaction={tx}
-                  interactive={interactive}
-                />
+                <TransactionRow key={tx.id} transaction={tx} appBaseUrl={appBaseUrl} />
               ))}
             </tbody>
           </table>
@@ -143,33 +117,14 @@ export function FailedTransactionsTable({
   );
 }
 
-function TransactionRow({
-  transaction,
-  interactive,
-}: {
-  transaction: FailedTransaction;
-  interactive: boolean;
-}) {
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+function TransactionRow({ transaction, appBaseUrl }: { transaction: FailedTransaction; appBaseUrl: string }) {
+  const [copied, setCopied] = useState(false);
+  const payLink = `${appBaseUrl}/pay/${transaction.paymentLinkToken}`;
 
-  async function handleResend() {
-    setState("sending");
-    try {
-      const response = await fetch(
-        `/api/dashboard/transactions/${transaction.invoiceId}/resend`,
-        {
-          method: "POST",
-        },
-      );
-      if (!response.ok) throw new Error("resend failed");
-      setState("sent");
-    } catch {
-      setState("error");
-    } finally {
-      setTimeout(() => setState("idle"), 2500);
-    }
+  async function handleCopy() {
+    await navigator.clipboard.writeText(payLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
@@ -181,40 +136,33 @@ function TransactionRow({
       <td className="px-3 py-3 font-medium text-zinc-900">
         {formatAmount(transaction.amount, transaction.currency)}
       </td>
-      <td className="px-3 py-3 text-zinc-600">{transaction.reason}</td>
       <td className="px-3 py-3">
-        <Badge className={STATUS_BADGE_CLASS[transaction.status]}>
-          {STATUS_LABEL[transaction.status]}
-        </Badge>
+        <Badge className={STATUS_BADGE_CLASS[transaction.status]}>{STATUS_LABEL[transaction.status]}</Badge>
       </td>
       <td className="px-3 py-3 text-zinc-600">
-        {formatDate(transaction.createdAt)}
+        {transaction.firstNoticeSentAt ? formatDate(transaction.firstNoticeSentAt) : "—"}
       </td>
-      {interactive && (
-        <td className="px-3 py-3 text-right last:pr-0">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-            disabled={
-              transaction.status === "recuperato" || state === "sending"
-            }
-            onClick={handleResend}
+      <td className="px-3 py-3 last:pr-0">
+        <div className="flex items-center gap-2">
+          <a
+            href={payLink}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-500"
           >
-            {state === "sending" ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Send className="size-3.5" />
-            )}
-            {state === "sent"
-              ? "Sollecito inviato"
-              : state === "error"
-                ? "Invio non riuscito"
-                : "Invia Sollecito Manuale"}
-          </Button>
-        </td>
-      )}
+            <ExternalLink className="size-3.5" />
+            Apri
+          </a>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="inline-flex items-center gap-1 text-zinc-500 hover:text-zinc-800"
+          >
+            {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+            {copied ? "Copiato" : "Copia"}
+          </button>
+        </div>
+      </td>
     </tr>
   );
 }

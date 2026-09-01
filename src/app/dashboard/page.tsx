@@ -6,6 +6,7 @@ import { listTransactions, type FailedTransaction } from "@/lib/transactions";
 import { listAllDunningLogs } from "@/lib/dunning-logs";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 import { getPaywallStatus } from "@/lib/paywall";
+import { getAppBaseUrl } from "@/lib/app-url";
 import type { DunningLogEntry, SequenceStepDefinition } from "@/lib/dashboard-analytics";
 
 /**
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
         dunningLogs={dunningLogs}
         sequenceSteps={sequenceSteps}
         paywall={paywall}
+        appBaseUrl={getAppBaseUrl()}
       />
     </div>
   );

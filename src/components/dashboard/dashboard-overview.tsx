@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, DollarSign, Download, TrendingUp, XCircle } from "lucide-react";
+import { useMemo } from "react";
+import { AlertTriangle, DollarSign, Download, TrendingUp } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
@@ -13,14 +13,11 @@ import { transactionsToCsv, downloadCsv } from "@/lib/csv-export";
 import type { FailedTransaction } from "@/lib/transactions";
 import type { PaywallStatus } from "@/lib/paywall";
 import {
-  TIME_RANGE_OPTIONS,
-  TIME_RANGE_CAPTION,
-  filterTransactionsByRange,
-  daysForRange,
   computeDashboardStats,
-  computeRecoveryChartData,
+  computeMonthlyRecoveryChartData,
+  computeMrrRecovered,
+  computeVolumeAtRisk,
   computeSequencePerformance,
-  type TimeRange,
   type DunningLogEntry,
   type SequenceStepDefinition,
 } from "@/lib/dashboard-analytics";
@@ -30,6 +27,7 @@ type DashboardOverviewProps = {
   dunningLogs: DunningLogEntry[];
   sequenceSteps: SequenceStepDefinition[];
   paywall: PaywallStatus;
+  appBaseUrl: string;
 };
 
 function conversionColorClass(reached: number, rate: number): string {
@@ -39,28 +37,33 @@ function conversionColorClass(reached: number, rate: number): string {
   return "text-rose-600";
 }
 
-export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps, paywall }: DashboardOverviewProps) {
-  const [range, setRange] = useState<TimeRange>("30d");
-
-  const filtered = useMemo(() => filterTransactionsByRange(allTransactions, range), [allTransactions, range]);
-  const stats = useMemo(() => computeDashboardStats(filtered), [filtered]);
-  const chartData = useMemo(
-    () => computeRecoveryChartData(filtered, daysForRange(range, filtered)),
-    [filtered, range]
-  );
+export function DashboardOverview({
+  allTransactions,
+  dunningLogs,
+  sequenceSteps,
+  paywall,
+  appBaseUrl,
+}: DashboardOverviewProps) {
+  // Le card KPI e il grafico mensile sono sempre calcolati su tutto lo
+  // storico (non su un periodo selezionabile): sono numeri di sintesi
+  // "quanto abbiamo recuperato in totale / questo mese / a rischio ora", non
+  // un'analisi per coorte. Il filtro per periodo resta solo sulla tabella
+  // delle transazioni sotto, dove ha senso restringere la vista storica.
+  const stats = useMemo(() => computeDashboardStats(allTransactions), [allTransactions]);
+  const mrr = useMemo(() => computeMrrRecovered(allTransactions), [allTransactions]);
+  const volumeAtRisk = useMemo(() => computeVolumeAtRisk(allTransactions), [allTransactions]);
+  const chartData = useMemo(() => computeMonthlyRecoveryChartData(allTransactions, 6), [allTransactions]);
   const sequencePerformance = useMemo(
-    () => computeSequencePerformance(filtered, dunningLogs, sequenceSteps),
-    [filtered, dunningLogs, sequenceSteps]
+    () => computeSequencePerformance(allTransactions, dunningLogs, sequenceSteps),
+    [allTransactions, dunningLogs, sequenceSteps]
   );
   const exportableTransactions = useMemo(
-    () => filtered.filter((t) => t.status === "recuperato" || t.status === "perso"),
-    [filtered]
+    () => allTransactions.filter((t) => t.status === "recuperato" || t.status === "perso"),
+    [allTransactions]
   );
 
-  const recoveredAmountLabel = new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: stats.currency.toUpperCase(),
-  }).format(stats.recoveredAmount / 100);
+  const formatCurrency = (amount: number, currency: string) =>
+    new Intl.NumberFormat("it-IT", { style: "currency", currency: currency.toUpperCase() }).format(amount / 100);
 
   function handleExportCsv() {
     const csv = transactionsToCsv(exportableTransactions);
@@ -69,32 +72,13 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
 
   return (
     <>
-      <div className="mt-6 flex flex-wrap items-center gap-2">
-        {TIME_RANGE_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => setRange(option.value)}
-            aria-pressed={range === option.value}
-            className={cn(
-              "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
-              range === option.value
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-                : "border-zinc-700/60 bg-zinc-900/40 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
         <StatCard
           icon={DollarSign}
-          label="Fatturato Recuperato"
-          value={recoveredAmountLabel}
-          delta={stats.totalCount > 0 ? `${stats.recoveredCount} di ${stats.totalCount} fatture` : "Nessun dato"}
-          trend={stats.recoveredAmount > 0 ? "up" : "neutral"}
+          label="MRR Recuperato"
+          value={formatCurrency(mrr.totalAmount, mrr.currency)}
+          delta={`${formatCurrency(mrr.monthAmount, mrr.currency)} questo mese`}
+          trend={mrr.totalAmount > 0 ? "up" : "neutral"}
         />
         <StatCard
           icon={TrendingUp}
@@ -104,18 +88,11 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
           trend={stats.recoveryRate >= 50 ? "up" : stats.totalCount > 0 ? "down" : "neutral"}
         />
         <StatCard
-          icon={XCircle}
-          label="Pagamenti Persi"
-          value={String(stats.lostCount)}
-          delta={stats.totalCount > 0 ? `${stats.lostCount}/${stats.totalCount} fatture` : "Nessun dato"}
-          trend={stats.lostCount > 0 ? "down" : "neutral"}
-        />
-        <StatCard
           icon={AlertTriangle}
-          label="Pagamenti Falliti Attivi"
-          value={String(stats.activeFailedCount)}
-          delta="In corso di recupero"
-          trend={stats.activeFailedCount > 0 ? "down" : "neutral"}
+          label="Volume a Rischio"
+          value={formatCurrency(volumeAtRisk.amount, volumeAtRisk.currency)}
+          delta={`${volumeAtRisk.count} fatture in corso di recupero`}
+          trend={volumeAtRisk.amount > 0 ? "down" : "neutral"}
         />
       </div>
 
@@ -127,9 +104,9 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
             <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-zinc-900">Fatturato Recuperato vs Pagamenti Falliti</h2>
+                  <h2 className="text-lg font-semibold text-zinc-900">Andamento Mensile</h2>
                   <p className="mt-1 text-sm text-zinc-600">
-                    {TIME_RANGE_CAPTION[range]}, aggiornato in tempo reale via webhook Stripe.
+                    Ultimi 6 mesi, aggiornato in tempo reale via webhook Stripe.
                   </p>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-zinc-600">
@@ -154,7 +131,7 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
               <div>
                 <h2 className="text-lg font-semibold text-zinc-900">Performance Sequenze</h2>
                 <p className="mt-1 text-sm text-zinc-600">
-                  Tasso di conversione per step della sequenza dunning ({TIME_RANGE_CAPTION[range].toLowerCase()}).
+                  Tasso di conversione per step della sequenza dunning (dall&apos;inizio).
                 </p>
               </div>
 
@@ -204,7 +181,7 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
 
       <section id="transazioni" className="mt-10 scroll-mt-20">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-zinc-100">Transazioni Fallite Recenti</h2>
+          <h2 className="text-lg font-semibold text-zinc-100">Transazioni Fallite</h2>
           <div className="flex items-center gap-4">
             <Button
               type="button"
@@ -223,7 +200,7 @@ export function DashboardOverview({ allTransactions, dunningLogs, sequenceSteps,
           </div>
         </div>
         <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md">
-          <FailedTransactionsTable transactions={filtered.slice(0, 5)} />
+          <FailedTransactionsTable transactions={allTransactions} appBaseUrl={appBaseUrl} />
         </div>
       </section>
     </>
