@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Eye, Mail, PenLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,12 +52,65 @@ export function DunningTemplatesManager({
   const [steps, setSteps] = useState(initialSettings.steps);
   const [openStepId, setOpenStepId] = useState<string | null>(null);
   const [previewStepId, setPreviewStepId] = useState<string | null>(null);
+  const [previewSubject, setPreviewSubject] = useState("");
+  const [previewCompanyName, setPreviewCompanyName] = useState(PREVIEW_VARS.nome_azienda);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const subjectRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const bodyRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const lastFocusedField = useRef<Record<string, "subject" | "body">>({});
+
+  // Rigenera l'anteprima grafica reale (src/app/api/dashboard/dunning-templates/preview/route.ts)
+  // ogni volta che si apre il modale su uno step diverso: usa i valori
+  // dell'editor al momento del click, così l'anteprima riflette anche
+  // modifiche non ancora salvate.
+  useEffect(() => {
+    const step = steps.find((candidate) => candidate.id === previewStepId);
+    if (!step) return;
+
+    let cancelled = false;
+    setPreviewLoading(true);
+    setPreviewError(null);
+
+    fetch("/api/dashboard/dunning-templates/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stepId: step.id,
+        subject: renderDunningTemplate(step.subject, PREVIEW_VARS),
+        bodyText: renderDunningTemplate(step.body, PREVIEW_VARS),
+        customerName: PREVIEW_VARS.nome_cliente,
+        planName: PREVIEW_VARS.nome_piano,
+        amountFormatted: PREVIEW_VARS.importo,
+        recoveryLink: PREVIEW_VARS.link_recupero,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("preview failed");
+        return response.json() as Promise<{ html: string; companyName: string }>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setPreviewSubject(renderDunningTemplate(step.subject, PREVIEW_VARS));
+        setPreviewCompanyName(data.companyName);
+        setPreviewHtml(data.html);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewError("Impossibile generare l'anteprima. Riprova.");
+      })
+      .finally(() => {
+        if (!cancelled) setPreviewLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewStepId]);
 
   function showToast(message: string) {
     const id = Date.now();
@@ -360,11 +413,17 @@ export function DunningTemplatesManager({
 
       {previewStep && (
         <EmailPreviewModal
-          companyName={PREVIEW_VARS.nome_azienda}
+          companyName={previewCompanyName}
           recipientLabel={PREVIEW_RECIPIENT}
-          subject={renderDunningTemplate(previewStep.subject, PREVIEW_VARS)}
-          body={renderDunningTemplate(previewStep.body, PREVIEW_VARS)}
-          onClose={() => setPreviewStepId(null)}
+          subject={previewSubject}
+          html={previewHtml}
+          loading={previewLoading}
+          error={previewError}
+          onClose={() => {
+            setPreviewStepId(null);
+            setPreviewHtml(null);
+            setPreviewError(null);
+          }}
         />
       )}
 

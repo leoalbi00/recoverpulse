@@ -46,13 +46,53 @@ function buildShieldSvg(color: string): string {
 
 const LOCK_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:5px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 
-function buildDunningEmailHtml({
+/**
+ * Resa grafica per ciascuno dei 3 step della sequenza dunning
+ * (src/lib/dunning-templates.ts): badge/titolo/CTA crescono in urgenza da
+ * "Primo Sollecito" (nessun badge, tono neutro) a "Ultimo Avviso" (badge
+ * rosso, richiesta esplicita di aggiornamento carta prima della sospensione).
+ * Oggetto e corpo restano quelli configurati dal merchant in /dashboard/dunning
+ * (bodyText qui sotto); solo la cornice visiva cambia per step.
+ */
+const STEP_EMAIL_VISUALS: Record<
+  DunningTemplateStepId,
+  {
+    badge: { label: string; background: string; color: string } | null;
+    title: string;
+    ctaLabel: string;
+  }
+> = {
+  immediate: {
+    badge: null,
+    title: "Il pagamento non è andato a buon fine",
+    ctaLabel: "Aggiorna metodo di pagamento",
+  },
+  first_reminder: {
+    badge: { label: "Secondo sollecito", background: "#fffbeb", color: "#b45309" },
+    title: "Il pagamento è ancora in sospeso",
+    ctaLabel: "Aggiorna la tua carta ora",
+  },
+  final_notice: {
+    badge: { label: "Ultimo avviso", background: "#fef2f2", color: "#dc2626" },
+    title: "Il tuo abbonamento sta per essere sospeso",
+    ctaLabel: "Aggiorna ora per evitare l'interruzione",
+  },
+};
+
+/**
+ * Esportata per essere riusata identica dalla rotta di anteprima grafica
+ * (src/app/api/dashboard/dunning-templates/preview/route.ts): l'anteprima
+ * mostrata in /dashboard/dunning e /dashboard/impostazioni deve corrispondere
+ * esattamente all'email che Resend invierà davvero, non a una ricostruzione
+ * separata che rischia di disallinearsi nel tempo.
+ */
+export function buildDunningEmailHtml({
   customerName,
   planName,
   amountFormatted,
   recoveryLink,
   bodyText,
-  isFinalNotice = false,
+  stepId,
   companyName,
   logoUrl,
   primaryColor,
@@ -64,12 +104,14 @@ function buildDunningEmailHtml({
   recoveryLink: string;
   /** Corpo email già renderizzato (variabili sostituite) dal template configurato in /dashboard/dunning. */
   bodyText: string;
-  isFinalNotice?: boolean;
+  stepId: DunningTemplateStepId;
   companyName: string;
   logoUrl: string | null;
   primaryColor: string;
   supportEmail: string;
 }): string {
+  const visuals = STEP_EMAIL_VISUALS[stepId];
+  const isFinalNotice = stepId === "final_notice";
   // customerName e planName arrivano da Stripe (nome del Customer / descrizione
   // riga fattura): un cliente può impostarli liberamente sul proprio account,
   // quindi vanno trattati come input non fidato ed escapati prima di finire
@@ -86,7 +128,9 @@ function buildDunningEmailHtml({
     customerName && customerName !== "Gentile cliente" ? `Ciao ${safeCustomerName}` : "Gentile cliente";
   const preheader = isFinalNotice
     ? `Ultimo avviso: rischi l'interruzione del piano ${safePlanName}. Aggiorna la carta in 1 click.`
-    : `${greeting}, aggiorna il metodo di pagamento per ${safePlanName} in meno di un minuto.`;
+    : stepId === "first_reminder"
+      ? `${greeting}, il pagamento di ${safePlanName} è ancora in sospeso: aggiorna la carta per evitare interruzioni.`
+      : `${greeting}, aggiorna il metodo di pagamento per ${safePlanName} in meno di un minuto.`;
 
   const safeCompanyName = escapeHtml(companyName);
   const ctaTextColor = getReadableTextColor(primaryColor);
@@ -145,11 +189,11 @@ function buildDunningEmailHtml({
                   </tr>
 
                   ${
-                    isFinalNotice
+                    visuals.badge
                       ? `<tr>
                     <td style="padding:20px 32px 0 32px;">
-                      <span style="display:inline-block; background-color:#fef2f2; color:#dc2626; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:5px 10px; border-radius:999px;">
-                        Ultimo avviso
+                      <span style="display:inline-block; background-color:${visuals.badge.background}; color:${visuals.badge.color}; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:5px 10px; border-radius:999px;">
+                        ${visuals.badge.label}
                       </span>
                     </td>
                   </tr>`
@@ -157,9 +201,9 @@ function buildDunningEmailHtml({
                   }
 
                   <tr>
-                    <td style="padding:${isFinalNotice ? "12" : "32"}px 32px 0 32px;">
+                    <td style="padding:${visuals.badge ? "12" : "32"}px 32px 0 32px;">
                       <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
-                        ${isFinalNotice ? "Il tuo abbonamento sta per essere sospeso" : "Il pagamento non è andato a buon fine"}
+                        ${visuals.title}
                       </h1>
                       <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46; white-space:normal;">
                         ${safeBodyHtml}
@@ -193,7 +237,7 @@ function buildDunningEmailHtml({
                               href="${safeRecoveryLink}"
                               style="display:block; width:100%; box-sizing:border-box; color:${ctaTextColor}; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
                             >
-                              Aggiorna metodo di pagamento →
+                              ${visuals.ctaLabel} →
                             </a>
                           </td>
                         </tr>
@@ -655,7 +699,6 @@ export async function sendDunningEmail({
 
   const merchant = await getMerchantSettings(userId);
   const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
-  const isFinalNotice = stepId === "final_notice";
 
   const templates = await getDunningTemplates(userId);
   const step = templates.steps.find((candidate) => candidate.id === stepId);
@@ -680,7 +723,7 @@ export async function sendDunningEmail({
     amountFormatted,
     recoveryLink,
     bodyText,
-    isFinalNotice,
+    stepId,
     companyName,
     logoUrl: merchant.logoUrl,
     primaryColor: merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor,

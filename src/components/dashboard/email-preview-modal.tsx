@@ -1,27 +1,35 @@
 "use client";
 
 import { useEffect } from "react";
-import { Mail, X } from "lucide-react";
+import { Loader2, Mail, X } from "lucide-react";
 
 /**
- * Anteprima dell'email già renderizzata (variabili {{...}} sostituite),
- * riusata sia dall'editor dei modelli (src/components/dashboard/dunning-templates-manager.tsx)
- * sia da qualsiasi altro punto che debba mostrare com'è "un'email dunning
- * finita" prima dell'invio reale. Stesso pattern a overlay già usato per
- * LeadDetailModal (src/components/dashboard/notifications-manager.tsx):
- * chiusura su Escape, clic sull'overlay o sulla X.
+ * Anteprima grafica dell'email così come Resend la invierà davvero: l'HTML
+ * arriva dalla rotta /api/dashboard/dunning-templates/preview, che chiama lo
+ * stesso builder dell'invio reale (buildDunningEmailHtml, src/lib/email.ts)
+ * con il logo/colore/nome azienda effettivi del merchant — non una
+ * ricostruzione approssimata. Riusata sia dall'editor dei modelli
+ * (src/components/dashboard/dunning-templates-manager.tsx) sia da qualsiasi
+ * altro punto che debba mostrare com'è "un'email dunning finita" prima
+ * dell'invio reale. Stesso pattern a overlay già usato per LeadDetailModal
+ * (src/components/dashboard/notifications-manager.tsx): chiusura su Escape,
+ * clic sull'overlay o sulla X.
  */
 export function EmailPreviewModal({
   companyName,
   recipientLabel,
   subject,
-  body,
+  html,
+  loading,
+  error,
   onClose,
 }: {
   companyName: string;
   recipientLabel: string;
   subject: string;
-  body: string;
+  html: string | null;
+  loading: boolean;
+  error: string | null;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -39,7 +47,7 @@ export function EmailPreviewModal({
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-white text-zinc-900 shadow-lg"
+        className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-white text-zinc-900 shadow-lg"
       >
         <div className="flex items-center justify-between gap-3 border-b border-zinc-200/80 px-5 py-4">
           <div className="flex items-center gap-2">
@@ -66,13 +74,28 @@ export function EmailPreviewModal({
           </div>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto p-5">
-          <p className="mb-3 border-b border-zinc-100 pb-3 text-sm font-semibold text-zinc-900">
-            {subject || <span className="font-normal text-zinc-400">(nessun oggetto)</span>}
-          </p>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-700">
-            {body || <span className="text-zinc-400">(nessun testo)</span>}
-          </p>
+        <p className="border-b border-zinc-200/80 px-5 py-3 text-sm font-semibold text-zinc-900">
+          {subject || <span className="font-normal text-zinc-400">(nessun oggetto)</span>}
+        </p>
+
+        <div className="h-[65vh] bg-zinc-100">
+          {loading ? (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-zinc-500">
+              <Loader2 className="size-5 animate-spin" />
+              <p className="text-xs">Generazione anteprima…</p>
+            </div>
+          ) : error ? (
+            <div className="flex h-full items-center justify-center px-8 text-center text-sm text-rose-600">
+              {error}
+            </div>
+          ) : (
+            <iframe
+              title="Anteprima email"
+              srcDoc={html ?? ""}
+              sandbox=""
+              className="h-full w-full border-0 bg-white"
+            />
+          )}
         </div>
       </div>
     </div>
