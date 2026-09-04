@@ -255,11 +255,13 @@ export type SequenceStepPerformance = SequenceStepDefinition & {
 /**
  * Tasso di conversione per step della sequenza dunning: per ogni step,
  * percentuale di fatture che lo hanno raggiunto e sono oggi "recuperato".
- * Lo step "immediate" (T+0) non viene mai registrato su dunning_logs (è
- * inviato subito dal webhook, non dal cron — vedi src/lib/dunning.ts), quindi
- * per quello si usa l'intero insieme delle fatture fallite come "raggiunte".
- * Per gli altri step si usano i soli invoice_id con un log di stato "sent"
- * per quel delayDays (src/lib/dunning-logs.ts).
+ * Lo step "immediate" (T+0) è inviato subito dal webhook, non dal cron (vedi
+ * src/lib/dunning.ts, che registra comunque un log su dunning_logs): qui si
+ * usa comunque l'intero insieme delle fatture fallite come "raggiunte",
+ * invece del solo sottoinsieme con log "sent", per non introdurre un salto
+ * nelle metriche storiche precedenti all'introduzione di quel log. Per gli
+ * altri step si usano i soli invoice_id con un log di stato "sent" per quel
+ * delayDays (src/lib/dunning-logs.ts).
  *
  * Nota: le percentuali per step successivi si sovrappongono (una fattura
  * recuperata dopo l'ultimo avviso conta come "recuperata" anche per gli step

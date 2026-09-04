@@ -1,6 +1,7 @@
 import { markFirstNoticeSent, type FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
 import { getDunningTemplates } from "@/lib/dunning-templates";
+import { recordDunningLog } from "@/lib/dunning-logs";
 import { sendDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
@@ -81,6 +82,7 @@ export async function startDunningSequence(
     // deve far fallire l'intero webhook e farlo ritentare da Stripe, il
     // sollecito successivo del cron proverà comunque a raggiungere il
     // cliente.
+    let emailSent = false;
     try {
       await sendDunningEmail({
         userId: transaction.userId,
@@ -91,13 +93,40 @@ export async function startDunningSequence(
         recoveryLink,
         stepId: "immediate",
       });
+      emailSent = true;
     } catch (error) {
       console.error(
         `[dunning] invio dell'email immediata fallito per la fattura ${transaction.invoiceId}: la fattura resta comunque registrata e recuperabile dal portale.`,
         error
       );
-      return;
     }
+
+    // Traccia il tentativo su dunning_logs (letto da /dashboard/transazioni
+    // per le colonne "Tentativi Dunning"/"Ultima Azione", src/lib/dunning-logs.ts
+    // getDunningLogSummaries): a differenza degli step successivi, inviati e
+    // registrati dal cron (src/app/api/cron/dunning/route.ts), questo è
+    // l'unico punto che invia lo step "immediate" (T+0, delayDays 0), quindi
+    // senza questa chiamata la dashboard non mostrerebbe mai il primo
+    // sollecito appena inviato. Il vincolo unique (invoice_id, step_days) fa
+    // sì che eventuali reinvii manuali dello stesso step (pulsante
+    // "Sollecito" su /dashboard/transazioni) non producano righe duplicate.
+    try {
+      await recordDunningLog({
+        userId: transaction.userId,
+        invoiceId: transaction.invoiceId,
+        stepDays: 0,
+        customerEmail: transaction.customerEmail,
+        channel: "email",
+        status: emailSent ? "sent" : "failed",
+      });
+    } catch (error) {
+      console.error(
+        `[dunning] impossibile registrare il log del sollecito immediato per la fattura ${transaction.invoiceId}:`,
+        error
+      );
+    }
+
+    if (!emailSent) return;
 
     // first_notice_sent_at è puramente informativo (dashboard/audit): non
     // tocca `status`, che resta "in_corso" perché continua a guidare il cron
