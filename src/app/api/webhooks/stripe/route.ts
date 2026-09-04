@@ -207,10 +207,18 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
  * paywall, src/lib/paywall.ts), non va confuso con l'omonimo evento lato
  * account collegato (handleSubscriptionDeleted sopra, chiamato solo dal ramo
  * connectedAccountId, riguarda l'abbonamento di un CLIENTE del merchant).
+ *
+ * Risolve l'utente prima da `subscription.metadata.userId` (impostato al
+ * checkout, src/app/api/checkout/route.ts): Stripe non garantisce che
+ * checkout.session.completed arrivi prima di questo evento, quindi
+ * affidarsi solo a `users.stripe_customer_id` (impostato da
+ * handleCheckoutSessionCompleted) rischierebbe di scartare l'evento se
+ * arriva per primo. Fallback sul customer id per gli abbonamenti creati
+ * prima dell'introduzione di questo metadata.
  */
 async function handlePlatformSubscriptionChange(subscription: Stripe.Subscription): Promise<void> {
   const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
-  const userId = await getUserIdForStripeCustomer(customerId);
+  const userId = subscription.metadata?.userId || (await getUserIdForStripeCustomer(customerId));
   if (!userId) {
     console.warn(
       `[stripe-webhook] abbonamento piattaforma ${subscription.id} per il customer ${customerId} non associato a nessun utente RecoverPulse: ignorato.`

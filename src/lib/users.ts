@@ -103,3 +103,18 @@ export async function setTrialEndsAt(userId: string, trialEndsAt: string): Promi
     throw new Error(`Errore nell'impostazione della scadenza prova su Supabase: ${error.message}`);
   }
 }
+
+/** Letta da src/lib/trial.ts: fonte primaria della prova a livello di account, impostata da setTrialEndsAt sopra. */
+export async function getTrialEndsAtForUser(userId: string): Promise<string | null> {
+  const { data, error } = await supabaseAdmin
+    .from("users")
+    .select("trial_ends_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Errore nel recupero della scadenza prova da Supabase: ${error.message}`);
+  }
+
+  return data?.trial_ends_at ?? null;
+}

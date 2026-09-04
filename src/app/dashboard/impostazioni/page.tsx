@@ -91,7 +91,7 @@ export default async function ImpostazioniPage() {
         </div>
       )}
 
-      <Accordion multiple defaultValue={["brand"]} className="mt-8 flex flex-col gap-4">
+      <Accordion multiple defaultValue={["brand", "subscription"]} className="mt-8 flex flex-col gap-4">
         <AccordionItem
           id="profilo-azienda"
           value="brand"
@@ -137,7 +137,11 @@ export default async function ImpostazioniPage() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="subscription" className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5">
+        <AccordionItem
+          id="abbonamento"
+          value="subscription"
+          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+        >
           <AccordionTrigger className="py-4 text-zinc-100">Abbonamento</AccordionTrigger>
           <AccordionContent>
             <p className="text-xs text-zinc-400">

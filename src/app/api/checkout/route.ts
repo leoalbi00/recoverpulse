@@ -34,6 +34,10 @@ export async function POST(request: Request) {
   const priceId = PLAN_PRICE_ENV[parsed.data.plan];
 
   const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Devi accedere per attivare un abbonamento." }, { status: 401 });
+  }
+
   const origin = request.headers.get("origin") ?? new URL(request.url).origin;
   const referer = request.headers.get("referer");
 
@@ -57,14 +61,18 @@ export async function POST(request: Request) {
               },
             },
       ],
-      customer_email: session?.user?.email ?? undefined,
-      client_reference_id: session?.user?.id,
+      customer_email: session.user.email ?? undefined,
+      client_reference_id: session.user.id,
       // Propaga sull'abbonamento creato (subscription_data.metadata), letto
-      // dal webhook per popolare users.subscription_plan: senza questo, col
-      // fallback price_data inline non c'è un Price ID stabile da cui
-      // risalire al piano scelto (vedi src/app/api/webhooks/stripe/route.ts).
+      // dal webhook (src/app/api/webhooks/stripe/route.ts): planId popola
+      // users.subscription_plan (necessario col fallback price_data inline,
+      // che non ha un Price ID stabile da cui risalire al piano scelto);
+      // userId risolve l'utente RecoverPulse senza dover attendere che
+      // checkout.session.completed abbia già salvato stripe_customer_id —
+      // customer.subscription.created può arrivare prima, in ordine non
+      // garantito da Stripe.
       subscription_data: {
-        metadata: { planId: parsed.data.plan },
+        metadata: { planId: parsed.data.plan, userId: session.user.id },
       },
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: referer ?? `${origin}/#pricing`,
