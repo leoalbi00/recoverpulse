@@ -198,7 +198,7 @@ export function Hero() {
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
             <Button
               size="lg"
-              render={<a href="/register" />}
+              render={<a href="/start-trial" />}
               className="h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-emerald-500/20"
             >
               Inizia la Prova Gratuita
