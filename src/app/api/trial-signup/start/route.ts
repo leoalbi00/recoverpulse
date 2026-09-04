@@ -51,7 +51,20 @@ export async function POST(request: Request) {
     }
 
     const code = await startTrialSignup(parsed.data);
-    await sendTrialActivationCodeEmail({ to: email, firstName: parsed.data.firstName, code });
+    const emailSent = await sendTrialActivationCodeEmail({ to: email, firstName: parsed.data.firstName, code });
+
+    // A differenza di magic-link/forgot-password (dove l'email non deve mai
+    // rivelare se un account esiste), qui l'esito dell'invio viene mostrato
+    // per davvero: senza email l'utente resterebbe bloccato su uno Step 2
+    // che aspetta un codice mai arrivato, senza alcun modo di capire perché.
+    // La riga trial_signups resta comunque salvata (upsert su email): un
+    // retry dallo Step 1 rigenera un nuovo codice sulla stessa riga.
+    if (!emailSent) {
+      return NextResponse.json(
+        { error: "Non siamo riusciti a inviare l'email con il codice di attivazione. Riprova tra qualche minuto." },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json({ email });
   } catch (error) {

@@ -1314,10 +1314,12 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
 
 /**
  * Email con il codice di attivazione a 6 cifre dello Step 2 di /start-trial
- * (vedi src/lib/trial-signup.ts). Non propaga mai errori: la route che la
- * chiama (POST /api/trial-signup/start) deve poter far avanzare comunque
- * l'utente allo Step 2 anche se l'invio fallisce, mostrando un errore solo
- * se in seguito il codice risulta davvero non recapitato.
+ * (vedi src/lib/trial-signup.ts). A differenza delle altre email di questo
+ * file, l'esito dell'invio viene ritornato invece di essere solo loggato:
+ * qui non c'è nessun link da poter riprovare in un secondo momento (a
+ * differenza di magic link/reset password), quindi POST
+ * /api/trial-signup/start deve poter mostrare subito un errore nel form
+ * invece di far avanzare l'utente a uno Step 2 con un codice mai recapitato.
  */
 export async function sendTrialActivationCodeEmail({
   to,
@@ -1327,14 +1329,14 @@ export async function sendTrialActivationCodeEmail({
   to: string;
   firstName: string;
   code: string;
-}): Promise<void> {
-  if (!to) return;
+}): Promise<boolean> {
+  if (!to) return false;
 
   try {
     const resend = await getResendClient();
     if (!resend) {
       console.warn("[email] Resend API Key non configurata: invio codice di attivazione saltato.");
-      return;
+      return false;
     }
 
     const ttlLabel = "10 minuti";
@@ -1347,11 +1349,13 @@ export async function sendTrialActivationCodeEmail({
 
     if (error) {
       console.error(`[email] Resend ha risposto con un errore per il codice di attivazione a "${to}":`, JSON.stringify(error));
-      return;
+      return false;
     }
 
     console.log(`[email] codice di attivazione inviato con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`);
+    return true;
   } catch (error) {
     console.error(`[email] eccezione imprevista nell'invio del codice di attivazione a "${to}":`, error);
+    return false;
   }
 }
