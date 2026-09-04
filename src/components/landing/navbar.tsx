@@ -65,7 +65,7 @@ export function Navbar({ user }: NavbarProps) {
               >
                 Accedi
               </Button>
-              <Button render={<a href="/register" />}>Inizia Prova</Button>
+              <Button render={<a href="/start-trial" />}>Inizia Prova</Button>
             </>
           )}
         </div>
