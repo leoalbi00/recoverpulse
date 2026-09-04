@@ -96,7 +96,7 @@ function StepOneForm({
       <p className="mt-1.5 text-sm text-zinc-400">Compila i tuoi dati per creare l&apos;account.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="firstName" className="text-sm font-medium text-zinc-300">
               Nome

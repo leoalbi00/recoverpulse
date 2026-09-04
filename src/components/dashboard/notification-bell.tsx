@@ -136,7 +136,12 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 z-50 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-xl">
+        // Sotto ~640px `fixed inset-x-4` ancora il pannello ai bordi del
+        // viewport invece che al pulsante: nell'header mobile la campanella
+        // non è mai al bordo destro (c'è anche l'hamburger accanto), quindi
+        // un pannello w-80 ancorato con right-0 al pulsante uscirebbe dallo
+        // schermo sui telefoni più stretti (320-375px).
+        <div className="fixed inset-x-4 top-16 z-50 max-h-96 overflow-y-auto rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80">
           <div className="sticky top-0 flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-3">
             <p className="text-sm font-semibold text-zinc-900">Notifiche</p>
             {unreadCount > 0 && (
