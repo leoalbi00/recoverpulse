@@ -23,7 +23,7 @@ async function loadTransactionsData(userId: string): Promise<{
     transactions = await listTransactions(userId);
   } catch (error) {
     console.error(
-      "[dashboard/transazioni] errore nel recupero delle transazioni:",
+      "[dashboard/recuperi] errore nel recupero delle transazioni:",
       error,
     );
     return { transactions: [], dunningByInvoice: {} };
@@ -38,7 +38,7 @@ async function loadTransactionsData(userId: string): Promise<{
     dunningByInvoice = Object.fromEntries(summaries);
   } catch (error) {
     console.error(
-      "[dashboard/transazioni] errore nel recupero dello storico solleciti:",
+      "[dashboard/recuperi] errore nel recupero dello storico solleciti:",
       error,
     );
   }
@@ -46,7 +46,7 @@ async function loadTransactionsData(userId: string): Promise<{
   return { transactions, dunningByInvoice };
 }
 
-export default async function TransazioniPage() {
+export default async function RecuperiPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
@@ -56,7 +56,7 @@ export default async function TransazioniPage() {
     <div className="mx-auto max-w-6xl">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
-          Transazioni
+          Recuperi
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">
           Storico completo dei pagamenti falliti intercettati via webhook

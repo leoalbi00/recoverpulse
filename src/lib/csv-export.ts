@@ -1,4 +1,4 @@
-// Export CSV condiviso da TransactionsExplorer (/dashboard/transazioni) e dal
+// Export CSV condiviso da TransactionsExplorer (/dashboard/recuperi) e dal
 // nuovo pannello della dashboard principale: nessuna dipendenza da Supabase o
 // da altro codice server-only, così è richiamabile da qualunque componente
 // client ("use client").

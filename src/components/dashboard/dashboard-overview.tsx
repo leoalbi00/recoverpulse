@@ -43,7 +43,7 @@ export function DashboardOverview({
   // Le card KPI e il grafico mensile sono sempre calcolati su tutto lo
   // storico (non su un periodo selezionabile): sono numeri di sintesi
   // "quanto abbiamo recuperato in totale / questo mese / a rischio ora", non
-  // un'analisi per coorte. Il filtro per periodo vive solo in /dashboard/transazioni
+  // un'analisi per coorte. Il filtro per periodo vive solo in /dashboard/recuperi
   // (src/components/dashboard/transactions-explorer.tsx), dove ha senso
   // restringere la vista storica.
   const stats = useMemo(() => computeDashboardStats(allTransactions), [allTransactions]);

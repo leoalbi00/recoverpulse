@@ -12,7 +12,7 @@ import type { DunningLogEntry, SequenceStepDefinition } from "@/lib/dashboard-an
  * Carica transazioni, storico solleciti e step configurati da Supabase con
  * fallback puliti a liste vuote: se il DB non è raggiungibile, la pagina
  * mostra la dashboard con valori a zero invece di rompere il render del
- * Server Component (stesso principio di /dashboard/transazioni).
+ * Server Component (stesso principio di /dashboard/recuperi).
  */
 async function loadDashboardData(userId: string): Promise<{
   allTransactions: FailedTransaction[];

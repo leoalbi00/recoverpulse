@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { MerchantSettingsPanel } from "@/components/dashboard/merchant-settings-panel";
 import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
+import { DunningChannelTabs } from "@/components/dashboard/dunning-channel-tabs";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { SubscriptionOverviewPanel } from "@/components/dashboard/subscription-overview-panel";
 import { PlanButton } from "@/components/billing/plan-button";
@@ -18,6 +19,8 @@ import { getMerchantSettings, isMerchantProfileComplete } from "@/lib/merchant-s
 import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 import { getBillingInfoForUser } from "@/lib/billing";
 import { getSubscriptionOverview } from "@/lib/subscription-overview";
+import { getDunningTemplates } from "@/lib/dunning-templates";
+import { getDunningSettings } from "@/lib/dunning-settings";
 import { getTrialStatus } from "@/lib/trial";
 import { listTransactions, type FailedTransaction } from "@/lib/transactions";
 import { computePlanRecommendation } from "@/lib/plan-recommendation";
@@ -42,6 +45,9 @@ export default async function ImpostazioniPage() {
   const hasActiveSubscription =
     billingInfo.subscriptionStatus === "active" || billingInfo.subscriptionStatus === "trialing";
   const subscriptionOverview = await getSubscriptionOverview(session.user.id);
+
+  const dunningTemplates = await getDunningTemplates(session.user.id);
+  const dunningChannelSettings = await getDunningSettings(session.user.id);
 
   const trial = await getTrialStatus(session.user.id);
   let transactions: FailedTransaction[] = [];
@@ -132,6 +138,30 @@ export default async function ImpostazioniPage() {
                 connected={connectedAccount !== null}
                 stripeAccountId={connectedAccount?.stripeAccountId ?? null}
                 livemode={connectedAccount?.livemode ?? null}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem
+          id="solleciti-dunning"
+          value="dunning"
+          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+        >
+          <AccordionTrigger className="py-4 text-zinc-100">
+            Regole Solleciti Dunning
+          </AccordionTrigger>
+          <AccordionContent>
+            <p className="text-xs text-zinc-400">
+              Intervallo di giorni e numero di tentativi della sequenza
+              automatica dopo un pagamento fallito: la stessa configurazione
+              di &quot;Sequenze Dunning&quot; nel menu laterale, qui a portata
+              di mano insieme al resto delle impostazioni.
+            </p>
+            <div className="mt-3">
+              <DunningChannelTabs
+                initialTemplatesSettings={dunningTemplates}
+                initialChannelEmailEnabled={dunningChannelSettings.channels.email}
               />
             </div>
           </AccordionContent>

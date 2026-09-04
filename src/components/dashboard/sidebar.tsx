@@ -37,7 +37,7 @@ const NAV_ITEMS = [
     href: "/dashboard/dunning",
     icon: MessagesSquare,
   },
-  { label: "Transazioni", href: "/dashboard/transazioni", icon: Receipt },
+  { label: "Recuperi", href: "/dashboard/recuperi", icon: Receipt },
   { label: "Clienti", href: "/dashboard/customers", icon: Users },
   { label: "Impostazioni", href: "/dashboard/impostazioni", icon: Settings },
 ];

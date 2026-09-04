@@ -101,7 +101,7 @@ export async function startDunningSequence(
       );
     }
 
-    // Traccia il tentativo su dunning_logs (letto da /dashboard/transazioni
+    // Traccia il tentativo su dunning_logs (letto da /dashboard/recuperi
     // per le colonne "Tentativi Dunning"/"Ultima Azione", src/lib/dunning-logs.ts
     // getDunningLogSummaries): a differenza degli step successivi, inviati e
     // registrati dal cron (src/app/api/cron/dunning/route.ts), questo è
@@ -109,7 +109,7 @@ export async function startDunningSequence(
     // senza questa chiamata la dashboard non mostrerebbe mai il primo
     // sollecito appena inviato. Il vincolo unique (invoice_id, step_days) fa
     // sì che eventuali reinvii manuali dello stesso step (pulsante
-    // "Sollecito" su /dashboard/transazioni) non producano righe duplicate.
+    // "Sollecito" su /dashboard/recuperi) non producano righe duplicate.
     try {
       await recordDunningLog({
         userId: transaction.userId,

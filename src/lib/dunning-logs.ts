@@ -63,7 +63,7 @@ export type DunningLogSummary = {
 
 /**
  * Riepiloga i solleciti già inviati per un gruppo di fatture (usata dalla
- * pagina /dashboard/transazioni per le colonne "Tentativi Dunning" e "Ultima
+ * pagina /dashboard/recuperi per le colonne "Tentativi Dunning" e "Ultima
  * Azione"). Una sola query per tutte le fatture visualizzate, invece di una
  * query per riga.
  */
