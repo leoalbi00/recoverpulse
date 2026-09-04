@@ -1198,3 +1198,160 @@ export async function sendMagicLinkEmail({
     console.error(`[email] eccezione imprevista nell'invio del Magic Link a "${to}":`, error);
   }
 }
+
+// Stessa struttura (header, card, footer) di buildAuthEmailHtml, ma con il
+// codice OTP mostrato in chiaro al posto del pulsante CTA: qui non c'è un
+// link da cliccare, l'utente deve ricopiare le 6 cifre nello Step 2 di
+// /start-trial.
+function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; code: string; ttlLabel: string }): string {
+  const safeFirstName = escapeHtml(firstName);
+  const safeCode = escapeHtml(code);
+  const preheader = `Il tuo codice di attivazione RecoverPulse: ${code}`;
+
+  return `<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Il tuo codice di attivazione RecoverPulse</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f4f5; font-family:${FONT_STACK};">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      ${preheader}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%;">
+
+            <tr>
+              <td align="center" style="padding-bottom:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:8px; vertical-align:middle;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${RECOVERPULSE_BRAND_COLOR}; border-radius:8px;">
+                        <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
+                      </table>
+                    </td>
+                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                      RecoverPulse
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="background-color:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                  <tr>
+                    <td height="4" style="background-color:${RECOVERPULSE_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:32px 32px 0 32px;">
+                      <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
+                        Il tuo codice di attivazione
+                      </h1>
+                      <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
+                        Ciao ${safeFirstName}, usa questo codice per completare la registrazione alla prova gratuita di RecoverPulse.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:0 32px 8px 32px;" align="center">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                          <td align="center" style="border-radius:10px; background-color:#fafafa; border:1px solid #e4e4e7; padding:18px 24px;">
+                            <span style="font-size:32px; font-weight:700; letter-spacing:0.3em; color:#18181b; font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;">
+                              ${safeCode}
+                            </span>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:14px 32px 32px 32px;">
+                      <p style="margin:0; font-size:12.5px; line-height:1.6; color:#a1a1aa;">
+                        Inseriscilo nella schermata di attivazione da cui hai avviato la registrazione.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:18px 32px; border-top:1px solid #e4e4e7; background-color:#fafafa;">
+                      <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                        Il codice scade tra ${ttlLabel}. Se non hai richiesto tu questa email, ignorala pure.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding:24px 16px 0 16px;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                  Inviato da RecoverPulse su richiesta da recoverpulse.app.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+/**
+ * Email con il codice di attivazione a 6 cifre dello Step 2 di /start-trial
+ * (vedi src/lib/trial-signup.ts). Non propaga mai errori: la route che la
+ * chiama (POST /api/trial-signup/start) deve poter far avanzare comunque
+ * l'utente allo Step 2 anche se l'invio fallisce, mostrando un errore solo
+ * se in seguito il codice risulta davvero non recapitato.
+ */
+export async function sendTrialActivationCodeEmail({
+  to,
+  firstName,
+  code,
+}: {
+  to: string;
+  firstName: string;
+  code: string;
+}): Promise<void> {
+  if (!to) return;
+
+  try {
+    const resend = await getResendClient();
+    if (!resend) {
+      console.warn("[email] Resend API Key non configurata: invio codice di attivazione saltato.");
+      return;
+    }
+
+    const ttlLabel = "10 minuti";
+    const html = buildOtpEmailHtml({ firstName, code, ttlLabel });
+    const subject = `${code} è il tuo codice di attivazione RecoverPulse`;
+
+    console.log(`[email] invio codice di attivazione tramite Resend: to="${to}" from="${FROM_ADDRESS}"`);
+
+    const { data, error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+
+    if (error) {
+      console.error(`[email] Resend ha risposto con un errore per il codice di attivazione a "${to}":`, JSON.stringify(error));
+      return;
+    }
+
+    console.log(`[email] codice di attivazione inviato con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`);
+  } catch (error) {
+    console.error(`[email] eccezione imprevista nell'invio del codice di attivazione a "${to}":`, error);
+  }
+}

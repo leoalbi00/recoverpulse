@@ -94,3 +94,12 @@ export async function updatePasswordHash(userId: string, newPasswordHash: string
     throw new Error(`Errore nell'aggiornamento della password su Supabase: ${error.message}`);
   }
 }
+
+/** Imposta la scadenza della prova di 14 giorni al completamento della registrazione self-serve (src/app/api/trial-signup/complete/route.ts). */
+export async function setTrialEndsAt(userId: string, trialEndsAt: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("users").update({ trial_ends_at: trialEndsAt }).eq("id", userId);
+
+  if (error) {
+    throw new Error(`Errore nell'impostazione della scadenza prova su Supabase: ${error.message}`);
+  }
+}
