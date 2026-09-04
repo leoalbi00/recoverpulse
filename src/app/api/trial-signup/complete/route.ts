@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createUser, DuplicateEmailError, setTrialEndsAt } from "@/lib/users";
+import { createUser, findUserByEmail, DuplicateEmailError, setTrialEndsAt, type User } from "@/lib/users";
 import { updateMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
 import { getPendingTrialSignup, verifyTrialSignupOtp, deleteTrialSignup } from "@/lib/trial-signup";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -20,6 +20,13 @@ const completeSchema = z.object({
 // ancora valido, crea l'account. Evita che un codice verificato allo Step 2
 // ma poi scaduto — o riusato dopo il limite di tentativi — possa comunque
 // portare alla creazione dell'utente.
+//
+// Sicura da ripetere con la stessa coppia email/codice se un guasto
+// infrastrutturale (Supabase irraggiungibile, timeout) interrompe la
+// richiesta a metà: ogni passo dopo createUser è idempotente
+// (update/upsert/delete), e createUser stesso viene recuperato se
+// l'account risulta già creato da un tentativo precedente andato a buon
+// fine solo in parte — vedi il commento sul catch qui sotto.
 export async function POST(request: Request) {
   const ip = getClientIp(request);
   const { allowed: ipAllowed, retryAfterSeconds } = checkRateLimit(`trial-signup-complete:${ip}`, 10, 15 * 60);
@@ -49,11 +56,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Richiesta di attivazione non trovata. Ricomincia la registrazione." }, { status: 400 });
     }
 
-    const user = await createUser({
-      name: `${pending.firstName} ${pending.lastName}`.trim(),
-      email,
-      password,
-    });
+    let user: User;
+    try {
+      user = await createUser({
+        name: `${pending.firstName} ${pending.lastName}`.trim(),
+        email,
+        password,
+      });
+    } catch (error) {
+      if (!(error instanceof DuplicateEmailError)) throw error;
+
+      // La riga trial_signups esiste ancora (controllato sopra) e l'OTP è
+      // appena stato riverificato per questa email: l'unico modo per
+      // arrivare qui con un utente già esistente è un tentativo precedente
+      // di questo stesso Step 3 che ha creato l'account ma è poi fallito
+      // su uno dei passi seguenti (Supabase irraggiungibile su
+      // setTrialEndsAt/updateMerchantSettings, es. deploy in corso). Invece
+      // di bloccare l'utente con un 409 su un account che ha già scelto
+      // come password, recuperiamo quell'utente e completiamo i passi
+      // mancanti sotto — sono tutti idempotenti (update/upsert/delete).
+      const existingUser = await findUserByEmail(email);
+      if (!existingUser) throw error;
+      user = existingUser;
+    }
 
     const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * DAY_MS).toISOString();
     await setTrialEndsAt(user.id, trialEndsAt);
