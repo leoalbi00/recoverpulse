@@ -15,16 +15,13 @@ const ACCEPTED_LOGO_TYPES = [
 ];
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
-export function MerchantSettingsPanel({
+export function BrandSettingsPanel({
   initialSettings,
 }: {
   initialSettings: MerchantSettings;
 }) {
-  const [companyName, setCompanyName] = useState(initialSettings.companyName);
-  const [supportEmail, setSupportEmail] = useState(
-    initialSettings.supportEmail,
-  );
-  const [phone, setPhone] = useState(initialSettings.phone);
+  const [companyName] = useState(initialSettings.companyName);
+  const [senderName, setSenderName] = useState(initialSettings.senderName ?? "");
   const [logoUrl, setLogoUrl] = useState(initialSettings.logoUrl ?? "");
   const [primaryColor, setPrimaryColor] = useState(
     initialSettings.primaryColor,
@@ -48,9 +45,7 @@ export function MerchantSettingsPanel({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        companyName,
-        supportEmail,
-        phone,
+        senderName,
         primaryColor,
         logoUrl: overrides.logoUrl ?? logoUrl,
       }),
@@ -155,8 +150,8 @@ export function MerchantSettingsPanel({
               Brand &amp; Personalizzazione
             </p>
             <p className="mt-0.5 text-xs text-zinc-600">
-              Applicati automaticamente alle email di sollecito e al portale di
-              aggiornamento carta.
+              Facoltativi: applicati automaticamente alle email di sollecito e
+              al portale di aggiornamento carta.
             </p>
           </div>
         </div>
@@ -170,59 +165,26 @@ export function MerchantSettingsPanel({
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label
-              htmlFor="companyName"
+              htmlFor="senderName"
               className="text-sm font-medium text-zinc-700"
             >
-              Nome azienda
+              Nome mittente email
             </label>
             <input
-              id="companyName"
+              id="senderName"
               type="text"
-              required
               maxLength={120}
-              value={companyName}
-              onChange={(event) => setCompanyName(event.target.value)}
-              placeholder="RecoverPulse"
+              value={senderName}
+              onChange={(event) => setSenderName(event.target.value)}
+              placeholder={companyName || "RecoverPulse"}
               className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="supportEmail"
-              className="text-sm font-medium text-zinc-700"
-            >
-              Email aziendale
-            </label>
-            <input
-              id="supportEmail"
-              type="email"
-              required
-              value={supportEmail}
-              onChange={(event) => setSupportEmail(event.target.value)}
-              placeholder="info@tuaazienda.com"
-              className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="phone"
-              className="text-sm font-medium text-zinc-700"
-            >
-              Numero di telefono
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              required
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="+39 02 1234567"
-              className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
-            />
+            <p className="text-xs text-zinc-600">
+              Lascia vuoto per usare la ragione sociale come mittente delle
+              email di sollecito.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -367,7 +329,7 @@ export function MerchantSettingsPanel({
               </span>
             )}
             <span className="truncate text-sm font-semibold text-zinc-900">
-              {companyName || "RecoverPulse"}
+              {senderName || companyName || "RecoverPulse"}
             </span>
           </div>
 

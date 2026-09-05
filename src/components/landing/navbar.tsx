@@ -122,10 +122,10 @@ export function Navbar({ user }: NavbarProps) {
                   Accedi
                 </Button>
                 <Button
-                  render={<a href="/register" onClick={() => setOpen(false)} />}
+                  render={<a href="/start-trial" onClick={() => setOpen(false)} />}
                   className="w-full"
                 >
-                  Registrati
+                  Inizia Prova
                 </Button>
               </>
             )}

@@ -5,6 +5,7 @@ import { ProblemSolution } from "@/components/landing/problem-solution";
 import { Features } from "@/components/landing/features";
 import { RoiCalculator } from "@/components/landing/roi-calculator";
 import { Pricing } from "@/components/landing/pricing";
+import { RoadmapBadge } from "@/components/landing/roadmap-badge";
 import { Footer } from "@/components/landing/footer";
 
 export default async function Home() {
@@ -19,6 +20,7 @@ export default async function Home() {
         <Features />
         <RoiCalculator />
         <Pricing />
+        <RoadmapBadge />
       </main>
       <Footer />
     </div>

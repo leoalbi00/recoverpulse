@@ -59,6 +59,7 @@ export function Pricing() {
 
                 <PlanButton
                   plan={plan}
+                  href="/start-trial"
                   variant={plan.popular ? "default" : "outline"}
                   className={cn(
                     "mt-8 h-12 w-full rounded-full text-base font-semibold",

@@ -9,7 +9,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MerchantSettingsPanel } from "@/components/dashboard/merchant-settings-panel";
+import { MerchantLegalProfilePanel } from "@/components/dashboard/merchant-legal-profile-panel";
+import { BrandSettingsPanel } from "@/components/dashboard/brand-settings-panel";
 import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
 import { DunningChannelTabs } from "@/components/dashboard/dunning-channel-tabs";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
@@ -97,15 +98,15 @@ export default async function ImpostazioniPage() {
         </div>
       )}
 
-      <Accordion multiple defaultValue={["brand", "subscription"]} className="mt-8 flex flex-col gap-4">
+      <Accordion multiple defaultValue={["legal", "subscription"]} className="mt-8 flex flex-col gap-4">
         <AccordionItem
           id="profilo-azienda"
-          value="brand"
+          value="legal"
           className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
         >
           <AccordionTrigger className="py-4 text-zinc-100">
             <div className="flex items-center gap-2">
-              Profilo &amp; Brand Aziendale
+              Profilo Merchant &amp; Dati Legali/Fiscali
               {!profileComplete && (
                 <Badge className="h-auto bg-rose-500/20 px-2 py-0.5 text-rose-200">
                   Dati incompleti
@@ -115,12 +116,13 @@ export default async function ImpostazioniPage() {
           </AccordionTrigger>
           <AccordionContent>
             <p className="text-xs text-zinc-400">
-              Nome azienda, email aziendale e telefono (obbligatori), più logo
-              e colore mostrati nelle email di sollecito e nel portale di
-              aggiornamento carta.
+              Nome, cognome, ragione sociale, Partita IVA/Codice Fiscale,
+              indirizzo di sede legale, email di contatto e telefono:
+              obbligatori per la fatturazione e per i contratti (Termini di
+              Servizio, DPA).
             </p>
             <div className="mt-3">
-              <MerchantSettingsPanel initialSettings={merchantSettings} />
+              <MerchantLegalProfilePanel initialSettings={merchantSettings} />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -163,6 +165,22 @@ export default async function ImpostazioniPage() {
                 initialTemplatesSettings={dunningTemplates}
                 initialChannelEmailEnabled={dunningChannelSettings.channels.email}
               />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="brand" className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5">
+          <AccordionTrigger className="py-4 text-zinc-100">
+            Brand &amp; Personalizzazione
+          </AccordionTrigger>
+          <AccordionContent>
+            <p className="text-xs text-zinc-400">
+              Facoltativi: logo aziendale, colore primario del brand e nome
+              mittente mostrati nelle email di sollecito e nel portale di
+              aggiornamento carta.
+            </p>
+            <div className="mt-3">
+              <BrandSettingsPanel initialSettings={merchantSettings} />
             </div>
           </AccordionContent>
         </AccordionItem>

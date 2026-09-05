@@ -11,6 +11,7 @@ import {
 } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser, setSubscriptionForUser, getUserIdForStripeCustomer } from "@/lib/billing";
+import { findUserByEmail } from "@/lib/users";
 import { createPaymentToken } from "@/lib/tokens";
 import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications";
 import { sendCardExpiringEmail } from "@/lib/email";
@@ -193,11 +194,74 @@ async function handleCustomerSourceExpiring(stripe: Stripe, source: Stripe.Custo
   });
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
-  const userId = session.client_reference_id;
-  const customerId = session.customer;
-  if (userId && typeof customerId === "string") {
+/**
+ * Riconciliazione utente: prova prima `client_reference_id` (impostato al
+ * checkout, src/app/api/checkout/route.ts), poi lo `stripe_customer_id` già
+ * collegato in precedenza, infine l'email del cliente Stripe — utile se il
+ * checkout è ripartito da un contesto senza client_reference_id (es. un
+ * link di pagamento generato a mano) ma l'email coincide con quella
+ * dell'account RecoverPulse.
+ */
+async function resolvePlatformUserId(input: {
+  clientReferenceId?: string | null;
+  customerId: string | null;
+  customerEmail?: string | null;
+}): Promise<string | null> {
+  if (input.clientReferenceId) return input.clientReferenceId;
+
+  if (input.customerId) {
+    const byCustomer = await getUserIdForStripeCustomer(input.customerId);
+    if (byCustomer) return byCustomer;
+  }
+
+  if (input.customerEmail) {
+    const user = await findUserByEmail(input.customerEmail);
+    if (user) return user.id;
+  }
+
+  return null;
+}
+
+/**
+ * Collega il customer Stripe all'utente e, se la sessione ha già un
+ * abbonamento (mode "subscription"), ne recupera subito stato e piano
+ * invece di aspettare customer.subscription.created/updated: Stripe non
+ * garantisce l'ordine di arrivo tra i due eventi, quindi affidarsi al solo
+ * evento abbonamento rischierebbe di lasciare il paywall bloccato per un
+ * intervallo imprevedibile dopo un checkout già completato con successo.
+ */
+async function handleCheckoutSessionCompleted(stripe: Stripe, session: Stripe.Checkout.Session): Promise<void> {
+  const customerId = typeof session.customer === "string" ? session.customer : (session.customer?.id ?? null);
+  const customerEmail = session.customer_details?.email ?? session.customer_email ?? null;
+
+  const userId = await resolvePlatformUserId({
+    clientReferenceId: session.client_reference_id,
+    customerId,
+    customerEmail,
+  });
+
+  if (!userId) {
+    console.warn(
+      `[stripe-webhook] checkout.session.completed ${session.id}: nessun utente RecoverPulse risolto (client_reference_id assente, customer/email non associati). Sottoscrizione non collegata.`
+    );
+    return;
+  }
+
+  if (customerId) {
     await setStripeCustomerForUser(userId, customerId);
+  }
+
+  const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+  if (subscriptionId) {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      await setSubscriptionForUser(userId, subscription.status, subscription.metadata?.planId ?? null);
+    } catch (error) {
+      console.error(
+        `[stripe-webhook] impossibile recuperare l'abbonamento ${subscriptionId} dopo checkout.session.completed:`,
+        error
+      );
+    }
   }
 }
 
@@ -208,23 +272,43 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
  * account collegato (handleSubscriptionDeleted sopra, chiamato solo dal ramo
  * connectedAccountId, riguarda l'abbonamento di un CLIENTE del merchant).
  *
- * Risolve l'utente prima da `subscription.metadata.userId` (impostato al
- * checkout, src/app/api/checkout/route.ts): Stripe non garantisce che
- * checkout.session.completed arrivi prima di questo evento, quindi
- * affidarsi solo a `users.stripe_customer_id` (impostato da
- * handleCheckoutSessionCompleted) rischierebbe di scartare l'evento se
- * arriva per primo. Fallback sul customer id per gli abbonamenti creati
- * prima dell'introduzione di questo metadata.
+ * Risolve l'utente in ordine: `subscription.metadata.userId` (impostato al
+ * checkout, src/app/api/checkout/route.ts) → `users.stripe_customer_id` già
+ * collegato → email del customer Stripe (fallback finale, richiede una
+ * chiamata API perché la Subscription non la porta inline). Stripe non
+ * garantisce che checkout.session.completed arrivi prima di questo evento,
+ * quindi collega anche qui stripe_customer_id: se questo evento arriva per
+ * primo, il prossimo checkout.session.completed troverebbe comunque
+ * l'utente già risolvibile via customer id.
  */
-async function handlePlatformSubscriptionChange(subscription: Stripe.Subscription): Promise<void> {
+async function handlePlatformSubscriptionChange(stripe: Stripe, subscription: Stripe.Subscription): Promise<void> {
   const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
-  const userId = subscription.metadata?.userId || (await getUserIdForStripeCustomer(customerId));
+
+  let userId = subscription.metadata?.userId || (await getUserIdForStripeCustomer(customerId));
+
+  if (!userId) {
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      const email = !customer.deleted ? customer.email : null;
+      if (email) {
+        userId = (await findUserByEmail(email))?.id ?? null;
+      }
+    } catch (error) {
+      console.error(
+        `[stripe-webhook] impossibile risolvere l'email del customer ${customerId} per l'abbonamento ${subscription.id}:`,
+        error
+      );
+    }
+  }
+
   if (!userId) {
     console.warn(
       `[stripe-webhook] abbonamento piattaforma ${subscription.id} per il customer ${customerId} non associato a nessun utente RecoverPulse: ignorato.`
     );
     return;
   }
+
+  await setStripeCustomerForUser(userId, customerId);
   await setSubscriptionForUser(userId, subscription.status, subscription.metadata?.planId ?? null);
 }
 
@@ -340,12 +424,12 @@ export async function POST(request: Request) {
       // (il proprio billing SaaS), non di un merchant collegato.
       switch (event.type) {
         case "checkout.session.completed":
-          await handleCheckoutSessionCompleted(event.data.object);
+          await handleCheckoutSessionCompleted(platformStripe, event.data.object);
           break;
         case "customer.subscription.created":
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
-          await handlePlatformSubscriptionChange(event.data.object);
+          await handlePlatformSubscriptionChange(platformStripe, event.data.object);
           break;
         default:
           break;

@@ -12,6 +12,20 @@ import {
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "RecoverPulse <onboarding@resend.dev>";
 
+/**
+ * Sostituisce il nome visualizzato di FROM_ADDRESS con quello scelto dal
+ * merchant in "Brand & Personalizzazione" (senderName), mantenendo lo stesso
+ * indirizzo verificato su Resend: cambiare l'indirizzo per-merchant
+ * richiederebbe la verifica di un dominio per ogni account, fuori scope qui.
+ * Ricade sul nome azienda se senderName è vuoto.
+ */
+function buildFromHeader(senderName: string | null, companyName: string): string {
+  const displayName = (senderName || companyName || DEFAULT_MERCHANT_SETTINGS.companyName).trim();
+  const emailMatch = FROM_ADDRESS.match(/<([^>]+)>/);
+  const email = emailMatch ? emailMatch[1] : FROM_ADDRESS;
+  return `${displayName} <${email}>`;
+}
+
 // Usa la Resend API Key salvata da /dashboard/impostazioni su Supabase se
 // presente, altrimenti RESEND_API_KEY da env: una chiave salvata dalla
 // dashboard ha così effetto immediato sull'invio, senza toccare .env.
@@ -637,12 +651,13 @@ export async function sendRecoveryConfirmationEmail({
       supportEmail: merchant.supportEmail,
     });
     const subject = `Pagamento confermato: ${planName} è di nuovo attivo`;
+    const from = buildFromHeader(merchant.senderName, companyName);
 
     console.log(
-      `[email] invio email di conferma recupero tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+      `[email] invio email di conferma recupero tramite Resend: to="${to}" from="${from}" subject="${subject}"`
     );
 
-    const { data, error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+    const { data, error } = await resend.emails.send({ from, to, subject, html });
 
     if (error) {
       console.error(
@@ -730,13 +745,15 @@ export async function sendDunningEmail({
     supportEmail: merchant.supportEmail,
   });
 
+  const from = buildFromHeader(merchant.senderName, companyName);
+
   console.log(
-    `[email] invio email di dunning tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+    `[email] invio email di dunning tramite Resend: to="${to}" from="${from}" subject="${subject}"`
   );
 
   try {
     const { data, error } = await resend.emails.send({
-      from: FROM_ADDRESS,
+      from,
       to,
       subject,
       html,
@@ -989,12 +1006,13 @@ export async function sendCardExpiringEmail({
       supportEmail: merchant.supportEmail,
     });
     const subject = `La tua carta che termina con ${last4} sta per scadere`;
+    const from = buildFromHeader(merchant.senderName, companyName);
 
     console.log(
-      `[email] invio email carta in scadenza tramite Resend: to="${to}" from="${FROM_ADDRESS}" subject="${subject}"`
+      `[email] invio email carta in scadenza tramite Resend: to="${to}" from="${from}" subject="${subject}"`
     );
 
-    const { data, error } = await resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+    const { data, error } = await resend.emails.send({ from, to, subject, html });
 
     if (error) {
       console.error(

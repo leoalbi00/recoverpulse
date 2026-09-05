@@ -211,8 +211,8 @@ function LoginContent() {
 
         <p className="mt-6 text-center text-sm text-zinc-400">
           Non hai un account?{" "}
-          <Link href="/register" className="font-medium text-zinc-100 hover:underline">
-            Registrati
+          <Link href="/start-trial" className="font-medium text-zinc-100 hover:underline">
+            Inizia la prova gratuita
           </Link>
         </p>
       </div>

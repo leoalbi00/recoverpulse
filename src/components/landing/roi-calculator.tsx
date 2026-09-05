@@ -109,7 +109,7 @@ export function RoiCalculator() {
             </p>
             <Button
               size="lg"
-              render={<a href="/register" />}
+              render={<a href="/start-trial" />}
               className="h-11 shrink-0 gap-2 rounded-full px-6 text-sm font-semibold shadow-lg shadow-emerald-500/20"
             >
               Inizia a Recuperare Fatturato

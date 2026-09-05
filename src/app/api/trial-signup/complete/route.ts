@@ -83,13 +83,16 @@ export async function POST(request: Request) {
     const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * DAY_MS).toISOString();
     await setTrialEndsAt(user.id, trialEndsAt);
 
-    // supportEmail resta vuota (non companyName, dato reale non ancora
-    // fornito in questo flusso): il banner "Completa i dati aziendali
-    // obbligatori" di /dashboard/impostazioni deve continuare a comparire
-    // finché il merchant non inserisce davvero nome azienda ed email di
-    // supporto, vedi isMerchantProfileComplete in src/lib/merchant-settings.ts.
+    // companyName/supportEmail/vatNumber/legalAddress restano ai default
+    // (dati reali non ancora forniti in questo flusso): il banner "Completa
+    // i dati aziendali obbligatori" di /dashboard/impostazioni deve
+    // continuare a comparire finché il merchant non li inserisce davvero,
+    // vedi isMerchantProfileComplete in src/lib/merchant-settings.ts.
+    // firstName/lastName/phone sono invece già raccolti allo Step 1 del
+    // form di prova (src/app/start-trial/page.tsx): li riportiamo qui
+    // invece di richiederli una seconda volta in dashboard.
     await updateMerchantSettings(
-      { ...DEFAULT_MERCHANT_SETTINGS, phone: pending.phone },
+      { ...DEFAULT_MERCHANT_SETTINGS, firstName: pending.firstName, lastName: pending.lastName, phone: pending.phone },
       user.id
     );
 

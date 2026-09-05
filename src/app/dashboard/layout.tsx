@@ -45,6 +45,20 @@ export default async function DashboardLayout({
         <main className="flex-1 p-6 md:p-8 pt-8 space-y-6 bg-zinc-950">
           {children}
         </main>
+        <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-zinc-800/60 px-6 py-5 text-xs text-zinc-500 md:px-8">
+          <a href="/termini" className="hover:text-zinc-300">
+            Termini di servizio
+          </a>
+          <a href="/privacy" className="hover:text-zinc-300">
+            Privacy Policy
+          </a>
+          <a href="/dpa" className="hover:text-zinc-300">
+            DPA
+          </a>
+          <a href="/cookie" className="hover:text-zinc-300">
+            Cookie Policy
+          </a>
+        </footer>
       </div>
     </div>
   );

@@ -301,6 +301,8 @@ function StepThreePassword({
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [acceptedDataAccuracy, setAcceptedDataAccuracy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -310,6 +312,11 @@ function StepThreePassword({
 
     if (password !== confirmPassword) {
       setError("Le password non coincidono.");
+      return;
+    }
+
+    if (!acceptedLegal || !acceptedDataAccuracy) {
+      setError("Devi accettare entrambe le dichiarazioni per continuare.");
       return;
     }
 
@@ -375,11 +382,52 @@ function StepThreePassword({
           />
         </div>
 
+        <div className="flex flex-col gap-2.5 border-t border-zinc-800 pt-4">
+          <label className="flex items-start gap-2.5 text-xs text-zinc-400">
+            <input
+              type="checkbox"
+              required
+              checked={acceptedLegal}
+              onChange={(event) => setAcceptedLegal(event.target.checked)}
+              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+            />
+            <span>
+              Accetto i{" "}
+              <Link href="/termini" target="_blank" className="text-zinc-200 hover:underline">
+                Termini di Servizio
+              </Link>
+              , la{" "}
+              <Link href="/privacy" target="_blank" className="text-zinc-200 hover:underline">
+                Privacy Policy
+              </Link>{" "}
+              e la{" "}
+              <Link href="/dpa" target="_blank" className="text-zinc-200 hover:underline">
+                Nomina a Responsabile del Trattamento (DPA)
+              </Link>
+              .
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 text-xs text-zinc-400">
+            <input
+              type="checkbox"
+              required
+              checked={acceptedDataAccuracy}
+              onChange={(event) => setAcceptedDataAccuracy(event.target.checked)}
+              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+            />
+            <span>
+              Dichiaro che i dati aziendali forniti sono veritieri e di avere
+              il diritto di gestire le transazioni dell&apos;attività.
+            </span>
+          </label>
+        </div>
+
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !acceptedLegal || !acceptedDataAccuracy}
           className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 text-base font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Creazione account..." : "Crea account e accedi"}

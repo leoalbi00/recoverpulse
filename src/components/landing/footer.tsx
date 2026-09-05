@@ -74,9 +74,10 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Legale",
     links: [
-      { label: "Privacy", href: "#" },
-      { label: "Termini di servizio", href: "#" },
-      { label: "Cookie", href: "#" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Termini di servizio", href: "/termini" },
+      { label: "DPA (Trattamento Dati)", href: "/dpa" },
+      { label: "Cookie", href: "/cookie" },
     ],
   },
 ];
@@ -142,13 +143,16 @@ export function Footer() {
             riservati.
           </span>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-zinc-300">
+            <a href="/privacy" className="hover:text-zinc-300">
               Privacy
             </a>
-            <a href="#" className="hover:text-zinc-300">
+            <a href="/termini" className="hover:text-zinc-300">
               Termini
             </a>
-            <a href="#" className="hover:text-zinc-300">
+            <a href="/dpa" className="hover:text-zinc-300">
+              DPA
+            </a>
+            <a href="/cookie" className="hover:text-zinc-300">
               Cookie
             </a>
           </div>
