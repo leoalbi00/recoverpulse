@@ -303,6 +303,7 @@ function StepThreePassword({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [acceptedDataAccuracy, setAcceptedDataAccuracy] = useState(false);
+  const [acceptedVexatiousClauses, setAcceptedVexatiousClauses] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -315,8 +316,8 @@ function StepThreePassword({
       return;
     }
 
-    if (!acceptedLegal || !acceptedDataAccuracy) {
-      setError("Devi accettare entrambe le dichiarazioni per continuare.");
+    if (!acceptedLegal || !acceptedDataAccuracy || !acceptedVexatiousClauses) {
+      setError("Devi accettare tutte le dichiarazioni per continuare.");
       return;
     }
 
@@ -421,13 +422,44 @@ function StepThreePassword({
               il diritto di gestire le transazioni dell&apos;attività.
             </span>
           </label>
+
+          <label className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-xs text-zinc-300">
+            <input
+              type="checkbox"
+              required
+              checked={acceptedVexatiousClauses}
+              onChange={(event) => setAcceptedVexatiousClauses(event.target.checked)}
+              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+            />
+            <span>
+              Ai sensi e per gli effetti degli artt. 1341 e 1342 c.c.,
+              dichiaro di aver letto e di approvare espressamente le
+              seguenti clausole dei Termini di Servizio:{" "}
+              <Link href="/termini#manleva" target="_blank" className="text-zinc-100 hover:underline">
+                Art. 13 (Manleva)
+              </Link>
+              ,{" "}
+              <Link href="/termini#limitazione-responsabilita" target="_blank" className="text-zinc-100 hover:underline">
+                Art. 12 (Limite Massimo di Responsabilità)
+              </Link>
+              ,{" "}
+              <Link href="/termini#aup" target="_blank" className="text-zinc-100 hover:underline">
+                Art. 11 (Acceptable Use Policy e Sospensione Immediata Senza Rimborso)
+              </Link>{" "}
+              e{" "}
+              <Link href="/termini#legge-foro" target="_blank" className="text-zinc-100 hover:underline">
+                Art. 16 (Foro Competente Esclusivo)
+              </Link>
+              .
+            </span>
+          </label>
         </div>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <button
           type="submit"
-          disabled={loading || !acceptedLegal || !acceptedDataAccuracy}
+          disabled={loading || !acceptedLegal || !acceptedDataAccuracy || !acceptedVexatiousClauses}
           className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 text-base font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Creazione account..." : "Crea account e accedi"}
