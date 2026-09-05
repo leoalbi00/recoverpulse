@@ -6,21 +6,19 @@ export const metadata = {
 
 const TOC = [
   { id: "definizioni", label: "Definizioni" },
-  { id: "natura-servizio", label: "Oggetto e natura del Servizio" },
-  { id: "ambito-b2b", label: "Ambito B2B e accettazione" },
+  { id: "oggetto-natura", label: "Oggetto e natura del Servizio" },
+  { id: "manleva", label: "Manleva e Garanzia sui Crediti" },
+  { id: "limitazione-responsabilita", label: "Limite Massimo di Responsabilità" },
+  { id: "assenza-garanzia", label: "Assenza di garanzia di risultato" },
+  { id: "aup", label: "Acceptable Use Policy e Sospensione Immediata Senza Rimborso" },
+  { id: "servizi-terzi", label: "Dipendenza da servizi di terze parti" },
+  { id: "proprieta-riservatezza", label: "Proprietà intellettuale e riservatezza" },
+  { id: "legge-foro", label: "Legge applicabile e Foro Competente Esclusivo" },
   { id: "account", label: "Account, registrazione e prova gratuita" },
   { id: "obblighi-merchant", label: "Obblighi e dichiarazioni del Merchant" },
   { id: "corrispettivi", label: "Corrispettivi, fatturazione e recesso" },
-  { id: "assenza-garanzia", label: "Assenza di garanzia di risultato" },
-  { id: "servizi-terzi", label: "Dipendenza da servizi di terze parti" },
-  { id: "proprieta-intellettuale", label: "Proprietà intellettuale" },
-  { id: "riservatezza", label: "Riservatezza" },
-  { id: "aup", label: "Politica di Uso Accettabile (AUP)" },
-  { id: "limitazione-responsabilita", label: "Limitazione di responsabilità" },
-  { id: "manleva", label: "Manleva" },
   { id: "durata-risoluzione", label: "Durata, recesso e risoluzione" },
   { id: "modifiche", label: "Modifiche ai Termini" },
-  { id: "legge-foro", label: "Legge applicabile e foro competente" },
   { id: "disposizioni-finali", label: "Disposizioni finali" },
 ];
 
@@ -61,7 +59,7 @@ export default function TerminiPage() {
         </ul>
       </LegalSection>
 
-      <LegalSection id="natura-servizio" title="2. Oggetto e natura del Servizio">
+      <LegalSection id="oggetto-natura" title="2. Oggetto e natura del Servizio">
         <p>
           RecoverPulse è uno strumento software di automazione delle notifiche (&quot;dunning management&quot;)
           che si collega, tramite le API ufficiali di Stripe autorizzate dal Merchant, ai pagamenti ricorrenti
@@ -99,81 +97,77 @@ export default function TerminiPage() {
           automatizzata e non implica, in alcun caso, l&apos;assunzione da parte di RecoverPulse del ruolo di
           creditore, mandatario alla riscossione o agente di recupero crediti.
         </p>
+
+        <LegalSubsection title="2.1 Ambito B2B e accettazione">
+          <p>
+            Il Servizio è offerto <strong>esclusivamente a soggetti che agiscono nell&apos;esercizio di
+            un&apos;attività imprenditoriale, commerciale, artigianale o professionale</strong>
+            (rapporto Business-to-Business). Registrandosi al Servizio, il Merchant dichiara e garantisce di non
+            agire come consumatore ai sensi dell&apos;art. 3, comma 1, lett. a) del Codice del Consumo (D.Lgs.
+            206/2005) e che le tutele previste per i contratti B2C non trovano applicazione al presente
+            rapporto contrattuale.
+          </p>
+          <p>
+            L&apos;accesso e l&apos;utilizzo del Servizio, anche in fase di prova gratuita, comportano
+            l&apos;integrale accettazione dei presenti Termini. Se il Merchant non accetta integralmente i
+            Termini, non è autorizzato ad accedere o utilizzare il Servizio.
+          </p>
+        </LegalSubsection>
       </LegalSection>
 
-      <LegalSection id="ambito-b2b" title="3. Ambito B2B e accettazione">
+      <LegalSection id="manleva" title="3. Manleva e Garanzia sui Crediti">
         <p>
-          Il Servizio è offerto <strong>esclusivamente a soggetti che agiscono nell&apos;esercizio di
-          un&apos;attività imprenditoriale, commerciale, artigianale o professionale</strong> (rapporto
-          Business-to-Business). Registrandosi al Servizio, il Merchant dichiara e garantisce di non agire come
-          consumatore ai sensi dell&apos;art. 3, comma 1, lett. a) del Codice del Consumo (D.Lgs. 206/2005) e
-          che le tutele previste per i contratti B2C non trovano applicazione al presente rapporto contrattuale.
+          Il Merchant garantisce la piena legittimità, esistenza ed esigibilità dei crediti sottostanti alle
+          comunicazioni di dunning inviate tramite il Servizio, e si obbliga a tenere indenne e manlevare
+          RecoverPulse, i suoi amministratori, dipendenti e collaboratori, da qualsiasi pretesa, richiesta,
+          azione legale, danno, sanzione, costo o spesa (incluse le ragionevoli spese legali) derivante da o
+          connessa a:
         </p>
-        <p>
-          L&apos;accesso e l&apos;utilizzo del Servizio, anche in fase di prova gratuita, comportano
-          l&apos;integrale accettazione dei presenti Termini. Se il Merchant non accetta integralmente i
-          Termini, non è autorizzato ad accedere o utilizzare il Servizio.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="account" title="4. Account, registrazione e prova gratuita">
-        <p>
-          L&apos;attivazione avviene tramite registrazione self-serve su <code>/start-trial</code>, con un
-          periodo di prova gratuita di 14 giorni senza necessità di carta di credito. Al termine della prova,
-          l&apos;accesso alle funzionalità avanzate richiede la sottoscrizione di uno dei piani a pagamento
-          indicati in <code>/#pricing</code>.
-        </p>
-        <p>
-          Il Merchant è responsabile della riservatezza delle proprie credenziali di accesso e di ogni attività
-          svolta tramite il proprio account. RecoverPulse non è responsabile per accessi non autorizzati
-          derivanti da negligenza del Merchant nella custodia delle credenziali.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="obblighi-merchant" title="5. Obblighi e dichiarazioni del Merchant">
-        <p>Il Merchant dichiara e garantisce, per l&apos;intera durata del rapporto contrattuale, quanto segue:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            di avere pieno titolo per collegare il proprio account Stripe al Servizio e di essere l&apos;unico
-            responsabile della legittimità, esistenza ed esigibilità dei crediti sottostanti ai pagamenti
-            falliti oggetto delle comunicazioni di dunning;
+            la mancanza di titolo, legittimità, esistenza o esigibilità dei crediti sottostanti alle
+            comunicazioni di dunning inviate tramite il Servizio;
           </li>
           <li>
-            di essere responsabile dell&apos;accuratezza dei dati aziendali forniti (ragione sociale, Partita
-            IVA/Codice Fiscale, indirizzo di sede legale) in fase di registrazione e nelle Impostazioni
-            dell&apos;account, e di tenerli costantemente aggiornati;
+            pretese avanzate da Clienti Finali o da terzi in relazione ai contenuti, alla frequenza o alle
+            modalità delle comunicazioni configurate o approvate dal Merchant;
           </li>
           <li>
-            di avere ottenuto, ove necessario in base al rapporto con i propri Clienti Finali, ogni consenso o
-            base giuridica idonea per l&apos;invio delle comunicazioni automatizzate generate tramite il
-            Servizio;
+            la violazione da parte del Merchant dei presenti Termini, della normativa applicabile o di diritti
+            di terzi (inclusa la normativa sulla protezione dei dati personali riferita ai Clienti Finali);
           </li>
           <li>
-            di configurare correttamente le regole di dunning, i canali attivi e i template di comunicazione, e
-            di verificarne preventivamente contenuto e conformità normativa prima dell&apos;attivazione;
-          </li>
-          <li>
-            di utilizzare il Servizio in conformità alla normativa applicabile, inclusa quella in materia di
-            protezione dei dati personali, comunicazioni commerciali e tutela del consumatore nei rapporti con i
-            propri Clienti Finali.
+            l&apos;uso improprio, fraudolento o non autorizzato del Servizio da parte del Merchant o di soggetti
+            che accedono all&apos;account con le sue credenziali.
           </li>
         </ul>
+        <p>Tale obbligo di manleva sopravvive alla cessazione, per qualsiasi causa, del rapporto contrattuale.</p>
       </LegalSection>
 
-      <LegalSection id="corrispettivi" title="6. Corrispettivi, fatturazione e recesso">
+      <LegalSection id="limitazione-responsabilita" title="4. Limite Massimo di Responsabilità">
         <p>
-          I piani sono fatturati mensilmente tramite Stripe agli importi indicati nella pagina Prezzi al momento
-          della sottoscrizione o del successivo rinnovo. Il Merchant può annullare l&apos;abbonamento in
-          qualsiasi momento dalle Impostazioni della dashboard, senza vincoli di durata minima; la disdetta ha
-          effetto al termine del periodo di fatturazione in corso, salvo diversa indicazione contrattuale.
+          Nella misura massima consentita dalla legge applicabile, la responsabilità complessiva di
+          RecoverPulse nei confronti del Merchant, per qualsiasi causa e a qualsiasi titolo (contrattuale,
+          precontrattuale o extracontrattuale) derivante da o connessa all&apos;utilizzo del Servizio, è
+          <strong> limitata all&apos;importo complessivo effettivamente versato dal Merchant a RecoverPulse a
+          titolo di canone di abbonamento nei dodici (12) mesi immediatamente precedenti l&apos;evento che ha
+          generato la pretesa risarcitoria</strong>.
         </p>
         <p>
-          Gli importi corrisposti non sono rimborsabili, salvo quanto diversamente previsto dalla legge
-          inderogabile applicabile o espressamente concordato per iscritto tra le parti.
+          In nessun caso RecoverPulse sarà responsabile nei confronti del Merchant per danni indiretti,
+          consequenziali, incidentali, punitivi o esemplari, incluse a titolo esemplificativo e non esaustivo
+          <strong> perdita di profitto, mancato guadagno, lucro cessante, perdita di avviamento, perdita di dati
+          o interruzione di attività</strong>, anche qualora RecoverPulse fosse stata informata della possibilità
+          del verificarsi di tali danni.
+        </p>
+        <p>
+          Le limitazioni di cui al presente articolo non si applicano nei casi in cui la responsabilità non
+          possa essere validamente limitata o esclusa ai sensi di norme inderogabili di legge, incluso il caso di
+          dolo o colpa grave di RecoverPulse.
         </p>
       </LegalSection>
 
-      <LegalSection id="assenza-garanzia" title="7. Assenza di garanzia di risultato">
+      <LegalSection id="assenza-garanzia" title="5. Assenza di garanzia di risultato">
         <p>
           Il Servizio è fornito secondo il principio del <strong>miglior sforzo tecnologico
           (&quot;best effort&quot;)</strong>. RecoverPulse non garantisce, in alcuna forma, il recupero di uno
@@ -192,52 +186,7 @@ export default function TerminiPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="servizi-terzi" title="8. Dipendenza da servizi di terze parti">
-        <p>
-          L&apos;erogazione del Servizio dipende dal corretto funzionamento di infrastrutture e API gestite da
-          soggetti terzi, tra cui in particolare:
-        </p>
-        <ul className="list-disc space-y-1.5 pl-5">
-          <li><strong>Stripe, Inc.</strong> — elaborazione dei pagamenti e fonte dei dati relativi ai pagamenti falliti;</li>
-          <li><strong>Resend, Inc.</strong> — infrastruttura di invio delle comunicazioni email transazionali;</li>
-          <li><strong>Supabase, Inc.</strong> — infrastruttura di archiviazione dati;</li>
-          <li><strong>Vercel, Inc. / Amazon Web Services (AWS)</strong> — infrastruttura di hosting, calcolo e rete.</li>
-        </ul>
-        <p>
-          RecoverPulse non garantisce, e non può essere ritenuta responsabile per, interruzioni,
-          malfunzionamenti, ritardi, modifiche unilaterali alle API, indisponibilità di rete o qualsiasi altro
-          disservizio originato da tali Sub-fornitori o da altre infrastrutture di rete/Internet non gestite
-          direttamente da RecoverPulse. In caso di disservizio di un Sub-fornitore, RecoverPulse si impegna ad
-          adoperarsi secondo il principio del miglior sforzo per ripristinare la piena operatività del Servizio
-          nei tempi tecnicamente ragionevoli.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="proprieta-intellettuale" title="9. Proprietà intellettuale">
-        <p>
-          Il Servizio, il relativo software, l&apos;interfaccia, i marchi, i loghi e ogni altro elemento
-          distintivo sono di proprietà esclusiva di RecoverPulse o dei rispettivi licenzianti e sono protetti
-          dalla normativa applicabile in materia di proprietà intellettuale. Al Merchant è concessa una licenza
-          d&apos;uso limitata, non esclusiva, non trasferibile e revocabile, limitata alla durata
-          dell&apos;abbonamento e finalizzata al solo utilizzo del Servizio secondo i presenti Termini.
-        </p>
-        <p>
-          I Contenuti del Merchant restano di proprietà del Merchant, che concede a RecoverPulse una licenza
-          limitata a trattarli nella misura strettamente necessaria a erogare il Servizio.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="riservatezza" title="10. Riservatezza">
-        <p>
-          Ciascuna parte si impegna a mantenere riservate le informazioni di natura tecnica, commerciale o
-          organizzativa dell&apos;altra parte di cui venga a conoscenza in esecuzione del presente contratto, e a
-          non divulgarle a terzi né utilizzarle per finalità diverse dall&apos;esecuzione del rapporto
-          contrattuale, salvo quanto diversamente previsto dalla legge o da provvedimento dell&apos;autorità
-          competente.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="aup" title="11. Politica di Uso Accettabile (AUP)">
+      <LegalSection id="aup" title="6. Acceptable Use Policy e Sospensione Immediata Senza Rimborso">
         <p>
           Utilizzando il Servizio, il Merchant si impegna a non utilizzarlo, direttamente o tramite terzi, per
           finalità illecite o non autorizzate. È in particolare espressamente vietato:
@@ -270,80 +219,53 @@ export default function TerminiPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="limitazione-responsabilita" title="12. Limitazione di responsabilità">
+      <LegalSection id="servizi-terzi" title="7. Dipendenza da servizi di terze parti">
         <p>
-          Nella misura massima consentita dalla legge applicabile, la responsabilità complessiva di
-          RecoverPulse nei confronti del Merchant, per qualsiasi causa e a qualsiasi titolo (contrattuale,
-          precontrattuale o extracontrattuale) derivante da o connessa all&apos;utilizzo del Servizio, è
-          <strong> limitata all&apos;importo complessivo effettivamente versato dal Merchant a RecoverPulse a
-          titolo di canone di abbonamento nei dodici (12) mesi immediatamente precedenti l&apos;evento che ha
-          generato la pretesa risarcitoria</strong>.
-        </p>
-        <p>
-          In nessun caso RecoverPulse sarà responsabile nei confronti del Merchant per danni indiretti,
-          consequenziali, incidentali, punitivi o esemplari, incluse a titolo esemplificativo e non esaustivo
-          <strong> perdita di profitto, mancato guadagno, lucro cessante, perdita di avviamento, perdita di dati
-          o interruzione di attività</strong>, anche qualora RecoverPulse fosse stata informata della possibilità
-          del verificarsi di tali danni.
-        </p>
-        <p>
-          Le limitazioni di cui al presente articolo non si applicano nei casi in cui la responsabilità non
-          possa essere validamente limitata o esclusa ai sensi di norme inderogabili di legge, incluso il caso di
-          dolo o colpa grave di RecoverPulse.
-        </p>
-      </LegalSection>
-
-      <LegalSection id="manleva" title="13. Manleva">
-        <p>
-          Il Merchant si obbliga a tenere indenne e manlevare RecoverPulse, i suoi amministratori, dipendenti e
-          collaboratori, da qualsiasi pretesa, richiesta, azione legale, danno, sanzione, costo o spesa
-          (incluse le ragionevoli spese legali) derivante da o connessa a:
+          L&apos;erogazione del Servizio dipende dal corretto funzionamento di infrastrutture e API gestite da
+          soggetti terzi, tra cui in particolare:
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
-          <li>
-            la mancanza di titolo, legittimità, esistenza o esigibilità dei crediti sottostanti alle
-            comunicazioni di dunning inviate tramite il Servizio;
-          </li>
-          <li>
-            pretese avanzate da Clienti Finali o da terzi in relazione ai contenuti, alla frequenza o alle
-            modalità delle comunicazioni configurate o approvate dal Merchant;
-          </li>
-          <li>
-            la violazione da parte del Merchant dei presenti Termini, della normativa applicabile o di diritti
-            di terzi (inclusa la normativa sulla protezione dei dati personali riferita ai Clienti Finali);
-          </li>
-          <li>
-            l&apos;uso improprio, fraudolento o non autorizzato del Servizio da parte del Merchant o di soggetti
-            che accedono all&apos;account con le sue credenziali.
-          </li>
+          <li><strong>Stripe, Inc.</strong> — elaborazione dei pagamenti e fonte dei dati relativi ai pagamenti falliti;</li>
+          <li><strong>Resend, Inc.</strong> — infrastruttura di invio delle comunicazioni email transazionali;</li>
+          <li><strong>Supabase, Inc.</strong> — infrastruttura di archiviazione dati;</li>
+          <li><strong>Vercel, Inc. / Amazon Web Services (AWS)</strong> — infrastruttura di hosting, calcolo e rete.</li>
         </ul>
-        <p>Tale obbligo di manleva sopravvive alla cessazione, per qualsiasi causa, del rapporto contrattuale.</p>
-      </LegalSection>
-
-      <LegalSection id="durata-risoluzione" title="14. Durata, recesso e risoluzione">
         <p>
-          Il contratto ha durata pari al periodo di fatturazione dell&apos;abbonamento selezionato e si rinnova
-          automaticamente per periodi successivi di pari durata, salvo disdetta comunicata dal Merchant tramite
-          le Impostazioni della dashboard.
-        </p>
-        <p>
-          RecoverPulse può risolvere il contratto con effetto immediato, mediante semplice comunicazione,
-          in caso di violazione grave o reiterata dei presenti Termini da parte del Merchant, incluse le
-          violazioni dell&apos;AUP di cui all&apos;art. 11, o in caso di mancato pagamento del corrispettivo
-          dovuto.
+          RecoverPulse non garantisce, e non può essere ritenuta responsabile per, interruzioni,
+          malfunzionamenti, ritardi, modifiche unilaterali alle API, indisponibilità di rete o qualsiasi altro
+          disservizio originato da tali Sub-fornitori o da altre infrastrutture di rete/Internet non gestite
+          direttamente da RecoverPulse. In caso di disservizio di un Sub-fornitore, RecoverPulse si impegna ad
+          adoperarsi secondo il principio del miglior sforzo per ripristinare la piena operatività del Servizio
+          nei tempi tecnicamente ragionevoli.
         </p>
       </LegalSection>
 
-      <LegalSection id="modifiche" title="15. Modifiche ai Termini">
-        <p>
-          RecoverPulse può modificare i presenti Termini in qualsiasi momento, dandone comunicazione al Merchant
-          con ragionevole anticipo tramite la dashboard o l&apos;indirizzo email associato all&apos;account. La
-          prosecuzione nell&apos;utilizzo del Servizio successivamente all&apos;entrata in vigore delle modifiche
-          costituisce accettazione delle stesse.
-        </p>
+      <LegalSection id="proprieta-riservatezza" title="8. Proprietà intellettuale e riservatezza">
+        <LegalSubsection title="8.1 Proprietà intellettuale">
+          <p>
+            Il Servizio, il relativo software, l&apos;interfaccia, i marchi, i loghi e ogni altro elemento
+            distintivo sono di proprietà esclusiva di RecoverPulse o dei rispettivi licenzianti e sono protetti
+            dalla normativa applicabile in materia di proprietà intellettuale. Al Merchant è concessa una licenza
+            d&apos;uso limitata, non esclusiva, non trasferibile e revocabile, limitata alla durata
+            dell&apos;abbonamento e finalizzata al solo utilizzo del Servizio secondo i presenti Termini.
+          </p>
+          <p>
+            I Contenuti del Merchant restano di proprietà del Merchant, che concede a RecoverPulse una licenza
+            limitata a trattarli nella misura strettamente necessaria a erogare il Servizio.
+          </p>
+        </LegalSubsection>
+        <LegalSubsection title="8.2 Riservatezza">
+          <p>
+            Ciascuna parte si impegna a mantenere riservate le informazioni di natura tecnica, commerciale o
+            organizzativa dell&apos;altra parte di cui venga a conoscenza in esecuzione del presente contratto, e a
+            non divulgarle a terzi né utilizzarle per finalità diverse dall&apos;esecuzione del rapporto
+            contrattuale, salvo quanto diversamente previsto dalla legge o da provvedimento dell&apos;autorità
+            competente.
+          </p>
+        </LegalSubsection>
       </LegalSection>
 
-      <LegalSection id="legge-foro" title="16. Legge applicabile e foro competente">
+      <LegalSection id="legge-foro" title="9. Legge applicabile e Foro Competente Esclusivo">
         <p>
           I presenti Termini sono regolati e interpretati in conformità alla <strong>legge italiana</strong>, con
           esclusione delle norme di conflitto e della Convenzione delle Nazioni Unite sui contratti di vendita
@@ -359,28 +281,108 @@ export default function TerminiPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="disposizioni-finali" title="17. Disposizioni finali">
-        <LegalSubsection title="17.1 Intero accordo">
+      <LegalSection id="account" title="10. Account, registrazione e prova gratuita">
+        <p>
+          L&apos;attivazione avviene tramite registrazione self-serve su <code>/start-trial</code>, con un
+          periodo di prova gratuita di 14 giorni senza necessità di carta di credito. Al termine della prova,
+          l&apos;accesso alle funzionalità avanzate richiede la sottoscrizione di uno dei piani a pagamento
+          indicati in <code>/#pricing</code>.
+        </p>
+        <p>
+          Il Merchant è responsabile della riservatezza delle proprie credenziali di accesso e di ogni attività
+          svolta tramite il proprio account. RecoverPulse non è responsabile per accessi non autorizzati
+          derivanti da negligenza del Merchant nella custodia delle credenziali.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="obblighi-merchant" title="11. Obblighi e dichiarazioni del Merchant">
+        <p>Il Merchant dichiara e garantisce, per l&apos;intera durata del rapporto contrattuale, quanto segue:</p>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            di avere pieno titolo per collegare il proprio account Stripe al Servizio e di essere l&apos;unico
+            responsabile della legittimità, esistenza ed esigibilità dei crediti sottostanti ai pagamenti
+            falliti oggetto delle comunicazioni di dunning;
+          </li>
+          <li>
+            di essere responsabile dell&apos;accuratezza dei dati aziendali forniti (ragione sociale, Partita
+            IVA/Codice Fiscale, indirizzo di sede legale) in fase di registrazione e nelle Impostazioni
+            dell&apos;account, e di tenerli costantemente aggiornati;
+          </li>
+          <li>
+            di avere ottenuto, ove necessario in base al rapporto con i propri Clienti Finali, ogni consenso o
+            base giuridica idonea per l&apos;invio delle comunicazioni automatizzate generate tramite il
+            Servizio;
+          </li>
+          <li>
+            di configurare correttamente le regole di dunning, i canali attivi e i template di comunicazione, e
+            di verificarne preventivamente contenuto e conformità normativa prima dell&apos;attivazione;
+          </li>
+          <li>
+            di utilizzare il Servizio in conformità alla normativa applicabile, inclusa quella in materia di
+            protezione dei dati personali, comunicazioni commerciali e tutela del consumatore nei rapporti con i
+            propri Clienti Finali.
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection id="corrispettivi" title="12. Corrispettivi, fatturazione e recesso">
+        <p>
+          I piani sono fatturati mensilmente tramite Stripe agli importi indicati nella pagina Prezzi al momento
+          della sottoscrizione o del successivo rinnovo. Il Merchant può annullare l&apos;abbonamento in
+          qualsiasi momento dalle Impostazioni della dashboard, senza vincoli di durata minima; la disdetta ha
+          effetto al termine del periodo di fatturazione in corso, salvo diversa indicazione contrattuale.
+        </p>
+        <p>
+          Gli importi corrisposti non sono rimborsabili, salvo quanto diversamente previsto dalla legge
+          inderogabile applicabile o espressamente concordato per iscritto tra le parti.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="durata-risoluzione" title="13. Durata, recesso e risoluzione">
+        <p>
+          Il contratto ha durata pari al periodo di fatturazione dell&apos;abbonamento selezionato e si rinnova
+          automaticamente per periodi successivi di pari durata, salvo disdetta comunicata dal Merchant tramite
+          le Impostazioni della dashboard.
+        </p>
+        <p>
+          RecoverPulse può risolvere il contratto con effetto immediato, mediante semplice comunicazione,
+          in caso di violazione grave o reiterata dei presenti Termini da parte del Merchant, incluse le
+          violazioni dell&apos;AUP di cui all&apos;art. 6, o in caso di mancato pagamento del corrispettivo
+          dovuto.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="modifiche" title="14. Modifiche ai Termini">
+        <p>
+          RecoverPulse può modificare i presenti Termini in qualsiasi momento, dandone comunicazione al Merchant
+          con ragionevole anticipo tramite la dashboard o l&apos;indirizzo email associato all&apos;account. La
+          prosecuzione nell&apos;utilizzo del Servizio successivamente all&apos;entrata in vigore delle modifiche
+          costituisce accettazione delle stesse.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="disposizioni-finali" title="15. Disposizioni finali">
+        <LegalSubsection title="15.1 Intero accordo">
           <p>
             I presenti Termini, unitamente al DPA e alla Privacy Policy richiamati, costituiscono l&apos;intero
             accordo tra le parti in relazione al Servizio e sostituiscono ogni precedente intesa, scritta o
             orale, avente il medesimo oggetto.
           </p>
         </LegalSubsection>
-        <LegalSubsection title="17.2 Clausola di salvaguardia">
+        <LegalSubsection title="15.2 Clausola di salvaguardia">
           <p>
             Qualora una o più disposizioni dei presenti Termini fossero dichiarate invalide o inefficaci, ciò
             non pregiudicherà la validità delle restanti disposizioni, che rimarranno pienamente efficaci.
           </p>
         </LegalSubsection>
-        <LegalSubsection title="17.3 Cessione">
+        <LegalSubsection title="15.3 Cessione">
           <p>
             Il Merchant non può cedere il presente contratto, in tutto o in parte, senza il preventivo consenso
             scritto di RecoverPulse. RecoverPulse può cedere il contratto, anche parzialmente, nell&apos;ambito
             di operazioni societarie straordinarie (fusione, acquisizione, cessione di ramo d&apos;azienda).
           </p>
         </LegalSubsection>
-        <LegalSubsection title="17.4 Trattamento dei dati">
+        <LegalSubsection title="15.4 Trattamento dei dati">
           <p>
             Il trattamento dei dati personali dei Clienti Finali del Merchant, effettuato da RecoverPulse in
             qualità di responsabile del trattamento, è disciplinato dalla{" "}

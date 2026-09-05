@@ -436,19 +436,19 @@ function StepThreePassword({
               dichiaro di aver letto e di approvare espressamente le
               seguenti clausole dei Termini di Servizio:{" "}
               <Link href="/termini#manleva" target="_blank" className="text-zinc-100 hover:underline">
-                Art. 13 (Manleva)
+                Art. 3 (Manleva e Garanzia sui Crediti)
               </Link>
               ,{" "}
               <Link href="/termini#limitazione-responsabilita" target="_blank" className="text-zinc-100 hover:underline">
-                Art. 12 (Limite Massimo di Responsabilità)
+                Art. 4 (Limite Massimo di Responsabilità)
               </Link>
               ,{" "}
               <Link href="/termini#aup" target="_blank" className="text-zinc-100 hover:underline">
-                Art. 11 (Acceptable Use Policy e Sospensione Immediata Senza Rimborso)
+                Art. 6 (Acceptable Use Policy e Sospensione Immediata Senza Rimborso)
               </Link>{" "}
               e{" "}
               <Link href="/termini#legge-foro" target="_blank" className="text-zinc-100 hover:underline">
-                Art. 16 (Foro Competente Esclusivo)
+                Art. 9 (Foro Competente Esclusivo)
               </Link>
               .
             </span>
