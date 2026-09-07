@@ -2,10 +2,13 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
+import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { listTransactions, type FailedTransaction } from "@/lib/transactions";
 import { listAllDunningLogs } from "@/lib/dunning-logs";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 import { getPaywallStatus } from "@/lib/paywall";
+import { getMerchantSettings, isMerchantProfileComplete } from "@/lib/merchant-settings";
+import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 import type { DunningLogEntry, SequenceStepDefinition } from "@/lib/dashboard-analytics";
 
 /**
@@ -53,6 +56,14 @@ export default async function DashboardPage() {
   const { allTransactions, dunningLogs, sequenceSteps } = await loadDashboardData(session.user.id);
   const paywall = await getPaywallStatus(session.user.id);
 
+  const merchantSettings = await getMerchantSettings(session.user.id);
+  const profileComplete = isMerchantProfileComplete(merchantSettings);
+  const connectedAccount = await getConnectedAccountForUser(session.user.id).catch((error) => {
+    console.error("[dashboard] errore nel recupero dell'account Stripe collegato:", error);
+    return null;
+  });
+  const onboardingComplete = profileComplete && connectedAccount !== null;
+
   return (
     <div className="mx-auto max-w-6xl">
       <div>
@@ -61,6 +72,10 @@ export default async function DashboardPage() {
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">Ecco lo stato del recupero abbonamenti.</p>
       </div>
+
+      {!onboardingComplete && (
+        <OnboardingChecklist profileComplete={profileComplete} stripeConnected={connectedAccount !== null} />
+      )}
 
       <DashboardOverview
         allTransactions={allTransactions}

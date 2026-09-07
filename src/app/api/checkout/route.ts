@@ -1,97 +1,19 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
-import { auth } from "@/auth";
-import { getPlatformStripeClient } from "@/lib/stripe";
-import { PLANS, type PlanId } from "@/lib/plans";
-
-// Se in produzione preferisci Price ID pre-creati su Stripe (per reportistica,
-// trial personalizzati, ecc.), valorizza queste variabili: hanno priorità sul
-// fallback price_data inline usato per far funzionare il checkout da subito.
-const PLAN_PRICE_ENV: Record<PlanId, string | undefined> = {
-  starter: process.env.STRIPE_PRICE_STARTER,
-  growth: process.env.STRIPE_PRICE_GROWTH,
-  scale: process.env.STRIPE_PRICE_SCALE,
-};
-
-const checkoutSchema = z.object({
-  plan: z.enum(["starter", "growth", "scale"]),
-});
-
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-  const parsed = checkoutSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Piano non valido." }, { status: 400 });
-  }
-
-  const plan = PLANS.find((p) => p.id === parsed.data.plan);
-  if (!plan) {
-    return NextResponse.json({ error: "Piano non valido." }, { status: 400 });
-  }
-
-  const priceId = PLAN_PRICE_ENV[parsed.data.plan];
-
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Devi accedere per attivare un abbonamento." }, { status: 401 });
-  }
-
-  const origin = request.headers.get("origin") ?? new URL(request.url).origin;
-  const referer = request.headers.get("referer");
-
-  try {
-    const stripe = await getPlatformStripeClient();
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      line_items: [
-        priceId
-          ? { price: priceId, quantity: 1 }
-          : {
-              quantity: 1,
-              price_data: {
-                currency: "usd",
-                unit_amount: plan.priceInCents,
-                recurring: { interval: "month" },
-                product_data: {
-                  name: `RecoverPulse — Piano ${plan.name}`,
-                  description: plan.description,
-                },
-              },
-            },
-      ],
-      customer_email: session.user.email ?? undefined,
-      client_reference_id: session.user.id,
-      // Propaga sull'abbonamento creato (subscription_data.metadata), letto
-      // dal webhook (src/app/api/webhooks/stripe/route.ts): planId popola
-      // users.subscription_plan (necessario col fallback price_data inline,
-      // che non ha un Price ID stabile da cui risalire al piano scelto);
-      // userId risolve l'utente RecoverPulse senza dover attendere che
-      // checkout.session.completed abbia già salvato stripe_customer_id —
-      // customer.subscription.created può arrivare prima, in ordine non
-      // garantito da Stripe.
-      subscription_data: {
-        metadata: { planId: parsed.data.plan, userId: session.user.id },
-      },
-      success_url: `${origin}/dashboard?checkout=success`,
-      cancel_url: referer ?? `${origin}/#pricing`,
-      allow_promotion_codes: true,
-    });
-
-    if (!checkoutSession.url) {
-      throw new Error("Stripe non ha restituito un URL di checkout.");
-    }
-
-    return NextResponse.json({ url: checkoutSession.url });
-  } catch (error) {
-    console.error("Stripe checkout error:", error);
-    return NextResponse.json(
-      {
-        error:
-          "Impossibile avviare il checkout. Verifica STRIPE_SECRET_KEY e che il Price ID esista sul tuo account Stripe.",
-      },
-      { status: 500 }
-    );
-  }
+// RecoverPulse è in Beta Gratuita Pubblica: il checkout per l'abbonamento
+// SaaS della piattaforma è temporaneamente disattivato (accesso completo e
+// gratuito a tutte le funzionalità Email, vedi src/lib/paywall.ts). Non
+// tocca Stripe Connect (src/app/api/stripe/connect/*), che resta attivo per
+// il recupero pagamenti del Merchant.
+//
+// Il checkout reale (piani a pagamento via getPlatformStripeClient) resta
+// nella cronologia git: da ripristinare qui quando la Beta terminerà.
+export async function POST() {
+  return NextResponse.json(
+    {
+      error:
+        "RecoverPulse è attualmente in Beta Gratuita: il checkout è temporaneamente disabilitato. Usa la piattaforma al 100% senza costi di abbonamento.",
+    },
+    { status: 403 }
+  );
 }

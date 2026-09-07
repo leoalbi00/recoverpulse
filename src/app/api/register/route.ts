@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { createUser, DuplicateEmailError } from "@/lib/users";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { setSubscriptionForUser } from "@/lib/billing";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Il nome deve avere almeno 2 caratteri."),
@@ -64,6 +65,10 @@ export async function POST(request: Request) {
 
   try {
     const user = await createUser(parsed.data);
+    // Beta Gratuita Pubblica: anche gli account invito-only (non passano da
+    // /start-trial) sono taggati free_beta — stesso principio di
+    // src/app/api/trial-signup/complete/route.ts.
+    await setSubscriptionForUser(user.id, "active", "free_beta");
     return NextResponse.json({ id: user.id, email: user.email });
   } catch (error) {
     if (error instanceof DuplicateEmailError) {

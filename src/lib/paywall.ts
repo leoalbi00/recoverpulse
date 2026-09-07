@@ -10,15 +10,21 @@ export type PaywallStatus = {
 };
 
 /**
- * Blocca i report avanzati della dashboard (src/components/dashboard/dashboard-overview.tsx)
- * a prova scaduta senza un abbonamento SaaS RecoverPulse attivo. `trial.connected`
- * garantisce che chi non ha ancora collegato Stripe (prova mai iniziata,
- * vedi src/lib/trial.ts) non veda mai il paywall.
+ * RecoverPulse è in Beta Gratuita Pubblica: il paywall a prova scaduta è
+ * temporaneamente disattivato per TUTTI gli utenti (nuovi e storici), non
+ * solo per chi viene taggato `subscription_plan: "free_beta"` alla
+ * registrazione (vedi trial-signup/complete e register routes) — così un
+ * account creato prima di questa modifica non resta bloccato. `locked` è
+ * quindi sempre `false`; `trial`/`hasActiveSubscription` restano calcolati
+ * per uso puramente informativo (es. TrialBanner, SubscriptionOverviewPanel)
+ * finché la Beta non termina, momento in cui basterà ripristinare la riga
+ * commentata sotto per riattivare il paywall.
  */
 export async function getPaywallStatus(userId: string): Promise<PaywallStatus> {
   const [trial, billing] = await Promise.all([getTrialStatus(userId), getBillingInfoForUser(userId)]);
   const hasActiveSubscription =
     billing.subscriptionStatus === "active" || billing.subscriptionStatus === "trialing";
-  const locked = trial.connected && trial.isExpired && !hasActiveSubscription;
+  // const locked = trial.connected && trial.isExpired && !hasActiveSubscription;
+  const locked = false;
   return { locked, trial, hasActiveSubscription };
 }

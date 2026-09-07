@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import { Activity, Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 const NAV_LINKS = [
   { label: "Caratteristiche", href: "#features" },
@@ -22,6 +23,10 @@ export function Navbar({ user }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
+      <div className="flex items-center justify-center gap-1.5 border-b border-emerald-400/20 bg-emerald-400/10 px-4 py-1.5 text-center text-xs text-emerald-200">
+        <span className="font-semibold">{BETA_HEADLINE}</span>
+        <span className="hidden sm:inline">{BETA_SUBHEADLINE}</span>
+      </div>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">

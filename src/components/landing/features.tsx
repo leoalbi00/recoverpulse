@@ -21,10 +21,10 @@ const FEATURES: Feature[] = [
     icon: Workflow,
     title: "Sequenze Automatizzate",
     description:
-      "Ogni pagamento fallito attiva in automatico una sequenza dunning multi-canale su WhatsApp, SMS ed Email, con i tempi di invio che decidi tu.",
+      "Ogni pagamento fallito attiva in automatico una sequenza dunning via Email, con i tempi di invio che decidi tu. SMS e WhatsApp arrivano nella versione Pro.",
     points: [
       "Invio automatico su fattura fallita",
-      "Fallback tra i canali configurabile",
+      "Template pronti, personalizzabili in dashboard",
       "Nessun intervento manuale richiesto",
     ],
   },

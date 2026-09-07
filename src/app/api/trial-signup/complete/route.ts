@@ -5,6 +5,7 @@ import { createUser, findUserByEmail, DuplicateEmailError, setTrialEndsAt, type 
 import { updateMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
 import { getPendingTrialSignup, verifyTrialSignupOtp, deleteTrialSignup } from "@/lib/trial-signup";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { setSubscriptionForUser } from "@/lib/billing";
 
 const TRIAL_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -82,6 +83,12 @@ export async function POST(request: Request) {
 
     const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * DAY_MS).toISOString();
     await setTrialEndsAt(user.id, trialEndsAt);
+
+    // Beta Gratuita Pubblica: ogni nuovo account self-serve è taggato
+    // esplicitamente come free_beta (accesso completo, nessun paywall — vedi
+    // src/lib/paywall.ts). Riusa le colonne subscription_status/plan già
+    // esistenti su users invece di introdurre uno schema dedicato.
+    await setSubscriptionForUser(user.id, "active", "free_beta");
 
     // companyName/supportEmail/vatNumber/legalAddress restano ai default
     // (dati reali non ancora forniti in questo flusso): il banner "Completa

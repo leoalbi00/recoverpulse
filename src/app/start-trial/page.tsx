@@ -16,8 +16,8 @@ type Step1Data = {
 };
 
 const TRIAL_BENEFITS = [
-  "Accesso completo a tutte le funzionalità",
-  "Recuperi illimitati durante il trial",
+  "Accesso completo e illimitato a tutte le funzionalità Email",
+  "Nessun costo di abbonamento durante la Beta",
   "Zero carta di credito richiesta",
   "Integrazione Stripe in 1-click",
   "Assistenza dedicata",
@@ -40,11 +40,11 @@ function TrialInfoPanel() {
   return (
     <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
       <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
-        14 giorni gratis
+        Beta Gratuita
       </span>
       <h1 className="mt-4 text-xl font-semibold text-zinc-100">Prova RecoverPulse senza rischi</h1>
       <p className="mt-1.5 text-sm text-zinc-400">
-        Recupera i pagamenti falliti in automatico, senza impegno.
+        Recupera i pagamenti falliti in automatico, senza impegno e senza costi di abbonamento.
       </p>
 
       <ul className="mt-8 flex flex-col gap-3.5">

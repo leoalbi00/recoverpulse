@@ -15,7 +15,7 @@ import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
 import { DunningChannelTabs } from "@/components/dashboard/dunning-channel-tabs";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { SubscriptionOverviewPanel } from "@/components/dashboard/subscription-overview-panel";
-import { PlanButton } from "@/components/billing/plan-button";
+import { BetaStatusCard } from "@/components/dashboard/beta-status-card";
 import { getMerchantSettings, isMerchantProfileComplete } from "@/lib/merchant-settings";
 import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 import { getBillingInfoForUser } from "@/lib/billing";
@@ -62,6 +62,11 @@ export default async function ImpostazioniPage() {
 
   const profileComplete = isMerchantProfileComplete(merchantSettings);
   const currentPlanName = PLANS.find((plan) => plan.id === billingInfo.subscriptionPlan)?.name ?? null;
+  // Beta Gratuita Pubblica: solo chi ha un vero abbonamento a pagamento
+  // attivo da prima della Beta (subscription_plan starter/growth/scale, non
+  // "free_beta") vede ancora il pannello di gestione abbonamento classico —
+  // vedi src/lib/paywall.ts per lo stesso principio sul paywall.
+  const isLegacyPaidSubscriber = hasActiveSubscription && isPlanId(billingInfo.subscriptionPlan);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -192,67 +197,75 @@ export default async function ImpostazioniPage() {
         >
           <AccordionTrigger className="py-4 text-zinc-100">Abbonamento</AccordionTrigger>
           <AccordionContent>
-            <p className="text-xs text-zinc-400">
-              Stato del piano, prossimo rinnovo, fatture e un consiglio su
-              upgrade/downgrade in base al volume gestito.
-            </p>
-            <div className="mt-3">
-              <SubscriptionCard
-                hasSubscription={hasActiveSubscription}
-                planName={currentPlanName}
-              />
-            </div>
-            <div className="mt-5">
-              <SubscriptionOverviewPanel
-                hasActiveSubscription={hasActiveSubscription}
-                planName={currentPlanName}
-                overview={subscriptionOverview}
-                recommendation={planRecommendation}
-              />
-            </div>
-            <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-3">
-              {PLANS.map((plan) => (
-                <div
-                  key={plan.id}
-                  className={cn(
-                    "flex h-full flex-col rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md",
-                    plan.popular && "ring-2 ring-emerald-500/50",
-                    plan.id === planRecommendation.recommendedPlanId &&
-                      planRecommendation.action !== "keep" &&
-                      "ring-2 ring-amber-500/60",
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-zinc-900">
-                      {plan.name}
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      {plan.id === planRecommendation.recommendedPlanId &&
-                        planRecommendation.action !== "keep" && (
-                          <Badge className="h-auto bg-amber-100 px-2 py-0.5 text-amber-800">
-                            Consigliato per te
-                          </Badge>
-                        )}
-                      {plan.popular && (
-                        <Badge className="h-auto px-2 py-0.5">Consigliato</Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold text-zinc-900">
-                      {plan.price}
-                    </span>
-                    <span className="text-xs text-zinc-600">{plan.period}</span>
-                  </div>
-                  <p className="mt-2 text-xs text-zinc-600">{plan.description}</p>
-                  <PlanButton
-                    plan={plan}
-                    variant={plan.popular ? "default" : "outline"}
-                    className="mt-5 w-full"
+            {isLegacyPaidSubscriber ? (
+              <>
+                <p className="text-xs text-zinc-400">
+                  Stato del piano, prossimo rinnovo, fatture e un consiglio su
+                  upgrade/downgrade in base al volume gestito.
+                </p>
+                <div className="mt-3">
+                  <SubscriptionCard
+                    hasSubscription={hasActiveSubscription}
+                    planName={currentPlanName}
                   />
                 </div>
-              ))}
-            </div>
+                <div className="mt-5">
+                  <SubscriptionOverviewPanel
+                    hasActiveSubscription={hasActiveSubscription}
+                    planName={currentPlanName}
+                    overview={subscriptionOverview}
+                    recommendation={planRecommendation}
+                  />
+                </div>
+                <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-3">
+                  {PLANS.map((plan) => (
+                    <div
+                      key={plan.id}
+                      className={cn(
+                        "flex h-full flex-col rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md",
+                        plan.popular && "ring-2 ring-emerald-500/50",
+                        plan.id === planRecommendation.recommendedPlanId &&
+                          planRecommendation.action !== "keep" &&
+                          "ring-2 ring-amber-500/60",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-zinc-900">
+                          {plan.name}
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                          {plan.id === planRecommendation.recommendedPlanId &&
+                            planRecommendation.action !== "keep" && (
+                              <Badge className="h-auto bg-amber-100 px-2 py-0.5 text-amber-800">
+                                Consigliato per te
+                              </Badge>
+                            )}
+                          {plan.popular && (
+                            <Badge className="h-auto px-2 py-0.5">Consigliato</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-baseline gap-1">
+                        <span className="text-2xl font-semibold text-zinc-900">
+                          {plan.price}
+                        </span>
+                        <span className="text-xs text-zinc-600">{plan.period}</span>
+                      </div>
+                      <p className="mt-2 text-xs text-zinc-600">{plan.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-zinc-400">
+                  Stato del programma Beta Gratuita e anteprima dei piani Pro futuri.
+                </p>
+                <div className="mt-3">
+                  <BetaStatusCard />
+                </div>
+              </>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>

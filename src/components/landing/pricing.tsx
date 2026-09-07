@@ -1,10 +1,10 @@
-import { Check, Shield, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Lock, Shield, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlanButton } from "@/components/billing/plan-button";
 import { PilotRequestForm } from "@/components/landing/pilot-request-form";
 import { PLANS } from "@/lib/plans";
+import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 import { cn } from "@/lib/utils";
 
 export function Pricing() {
@@ -12,22 +12,43 @@ export function Pricing() {
     <section id="pricing" className="relative scroll-mt-16 py-28 sm:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
-          >
-            Prezzi
+          <Badge className="h-auto rounded-full bg-emerald-500 px-3 py-1 text-zinc-950">
+            Beta Gratuita
           </Badge>
           <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-            Un piano per ogni fase di crescita
+            {BETA_HEADLINE}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-zinc-400">
-            Inizia con 14 giorni di prova gratuita, nessuna carta di credito
-            richiesta. Nessun vincolo, disdici quando vuoi.
+            {BETA_SUBHEADLINE} Accesso completo e illimitato a tutte le
+            funzionalità di dunning via Email, nessuna carta di credito
+            richiesta.
+          </p>
+          <Button
+            size="lg"
+            render={<a href="/start-trial" />}
+            className="mt-8 h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-emerald-500/20"
+          >
+            Inizia Gratis
+            <ArrowRight className="size-4" data-icon="inline-end" />
+          </Button>
+        </div>
+
+        <div className="mx-auto mt-16 max-w-2xl text-center">
+          <Badge
+            variant="outline"
+            className="h-auto gap-1.5 rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-400"
+          >
+            <Lock className="size-3.5" />
+            In arrivo con la versione Pro
+          </Badge>
+          <p className="mt-3 text-sm text-zinc-500">
+            Al termine della fase Beta, questi piani a pagamento sbloccheranno il dunning multi-canale
+            (SMS &amp; WhatsApp) e volumi più alti. Durante la Beta restano solo un&apos;anteprima, non
+            acquistabili.
           </p>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 items-stretch gap-6 opacity-60 grayscale lg:grid-cols-3">
           {PLANS.map((plan) => (
             <div key={plan.id} className="relative h-full">
               {plan.popular && (
@@ -57,15 +78,15 @@ export function Pricing() {
                   <span className="text-sm text-zinc-500">{plan.period}</span>
                 </div>
 
-                <PlanButton
-                  plan={plan}
-                  href="/start-trial"
+                <Button
+                  size="lg"
+                  type="button"
+                  disabled
                   variant={plan.popular ? "default" : "outline"}
-                  className={cn(
-                    "mt-8 h-12 w-full rounded-full text-base font-semibold",
-                    plan.popular && "shadow-lg shadow-emerald-500/20",
-                  )}
-                />
+                  className="mt-8 h-12 w-full rounded-full text-base font-semibold"
+                >
+                  Prossimamente
+                </Button>
 
                 <ul className="mt-8 flex flex-col gap-3">
                   {plan.features.map((feature) => (

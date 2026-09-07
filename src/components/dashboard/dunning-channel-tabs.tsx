@@ -71,7 +71,7 @@ export function DunningChannelTabs({
                   variant="outline"
                   className="border-amber-400/30 bg-amber-400/10 text-amber-300"
                 >
-                  In arrivo
+                  Pro
                 </Badge>
               )}
               {isActive && (
@@ -112,11 +112,11 @@ function ChannelComingSoon({ channel }: { channel: "sms" | "whatsapp" }) {
         variant="outline"
         className="mt-4 border-amber-400/30 bg-amber-50 text-amber-700"
       >
-        In arrivo
+        In arrivo nella versione Pro a pagamento
       </Badge>
       <p className="mx-auto mt-5 max-w-sm text-xs text-zinc-500">
-        Nel frattempo la sequenza di solleciti via Email resta attiva nel tab
-        &quot;Email&quot;.
+        Durante la Beta Gratuita solo il canale Email è attivo e completamente incluso, senza costi. Il tab
+        &quot;Email&quot; resta l&apos;unico canale che invia davvero i solleciti.
       </p>
     </div>
   );

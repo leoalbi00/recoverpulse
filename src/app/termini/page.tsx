@@ -14,7 +14,7 @@ const TOC = [
   { id: "servizi-terzi", label: "Dipendenza da servizi di terze parti" },
   { id: "proprieta-riservatezza", label: "Proprietà intellettuale e riservatezza" },
   { id: "legge-foro", label: "Legge applicabile e Foro Competente Esclusivo" },
-  { id: "account", label: "Account, registrazione e prova gratuita" },
+  { id: "account", label: "Account, registrazione e fase Beta" },
   { id: "obblighi-merchant", label: "Obblighi e dichiarazioni del Merchant" },
   { id: "corrispettivi", label: "Corrispettivi, fatturazione e recesso" },
   { id: "durata-risoluzione", label: "Durata, recesso e risoluzione" },
@@ -24,7 +24,7 @@ const TOC = [
 
 export default function TerminiPage() {
   return (
-    <LegalPage title="Termini e Condizioni di Servizio" updatedAt="5 settembre 2026" toc={TOC}>
+    <LegalPage title="Termini e Condizioni di Servizio" updatedAt="7 settembre 2026" toc={TOC}>
       <LegalSection id="definizioni" title="1. Definizioni">
         <p>Ai fini del presente documento (i &quot;Termini&quot;), i seguenti termini assumono il significato indicato:</p>
         <ul className="list-disc space-y-1.5 pl-5">
@@ -281,12 +281,17 @@ export default function TerminiPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="account" title="10. Account, registrazione e prova gratuita">
+      <LegalSection id="account" title="10. Account, registrazione e fase Beta">
         <p>
-          L&apos;attivazione avviene tramite registrazione self-serve su <code>/start-trial</code>, con un
-          periodo di prova gratuita di 14 giorni senza necessità di carta di credito. Al termine della prova,
-          l&apos;accesso alle funzionalità avanzate richiede la sottoscrizione di uno dei piani a pagamento
-          indicati in <code>/#pricing</code>.
+          L&apos;attivazione avviene tramite registrazione self-serve su <code>/start-trial</code>, senza
+          necessità di carta di credito. Il Servizio è attualmente offerto in fase di <strong>Beta Gratuita
+          Pubblica</strong>: l&apos;accesso alle funzionalità di dunning via Email è completo e illimitato,
+          fornito gratuitamente e &quot;così com&apos;è&quot; (<em>AS IS</em>) e &quot;in base alla
+          disponibilità&quot;, alle condizioni e con i limiti di responsabilità di cui agli artt. 3, 4 e 5.
+          RecoverPulse si riserva il diritto di introdurre, al termine
+          della fase Beta, piani a pagamento (indicati in <code>/#pricing</code>) per l&apos;accesso continuativo
+          al Servizio o a funzionalità aggiuntive (inclusi i canali SMS e WhatsApp), dandone comunicazione al
+          Merchant con ragionevole anticipo ai sensi dell&apos;art. 14.
         </p>
         <p>
           Il Merchant è responsabile della riservatezza delle proprie credenziali di accesso e di ogni attività
@@ -327,14 +332,18 @@ export default function TerminiPage() {
 
       <LegalSection id="corrispettivi" title="12. Corrispettivi, fatturazione e recesso">
         <p>
-          I piani sono fatturati mensilmente tramite Stripe agli importi indicati nella pagina Prezzi al momento
-          della sottoscrizione o del successivo rinnovo. Il Merchant può annullare l&apos;abbonamento in
-          qualsiasi momento dalle Impostazioni della dashboard, senza vincoli di durata minima; la disdetta ha
-          effetto al termine del periodo di fatturazione in corso, salvo diversa indicazione contrattuale.
+          Per l&apos;intera durata della fase Beta Gratuita Pubblica di cui all&apos;art. 10, l&apos;utilizzo
+          del Servizio non comporta alcun corrispettivo a carico del Merchant e non viene attivata alcuna
+          fatturazione. Nessun metodo di pagamento è richiesto per l&apos;accesso al Servizio in questa fase.
         </p>
         <p>
-          Gli importi corrisposti non sono rimborsabili, salvo quanto diversamente previsto dalla legge
-          inderogabile applicabile o espressamente concordato per iscritto tra le parti.
+          Qualora, al termine della Beta, RecoverPulse introduca piani a pagamento, questi saranno fatturati
+          mensilmente tramite Stripe agli importi indicati nella pagina Prezzi al momento della sottoscrizione o
+          del successivo rinnovo. Il Merchant potrà annullare l&apos;abbonamento in qualsiasi momento dalle
+          Impostazioni della dashboard, senza vincoli di durata minima; la disdetta avrà effetto al termine del
+          periodo di fatturazione in corso, salvo diversa indicazione contrattuale. Gli importi corrisposti non
+          sono rimborsabili, salvo quanto diversamente previsto dalla legge inderogabile applicabile o
+          espressamente concordato per iscritto tra le parti.
         </p>
       </LegalSection>
 

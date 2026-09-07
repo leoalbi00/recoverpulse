@@ -39,7 +39,7 @@ export const PLANS: Plan[] = [
     description: "Per SaaS in crescita che vogliono un dunning multi-canale completo.",
     features: [
       "Tutto di Starter",
-      "Dunning multi-canale: WhatsApp + SMS + Email",
+      "Dunning multi-canale: WhatsApp + SMS (Pro) + Email",
       "Fino a 500 fatture fallite/mese",
       "Analytics MRR in tempo reale",
       "Sequenze dunning personalizzabili",

@@ -125,7 +125,9 @@ function DashboardMockup() {
           </span>
           <div className="min-w-0">
             <p className="text-[10px] text-zinc-500">Automazione</p>
-            <p className="truncate text-sm font-semibold text-zinc-100">Attiva su Email · SMS · WhatsApp</p>
+            <p className="truncate text-sm font-semibold text-zinc-100">
+              Attiva su Email <span className="text-zinc-500">· SMS/WhatsApp Pro</span>
+            </p>
           </div>
         </div>
       </div>
@@ -190,7 +192,7 @@ export function Hero() {
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
             RecoverPulse intercetta ogni pagamento fallito su Stripe e avvia in
-            automatico una sequenza di solleciti multi-canale con link 1-click
+            automatico una sequenza di solleciti via Email con link 1-click
             per aggiornare la carta — senza che il tuo team debba inseguire un
             solo cliente.
           </p>
@@ -201,7 +203,7 @@ export function Hero() {
               render={<a href="/start-trial" />}
               className="h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-emerald-500/20"
             >
-              Inizia la Prova Gratuita
+              Inizia Gratis
               <ArrowRight className="size-4" data-icon="inline-end" />
             </Button>
             <Button
@@ -224,7 +226,7 @@ export function Hero() {
           </div>
 
           <p className="mt-5 text-xs text-zinc-500">
-            14 giorni di prova gratuita per RecoverPulse &mdash; nessuna carta di
+            RecoverPulse è in Beta Gratuita &mdash; nessuna carta di
             credito richiesta per registrarsi &middot; connetti Stripe in pochi
             minuti, no-code
           </p>

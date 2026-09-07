@@ -13,7 +13,7 @@ const PROBLEM_POINTS = [
 
 const SOLUTION_POINTS = [
   "Il fallimento viene intercettato all'istante via webhook Stripe.",
-  "Parte subito una sequenza automatica su WhatsApp, SMS ed Email.",
+  "Parte subito una sequenza automatica via Email (SMS & WhatsApp in arrivo nella versione Pro).",
   "Ogni messaggio include un link 1-click sicuro per aggiornare la carta.",
   "Il pagamento viene riaddebitato in automatico appena la carta è aggiornata.",
   "Il tuo team vede tutto in dashboard, senza muovere un dito.",
