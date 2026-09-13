@@ -44,9 +44,6 @@ const STEP_METADATA: Record<DunningTemplateStepId, { label: string; description:
 
 const STEP_ORDER: DunningTemplateStepId[] = ["immediate", "first_reminder", "final_notice"];
 
-const VARIABLE_PLACEHOLDER_BODY = (label: string) =>
-  `Ciao {{nome_cliente}},\n\n${label} Il pagamento di {{importo}} per {{nome_piano}} non è ancora andato a buon fine.\n\nAggiorna il tuo metodo di pagamento qui:\n{{link_recupero}}\n\nGrazie,\nIl team`;
-
 function defaultSteps(): DunningTemplateStep[] {
   return [
     {
@@ -54,28 +51,42 @@ function defaultSteps(): DunningTemplateStep[] {
       ...STEP_METADATA.immediate,
       enabled: true,
       delayDays: 0,
-      subject: "Azione richiesta: aggiorna il metodo di pagamento",
-      body: VARIABLE_PLACEHOLDER_BODY(
-        "Il pagamento del tuo abbonamento non è andato a buon fine: è necessaria un'azione da parte tua per evitare l'interruzione del servizio."
-      ),
+      subject: "Azione richiesta: aggiornamento metodo di pagamento per {{nome_azienda}}",
+      body:
+        "Ciao {{nome_cliente}},\n\n" +
+        "Abbiamo riscontrato un problema durante l'ultimo tentativo di addebito di {{importo}} per il tuo abbonamento a {{nome_azienda}}. Questo può accadere in caso di carta scaduta, blocchi temporanei o fondi insufficienti.\n\n" +
+        "Per mantenere attivo il tuo accesso senza interruzioni, ti chiediamo di aggiornare o confermare i tuoi dati di pagamento tramite il link sicuro sottostante:\n\n" +
+        "[ {{link_recupero}} ]\n\n" +
+        "Se hai già provveduto, ti preghiamo di ignorare questa comunicazione.\n\n" +
+        "Un cordiale saluto,\nIl team di {{nome_azienda}}",
     },
     {
       id: "first_reminder",
       ...STEP_METADATA.first_reminder,
       enabled: true,
       delayDays: 3,
-      subject: "Promemoria: {{nome_piano}} in attesa di pagamento",
-      body: VARIABLE_PLACEHOLDER_BODY("Questo è un promemoria: il tuo abbonamento è ancora sospeso."),
+      subject: "Il tuo abbonamento a {{nome_azienda}} richiede la tua attenzione",
+      body:
+        "Ciao {{nome_cliente}},\n\n" +
+        "Ti ricordiamo che il pagamento di {{importo}} relativo al tuo account su {{nome_azienda}} risulta ancora in sospeso.\n\n" +
+        "Per evitare la sospensione temporanea del servizio e mantenere attive tutte le tue funzionalità, completa il saldo in meno di 60 secondi:\n\n" +
+        "[ {{link_recupero}} ]\n\n" +
+        "In caso di difficoltà o domande relative alla fattura, rispondi direttamente a questa e-mail.\n\n" +
+        "Cordiali saluti,\n{{nome_azienda}}",
     },
     {
       id: "final_notice",
       ...STEP_METADATA.final_notice,
       enabled: true,
       delayDays: 7,
-      subject: "Importante: Aggiorna il tuo metodo di pagamento per {{nome_azienda}}",
-      body: VARIABLE_PLACEHOLDER_BODY(
-        "Questo è l'ultimo avviso prima della sospensione dell'abbonamento."
-      ),
+      subject: "[URGENTE] Imminente sospensione dell'account {{nome_azienda}}",
+      body:
+        "Gentile {{nome_cliente}},\n\n" +
+        "Questo è l'ultimo avviso prima della disattivazione del tuo accesso a {{nome_azienda}}. L'importo di {{importo}} non è stato ancora incassato.\n\n" +
+        "Per evitare la chiusura definitiva del profilo e la perdita dei dati associati, ti invitiamo a regolarizzare la posizione immediatamente tramite questo link:\n\n" +
+        "[ {{link_recupero}} ]\n\n" +
+        "Trascorse 24 ore da questa notifica, il sistema sospenderà automaticamente l'erogazione del servizio.\n\n" +
+        "Distinti saluti,\n{{nome_azienda}}",
     },
   ];
 }
