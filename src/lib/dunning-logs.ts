@@ -1,6 +1,7 @@
 import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { PaymentMethodType } from "@/lib/transactions";
 
 export type DunningLogChannel = "whatsapp" | "sms" | "email";
 export type DunningLogStatus = "sent" | "failed";
@@ -38,6 +39,8 @@ export async function recordDunningLog(input: {
   customerEmail: string;
   channel: DunningLogChannel;
   status: DunningLogStatus;
+  /** 'card' (default) o 'sepa_debit', per distinguere in audit i solleciti originati da un insoluto SDD. */
+  paymentMethodType?: PaymentMethodType;
 }): Promise<void> {
   const { error } = await supabaseAdmin.from("dunning_logs").insert({
     user_id: input.userId,
@@ -46,6 +49,7 @@ export async function recordDunningLog(input: {
     customer_email: input.customerEmail,
     channel: input.channel,
     status: input.status,
+    payment_method_type: input.paymentMethodType ?? "card",
   });
 
   if (error && error.code !== UNIQUE_VIOLATION) {

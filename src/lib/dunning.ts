@@ -2,7 +2,7 @@ import { markFirstNoticeSent, type FailedTransaction } from "@/lib/transactions"
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
 import { getDunningTemplates } from "@/lib/dunning-templates";
 import { recordDunningLog } from "@/lib/dunning-logs";
-import { sendDunningEmail } from "@/lib/email";
+import { sendDunningEmail, sendSddDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
 export type { DunningChannel };
@@ -84,15 +84,28 @@ export async function startDunningSequence(
     // cliente.
     let emailSent = false;
     try {
-      await sendDunningEmail({
-        userId: transaction.userId,
-        to: transaction.customerEmail,
-        customerName: transaction.customerName,
-        planName: transaction.planName,
-        amountFormatted: formatAmount(transaction.amount, transaction.currency),
-        recoveryLink,
-        stepId: "immediate",
-      });
+      if (transaction.paymentMethodType === "sepa_debit") {
+        await sendSddDunningEmail({
+          userId: transaction.userId,
+          to: transaction.customerEmail,
+          customerName: transaction.customerName,
+          planName: transaction.planName,
+          amountFormatted: formatAmount(transaction.amount, transaction.currency),
+          recoveryLink,
+          ibanLast4: transaction.ibanLast4,
+          failureReason: transaction.reason,
+        });
+      } else {
+        await sendDunningEmail({
+          userId: transaction.userId,
+          to: transaction.customerEmail,
+          customerName: transaction.customerName,
+          planName: transaction.planName,
+          amountFormatted: formatAmount(transaction.amount, transaction.currency),
+          recoveryLink,
+          stepId: "immediate",
+        });
+      }
       emailSent = true;
     } catch (error) {
       console.error(
@@ -118,6 +131,7 @@ export async function startDunningSequence(
         customerEmail: transaction.customerEmail,
         channel: "email",
         status: emailSent ? "sent" : "failed",
+        paymentMethodType: transaction.paymentMethodType,
       });
     } catch (error) {
       console.error(

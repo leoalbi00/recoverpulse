@@ -309,6 +309,212 @@ export function buildDunningEmailHtml({
 </html>`;
 }
 
+/**
+ * Template dedicato per gli insoluti SDD (SEPA Direct Debit) ricevuti dal
+ * webhook universale (/api/v1/webhooks/sdd): a differenza delle email di
+ * dunning "carta" (buildDunningEmailHtml, oggetto/corpo configurabili in
+ * /dashboard/dunning) qui il testo è fisso, perché l'evento non ha nulla a
+ * che fare con Stripe/i template per-step — l'unica cosa che varia è
+ * l'importo, il piano e le ultime cifre dell'IBAN addebitato senza successo.
+ * Il link di recupero riusa lo stesso portale /pay/[token] già costruito per
+ * il flusso carta: oggi supporta solo il pagamento via carta, quindi la copia
+ * invita esplicitamente a saldare con carta o contattare il supporto per
+ * aggiornare l'IBAN.
+ */
+function buildSddDunningEmailHtml({
+  customerName,
+  planName,
+  amountFormatted,
+  recoveryLink,
+  ibanLast4,
+  failureReason,
+  companyName,
+  logoUrl,
+  primaryColor,
+  supportEmail,
+}: {
+  customerName: string;
+  planName: string;
+  amountFormatted: string;
+  recoveryLink: string;
+  ibanLast4: string | null;
+  failureReason: string;
+  companyName: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  supportEmail: string;
+}): string {
+  const safeCustomerName = escapeHtml(customerName);
+  const safePlanName = escapeHtml(planName);
+  const safeAmountFormatted = escapeHtml(amountFormatted);
+  const safeRecoveryLink = escapeHtml(recoveryLink);
+  const safeCompanyName = escapeHtml(companyName);
+  const safeFailureReason = escapeHtml(failureReason);
+  const ibanLabel = ibanLast4 ? `IBAN •••• ${escapeHtml(ibanLast4)}` : "il tuo conto bancario";
+
+  const greeting =
+    customerName && customerName !== "Gentile cliente" ? `Ciao ${safeCustomerName}` : "Gentile cliente";
+  const preheader = `${greeting}, l'addebito diretto SEPA su ${ibanLabel} non è andato a buon fine: aggiorna il pagamento per evitare l'interruzione del servizio.`;
+
+  const ctaTextColor = getReadableTextColor(primaryColor);
+  const logoMark = logoUrl
+    ? `<img src="${escapeHtml(logoUrl)}" alt="${safeCompanyName}" width="28" height="28" style="display:block; border-radius:8px; object-fit:contain;" />`
+    : `<table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${primaryColor}; border-radius:8px;">
+                        <tr><td align="center" valign="middle">${buildLogoMarkSvg(ctaTextColor)}</td></tr>
+                      </table>`;
+  const supportLine = supportEmail
+    ? `Domande? Scrivi a <a href="mailto:${escapeHtml(supportEmail)}" style="color:#71717a;">${escapeHtml(supportEmail)}</a>.`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Problema con l'addebito diretto sul tuo conto bancario</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f4f5; font-family:${FONT_STACK};">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
+      ${preheader}
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; width:100%;">
+
+            <!-- Logo -->
+            <tr>
+              <td align="center" style="padding-bottom:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:8px; vertical-align:middle;">
+                      ${logoMark}
+                    </td>
+                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                      ${safeCompanyName}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Card -->
+            <tr>
+              <td style="background-color:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+
+                  <tr>
+                    <td height="4" style="background-color:${primaryColor}; line-height:4px; font-size:4px;">&nbsp;</td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:20px 32px 0 32px;">
+                      <span style="display:inline-block; background-color:#fffbeb; color:#b45309; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:5px 10px; border-radius:999px;">
+                        Addebito SEPA non riuscito
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:12px 32px 0 32px;">
+                      <h1 style="margin:0 0 14px 0; font-size:21px; line-height:1.35; color:#18181b; font-weight:700;">
+                        Problema con l'addebito diretto sul tuo conto bancario
+                      </h1>
+                      <p style="margin:0 0 12px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
+                        ${greeting}, l'addebito diretto SEPA su <strong>${ibanLabel}</strong> per il tuo abbonamento
+                        <strong>${safePlanName}</strong> non è andato a buon fine (motivo: ${safeFailureReason}).
+                        Per evitare l'interruzione del servizio, salda subito con una carta oppure contatta il
+                        supporto per aggiornare il tuo IBAN.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Importo dovuto -->
+                  <tr>
+                    <td style="padding:0 32px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa; border:1px solid #e4e4e7; border-radius:10px;">
+                        <tr>
+                          <td style="padding:14px 16px;">
+                            <p style="margin:0; font-size:12px; color:#71717a; text-transform:uppercase; letter-spacing:0.04em;">${safePlanName}</p>
+                          </td>
+                          <td align="right" style="padding:14px 16px;">
+                            <p style="margin:0; font-size:16px; font-weight:700; color:#18181b;">${safeAmountFormatted}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- CTA -->
+                  <tr>
+                    <td style="padding:24px 32px 8px 32px;" align="center">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                          <td align="center" style="border-radius:10px; background-color:${primaryColor};">
+                            <a
+                              href="${safeRecoveryLink}"
+                              style="display:block; width:100%; box-sizing:border-box; color:${ctaTextColor}; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
+                            >
+                              Salda ora con carta o aggiorna l'IBAN →
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Security badges -->
+                  <tr>
+                    <td style="padding:14px 32px 28px 32px;" align="center">
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="font-size:12px; color:#71717a; padding-right:16px;">${buildShieldSvg(primaryColor)}Pagamento sicuro</td>
+                          <td style="font-size:12px; color:#71717a;">${LOCK_SVG}Crittografia SSL 256-bit</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:0 32px 32px 32px;">
+                      <p style="margin:0; font-size:12.5px; line-height:1.6; color:#a1a1aa;">
+                        Se il pulsante non funziona, copia e incolla questo link nel browser:<br />
+                        <a href="${safeRecoveryLink}" style="color:#71717a; word-break:break-all;">${safeRecoveryLink}</a>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:18px 32px; border-top:1px solid #e4e4e7; background-color:#fafafa;">
+                      <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                        Il link è valido 7 giorni ed è utilizzabile una sola volta. Se hai già saldato o aggiornato l'IBAN, ignora questa email.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td align="center" style="padding:24px 16px 0 16px;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
+                  Inviato da ${safeCompanyName} per conto del fornitore del servizio ${safePlanName}.${supportLine ? ` ${supportLine}` : ""}
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
 function buildRecoveryEmailHtml({
   customerName,
   planName,
@@ -777,6 +983,87 @@ export async function sendDunningEmail({
     console.error(`[email] eccezione imprevista durante la chiamata a Resend per "${to}":`, error);
     throw new Error(
       `Errore imprevisto nell'invio dell'email di dunning tramite Resend: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+/**
+ * Invia l'email di dunning dedicata agli insoluti SDD (SEPA Direct Debit),
+ * ricevuti dal webhook universale (/api/v1/webhooks/sdd) e avviati da
+ * startDunningSequence (src/lib/dunning.ts) al posto di sendDunningEmail
+ * quando transaction.paymentMethodType è 'sepa_debit'. Stesso principio delle
+ * altre funzioni di invio di questo file: propaga l'errore al chiamante (che
+ * lo traduce in un log su dunning_logs), non lo assorbe silenziosamente.
+ */
+export async function sendSddDunningEmail({
+  userId,
+  to,
+  customerName,
+  planName,
+  amountFormatted,
+  recoveryLink,
+  ibanLast4,
+  failureReason,
+}: {
+  userId: string;
+  to: string;
+  customerName: string;
+  planName: string;
+  amountFormatted: string;
+  recoveryLink: string;
+  ibanLast4: string | null;
+  failureReason: string;
+}): Promise<void> {
+  if (!to) {
+    console.warn("[email] invio saltato: email cliente mancante.");
+    return;
+  }
+
+  const resend = await getResendClient();
+  if (!resend) {
+    console.warn("[email] Resend API Key non configurata: invio email di dunning SDD saltato.");
+    return;
+  }
+
+  const merchant = await getMerchantSettings(userId);
+  const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
+
+  const html = buildSddDunningEmailHtml({
+    customerName,
+    planName,
+    amountFormatted,
+    recoveryLink,
+    ibanLast4,
+    failureReason,
+    companyName,
+    logoUrl: merchant.logoUrl,
+    primaryColor: merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor,
+    supportEmail: merchant.supportEmail,
+  });
+
+  const subject = `Problema con l'addebito diretto sul tuo conto bancario${ibanLast4 ? ` (IBAN •••• ${ibanLast4})` : ""}`;
+  const from = buildFromHeader(merchant.senderName, companyName);
+
+  console.log(`[email] invio email di dunning SDD tramite Resend: to="${to}" from="${from}" subject="${subject}"`);
+
+  try {
+    const { data, error } = await resend.emails.send({ from, to, subject, html });
+
+    if (error) {
+      console.error(`[email] Resend ha risposto con un errore per l'invio SDD a "${to}":`, JSON.stringify(error));
+      throw new Error(`Errore nell'invio dell'email di dunning SDD tramite Resend: ${error.message}`);
+    }
+
+    console.log(`[email] email di dunning SDD inviata con successo a "${to}" (Resend id: ${data?.id ?? "n/d"}).`);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Errore nell'invio dell'email di dunning SDD tramite Resend")) {
+      throw error;
+    }
+    console.error(`[email] eccezione imprevista durante la chiamata a Resend (SDD) per "${to}":`, error);
+    throw new Error(
+      `Errore imprevisto nell'invio dell'email di dunning SDD tramite Resend: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

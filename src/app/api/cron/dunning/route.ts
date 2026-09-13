@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { listActiveFailedTransactions, markInvoiceLost, type FailedTransaction } from "@/lib/transactions";
 import { hasDunningLogForStep, recordDunningLog } from "@/lib/dunning-logs";
 import { getDunningTemplates, type DunningTemplateStep } from "@/lib/dunning-templates";
-import { sendDunningEmail } from "@/lib/email";
+import { sendDunningEmail, sendSddDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { listConnectedAccountUserIds } from "@/lib/connected-stripe-accounts";
 
@@ -31,15 +31,28 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
   let emailSent = false;
   try {
     const recoveryLink = `${getAppBaseUrl()}/pay/${transaction.paymentLinkToken}`;
-    await sendDunningEmail({
-      userId: transaction.userId,
-      to: transaction.customerEmail,
-      customerName: transaction.customerName,
-      planName: transaction.planName,
-      amountFormatted: formatAmount(transaction.amount, transaction.currency),
-      recoveryLink,
-      stepId: step.id,
-    });
+    if (transaction.paymentMethodType === "sepa_debit") {
+      await sendSddDunningEmail({
+        userId: transaction.userId,
+        to: transaction.customerEmail,
+        customerName: transaction.customerName,
+        planName: transaction.planName,
+        amountFormatted: formatAmount(transaction.amount, transaction.currency),
+        recoveryLink,
+        ibanLast4: transaction.ibanLast4,
+        failureReason: transaction.reason,
+      });
+    } else {
+      await sendDunningEmail({
+        userId: transaction.userId,
+        to: transaction.customerEmail,
+        customerName: transaction.customerName,
+        planName: transaction.planName,
+        amountFormatted: formatAmount(transaction.amount, transaction.currency),
+        recoveryLink,
+        stepId: step.id,
+      });
+    }
     emailSent = true;
 
     await recordDunningLog({
@@ -49,6 +62,7 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
       customerEmail: transaction.customerEmail,
       channel: "email",
       status: "sent",
+      paymentMethodType: transaction.paymentMethodType,
     });
     return "sent";
   } catch (error) {
@@ -73,6 +87,7 @@ async function sendStepReminder(transaction: FailedTransaction, step: DunningTem
       customerEmail: transaction.customerEmail,
       channel: "email",
       status: "failed",
+      paymentMethodType: transaction.paymentMethodType,
     }).catch((logError) => {
       console.error(
         `[cron/dunning] impossibile registrare anche il fallimento del sollecito per la fattura ${transaction.invoiceId}:`,

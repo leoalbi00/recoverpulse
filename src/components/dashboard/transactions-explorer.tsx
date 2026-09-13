@@ -318,7 +318,14 @@ function TransactionRow({
   return (
     <tr className="transition-colors hover:bg-zinc-100">
       <td className="px-3 py-3 first:pl-0">
-        <p className="font-medium text-zinc-900">{transaction.customerName}</p>
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-zinc-900">{transaction.customerName}</p>
+          {transaction.paymentMethodType === "sepa_debit" && (
+            <Badge className="h-auto shrink-0 bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-800">
+              SDD / SEPA Automated
+            </Badge>
+          )}
+        </div>
         <p className="text-xs text-zinc-600">{transaction.customerEmail}</p>
       </td>
       <td className="px-3 py-3 font-medium text-zinc-900">

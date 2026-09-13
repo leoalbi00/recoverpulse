@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export type TransactionStatus = "in_corso" | "recuperato" | "perso";
 
+export type PaymentMethodType = "card" | "sepa_debit";
+
 export type FailedTransaction = {
   id: string;
   userId: string;
@@ -24,6 +26,14 @@ export type FailedTransaction = {
   recoveredAt: string | null;
   /** Timestamp del primo sollecito ("immediate") inviato con successo, null finché non è ancora partito. */
   firstNoticeSentAt: string | null;
+  /** 'card' per il flusso Stripe esistente, 'sepa_debit' per gli insoluti ricevuti dal webhook universale SDD. */
+  paymentMethodType: PaymentMethodType;
+  /** Ultime 4 cifre dell'IBAN addebitato, solo per paymentMethodType 'sepa_debit'. */
+  ibanLast4: string | null;
+  /** Riferimento al mandato SEPA (SDD), solo per paymentMethodType 'sepa_debit'. */
+  mandateReference: string | null;
+  /** Codice di storno SEPA (es. AC01, MD01, MS02), solo per paymentMethodType 'sepa_debit'. */
+  failureCode: string | null;
 };
 
 type FailedTransactionRow = {
@@ -44,6 +54,10 @@ type FailedTransactionRow = {
   created_at: string;
   recovered_at: string | null;
   first_notice_sent_at: string | null;
+  payment_method_type: PaymentMethodType;
+  iban_last4: string | null;
+  mandate_reference: string | null;
+  failure_code: string | null;
 };
 
 function mapRow(row: FailedTransactionRow): FailedTransaction {
@@ -65,6 +79,10 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
     createdAt: row.created_at,
     recoveredAt: row.recovered_at,
     firstNoticeSentAt: row.first_notice_sent_at,
+    paymentMethodType: row.payment_method_type ?? "card",
+    ibanLast4: row.iban_last4,
+    mandateReference: row.mandate_reference,
+    failureCode: row.failure_code,
   };
 }
 
@@ -91,6 +109,14 @@ export async function recordFailedPayment(input: {
   paymentLinkToken: string;
   /** Link Stripe alla fattura ospitata (invoice.hosted_invoice_url), se disponibile. */
   hostedInvoiceUrl?: string | null;
+  /** 'card' (default, flusso Stripe) o 'sepa_debit' (webhook universale SDD). */
+  paymentMethodType?: PaymentMethodType;
+  /** Ultime 4 cifre dell'IBAN addebitato, solo per 'sepa_debit'. */
+  ibanLast4?: string | null;
+  /** Riferimento al mandato SEPA, solo per 'sepa_debit'. */
+  mandateReference?: string | null;
+  /** Codice di storno SEPA (AC01, MD01, MS02, ...), solo per 'sepa_debit'. */
+  failureCode?: string | null;
 }): Promise<FailedTransaction> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
@@ -111,6 +137,10 @@ export async function recordFailedPayment(input: {
         status: "in_corso" satisfies TransactionStatus,
         recovered_at: null,
         first_notice_sent_at: null,
+        payment_method_type: input.paymentMethodType ?? "card",
+        iban_last4: input.ibanLast4 ?? null,
+        mandate_reference: input.mandateReference ?? null,
+        failure_code: input.failureCode ?? null,
       },
       { onConflict: "invoice_id" }
     )
