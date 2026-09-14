@@ -1,9 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Check, CheckCircle2, Copy, Landmark, Loader2, RefreshCw, Send, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  Landmark,
+  Loader2,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 const EXAMPLE_PAYLOAD = `{
   "customer_email": "cliente@esempio.it",
@@ -14,6 +27,14 @@ const EXAMPLE_PAYLOAD = `{
   "failure_code": "AC01",
   "iban_last4": "1234"
 }`;
+
+type ProviderTabId = "stripe" | "gocardless" | "custom-api";
+
+const PROVIDER_TABS: { id: ProviderTabId; label: string }[] = [
+  { id: "stripe", label: "Stripe SEPA" },
+  { id: "gocardless", label: "GoCardless / CRM" },
+  { id: "custom-api", label: "Custom API" },
+];
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -48,8 +69,118 @@ function CopyField({ label, value }: { label: string; value: string }) {
           onClick={handleCopy}
         >
           {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-          {copied ? "Copiato" : "Copia"}
+          {copied ? "Copiato" : "Copia URL"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/** Notifica transitoria in basso a destra, stile "toast": nessuna libreria
+ * dedicata nel progetto, un'implementazione locale minimale è sufficiente
+ * per l'unico pulsante che la usa. */
+function Toast({ message, tone, onDismiss }: { message: string; tone: "success" | "error"; onDismiss: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 4000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  return (
+    <div
+      role="status"
+      className={cn(
+        "fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg",
+        tone === "success"
+          ? "border-emerald-500/30 bg-emerald-600 text-white"
+          : "border-rose-500/30 bg-rose-600 text-white"
+      )}
+    >
+      {tone === "success" ? <CheckCircle2 className="size-4 shrink-0" /> : <XCircle className="size-4 shrink-0" />}
+      {message}
+    </div>
+  );
+}
+
+function ApiKeySection({
+  webhookUrl,
+  apiKey,
+  regenerating,
+  error,
+  sendingTest,
+  onRegenerate,
+  onSendTest,
+  showDocs,
+}: {
+  webhookUrl: string;
+  apiKey: string;
+  regenerating: boolean;
+  error: string | null;
+  sendingTest: boolean;
+  onRegenerate: () => void;
+  onSendTest: () => void;
+  showDocs: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      <CopyField label="URL Webhook" value={webhookUrl} />
+      <CopyField label="API Key" value={apiKey} />
+
+      <div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={regenerating}
+          className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+          onClick={onRegenerate}
+        >
+          {regenerating ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+          Rigenera API Key
+        </Button>
+        {error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
+      </div>
+
+      {showDocs && (
+        <Accordion className="overflow-hidden rounded-lg border border-zinc-200/80">
+          <AccordionItem value="docs" className="border-b-0 bg-zinc-50 px-4">
+            <AccordionTrigger className="py-3 text-sm font-medium text-zinc-800">
+              Mostra documentazione API
+            </AccordionTrigger>
+            <AccordionContent>
+              <p className="text-xs text-zinc-600">
+                Invia una richiesta <code className="rounded bg-zinc-200 px-1 py-0.5">POST</code> a questo URL con
+                l&apos;header <code className="rounded bg-zinc-200 px-1 py-0.5">X-Api-Key</code> impostato sulla
+                tua chiave, e questo corpo JSON per ogni insoluto:
+              </p>
+              <pre className="mt-3 overflow-x-auto rounded-md bg-zinc-900 p-3 text-[11px] leading-relaxed text-zinc-100">
+                {EXAMPLE_PAYLOAD}
+              </pre>
+              <p className="mt-3 text-xs text-zinc-600">
+                OmniRev registra l&apos;insoluto e avvia subito, in automatico, la sequenza di email di dunning
+                dedicata SDD verso <code className="rounded bg-zinc-200 px-1 py-0.5">customer_email</code>, senza
+                alcun intervento manuale.
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+
+      <div className="border-t border-zinc-200/80 pt-5">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={sendingTest}
+          className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+          onClick={onSendTest}
+        >
+          {sendingTest ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+          Testa Integrazione (Invia Insoluto Prova)
+        </Button>
+        <p className="mt-1.5 text-xs text-zinc-500">
+          Invia un insoluto di prova reale a questo webhook con la tua API Key: crea una fattura di test
+          (visibile in Recuperi) e avvia il dunning verso <code className="rounded bg-zinc-100 px-1 py-0.5">test@example.com</code>.
+        </p>
       </div>
     </div>
   );
@@ -62,12 +193,13 @@ export function SddWebhookSettingsPanel({
   initialApiKey: string;
   webhookUrl: string;
 }) {
+  const [activeTab, setActiveTab] = useState<ProviderTabId>("stripe");
   const [apiKey, setApiKey] = useState(initialApiKey);
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [sendingTest, setSendingTest] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
 
   async function handleRegenerate() {
     if (
@@ -93,7 +225,7 @@ export function SddWebhookSettingsPanel({
   }
 
   // Invia un vero insoluto di prova al webhook (stesso endpoint usato da un
-  // gestionale/CRM esterno reale): a differenza dell'esempio payload qui
+  // gestionale/CRM esterno reale): a differenza della documentazione API qui
   // sotto, che è solo testo da copiare, questo pulsante esegue davvero la
   // chiamata con la API Key corrente, così il merchant può verificare
   // l'integrazione end-to-end senza uscire dalla dashboard. Genera una
@@ -108,7 +240,6 @@ export function SddWebhookSettingsPanel({
   // browser esterne — solo per POST server-to-server come quelle di un
   // gestionale reale.
   async function handleSendTestEvent() {
-    setTestResult(null);
     setSendingTest(true);
     try {
       const response = await fetch("/api/v1/webhooks/sdd", {
@@ -125,14 +256,11 @@ export function SddWebhookSettingsPanel({
       });
       const data = await response.json().catch(() => null);
       if (!response.ok) throw new Error(data?.error ?? "Invio dell'evento di test non riuscito.");
-      setTestResult({
-        ok: true,
-        message: `Evento registrato con successo. ID fattura di test: ${data.invoiceId}`,
-      });
+      setToast({ message: "Insoluto di prova inviato con successo!", tone: "success" });
     } catch (err) {
-      setTestResult({
-        ok: false,
+      setToast({
         message: err instanceof Error ? err.message : "Invio dell'evento di test non riuscito.",
+        tone: "error",
       });
     } finally {
       setSendingTest(false);
@@ -153,77 +281,76 @@ export function SddWebhookSettingsPanel({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-5">
-        <CopyField label="URL Webhook" value={webhookUrl} />
-        <CopyField label="API Key" value={apiKey} />
-
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={regenerating}
-            className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-            onClick={handleRegenerate}
-          >
-            {regenerating ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
-            Rigenera API Key
-          </Button>
-          {error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
-        </div>
-
-        <div className="rounded-lg border border-zinc-200/80 bg-zinc-100 p-4">
-          <p className="text-xs font-medium text-zinc-600 uppercase tracking-wide">Esempio payload</p>
-          <p className="mt-1.5 text-xs text-zinc-600">
-            Invia una richiesta <code className="rounded bg-zinc-200 px-1 py-0.5">POST</code> a questo URL con
-            l&apos;header <code className="rounded bg-zinc-200 px-1 py-0.5">X-Api-Key</code> impostato sulla tua
-            chiave, e questo corpo JSON per ogni insoluto:
-          </p>
-          <pre className="mt-3 overflow-x-auto rounded-md bg-zinc-900 p-3 text-[11px] leading-relaxed text-zinc-100">
-            {EXAMPLE_PAYLOAD}
-          </pre>
-          <p className="mt-3 text-xs text-zinc-600">
-            OmniRev registra l&apos;insoluto e avvia subito, in automatico, la sequenza di email di dunning
-            dedicata SDD verso <code className="rounded bg-zinc-200 px-1 py-0.5">customer_email</code>, senza alcun
-            intervento manuale.
-          </p>
-
-          <div className="mt-4 border-t border-zinc-200/80 pt-4">
-            <Button
+      <div className="mt-6 flex items-center gap-1 border-b border-zinc-200" role="tablist">
+        {PROVIDER_TABS.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
               type="button"
-              variant="outline"
-              size="sm"
-              disabled={sendingTest}
-              className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
-              onClick={handleSendTestEvent}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "relative px-3.5 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "text-emerald-600" : "text-zinc-500 hover:text-zinc-800"
+              )}
             >
-              {sendingTest ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
-              Invia Evento di Test
-            </Button>
-            <p className="mt-1.5 text-xs text-zinc-500">
-              Invia davvero l&apos;esempio payload qui sopra a questo webhook con la tua API Key: crea una fattura
-              di test reale e avvia il dunning verso <code className="rounded bg-zinc-200 px-1 py-0.5">test@example.com</code>.
-            </p>
-
-            {testResult && (
-              <div
-                className={`mt-3 flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs ${
-                  testResult.ok
-                    ? "border-emerald-500/30 bg-emerald-50 text-emerald-700"
-                    : "border-rose-500/30 bg-rose-50 text-rose-700"
-                }`}
-              >
-                {testResult.ok ? (
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0" />
-                ) : (
-                  <XCircle className="mt-0.5 size-3.5 shrink-0" />
-                )}
-                <span>{testResult.message}</span>
-              </div>
-            )}
-          </div>
-        </div>
+              {tab.label}
+              {isActive && (
+                <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-emerald-500" aria-hidden />
+              )}
+            </button>
+          );
+        })}
       </div>
+
+      <div className="mt-6" role="tabpanel">
+        {activeTab === "stripe" && (
+          <div className="rounded-lg border border-zinc-200/80 bg-zinc-50 p-6 text-center">
+            <span className="mx-auto flex size-11 items-center justify-center rounded-full bg-emerald-100">
+              <ShieldCheck className="size-5 text-emerald-700" />
+            </span>
+            <Badge className="mt-3 bg-emerald-100 text-emerald-800">
+              Attivo e Automatizzato via Stripe Connect
+            </Badge>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-600">
+              Se i tuoi clienti pagano via SEPA Direct Debit direttamente su Stripe, OmniRev rileva già gli
+              insoluti in automatico con la stessa integrazione Stripe Connect usata per le carte (sezione
+              &quot;Account Stripe&quot; qui sopra). Nessuna configurazione aggiuntiva è richiesta in questa
+              scheda.
+            </p>
+          </div>
+        )}
+
+        {activeTab === "gocardless" && (
+          <ApiKeySection
+            webhookUrl={webhookUrl}
+            apiKey={apiKey}
+            regenerating={regenerating}
+            error={error}
+            sendingTest={sendingTest}
+            onRegenerate={handleRegenerate}
+            onSendTest={handleSendTestEvent}
+            showDocs={false}
+          />
+        )}
+
+        {activeTab === "custom-api" && (
+          <ApiKeySection
+            webhookUrl={webhookUrl}
+            apiKey={apiKey}
+            regenerating={regenerating}
+            error={error}
+            sendingTest={sendingTest}
+            onRegenerate={handleRegenerate}
+            onSendTest={handleSendTestEvent}
+            showDocs
+          />
+        )}
+      </div>
+
+      {toast && <Toast message={toast.message} tone={toast.tone} onDismiss={() => setToast(null)} />}
     </div>
   );
 }
