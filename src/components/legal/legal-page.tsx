@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Activity } from "lucide-react";
 
 import { Footer } from "@/components/landing/footer";
+import { Logo } from "@/components/ui/logo";
 
 type TocItem = { id: string; label: string };
 
@@ -20,13 +20,8 @@ export function LegalPage({
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-          <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-              <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-            </span>
-            <span className="text-base font-semibold tracking-tight text-zinc-100">
-              OmniRev
-            </span>
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <Logo />
           </Link>
           <Link href="/" className="text-sm text-zinc-400 transition-colors hover:text-zinc-100">
             Torna al sito

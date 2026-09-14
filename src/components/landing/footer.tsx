@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Activity } from "lucide-react";
+
+import { Logo } from "@/components/ui/logo";
 
 type SocialLink = {
   label: string;
@@ -88,13 +89,8 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 flex flex-col gap-4 lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-                <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-              </span>
-              <span className="text-base font-semibold tracking-tight text-zinc-100">
-                OmniRev
-              </span>
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Logo />
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-zinc-400">
               Recupera i pagamenti falliti su Stripe con dunning automatico

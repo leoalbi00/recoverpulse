@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  Activity,
   ArrowLeftRight,
   Bell,
   ChevronsUpDown,
@@ -25,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { isAdminEmail } from "@/lib/admin";
 import { Switch } from "@/components/ui/switch";
+import { Logo } from "@/components/ui/logo";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 const DEV_VIEW_STORAGE_KEY = "omnirev:dev-view";
@@ -96,14 +96,9 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <Link
         href="/"
-        className="flex items-center gap-2 px-6 py-5 transition-opacity hover:opacity-80"
+        className="px-6 py-5 transition-opacity hover:opacity-80"
       >
-        <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-          <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-        </span>
-        <span className="text-base font-bold tracking-tight text-zinc-100">
-          OmniRev
-        </span>
+        <Logo />
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -294,14 +289,9 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:hidden">
         <Link
           href="/"
-          className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          className="transition-opacity hover:opacity-80"
         >
-          <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-            <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-          </span>
-          <span className="text-base font-semibold tracking-tight text-zinc-100">
-            OmniRev
-          </span>
+          <Logo className="h-7" />
         </Link>
         <div className="flex items-center gap-1">
           <NotificationBell />

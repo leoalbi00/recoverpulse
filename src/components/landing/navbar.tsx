@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Activity, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 const NAV_LINKS = [
@@ -28,13 +29,8 @@ export function Navbar({ user }: NavbarProps) {
         <span className="hidden sm:inline">{BETA_SUBHEADLINE}</span>
       </div>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-            <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-          </span>
-          <span className="text-base font-semibold tracking-tight text-zinc-100">
-            OmniRev
-          </span>
+        <Link href="/" className="transition-opacity hover:opacity-80">
+          <Logo />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

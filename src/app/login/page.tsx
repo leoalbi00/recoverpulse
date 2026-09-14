@@ -4,9 +4,10 @@ import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Activity, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/logo";
 
 function PasswordLoginForm() {
   const router = useRouter();
@@ -162,13 +163,8 @@ function LoginContent() {
         className="pointer-events-none fixed -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/15 blur-[120px]"
       />
 
-      <Link href="/" className="mb-8 flex items-center gap-2 transition-opacity hover:opacity-80">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
-          <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
-        </span>
-        <span className="text-base font-semibold tracking-tight text-zinc-100">
-          OmniRev
-        </span>
+      <Link href="/" className="mb-8 transition-opacity hover:opacity-80">
+        <Logo />
       </Link>
 
       <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
