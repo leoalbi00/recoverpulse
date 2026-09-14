@@ -6,6 +6,15 @@ import type { PaymentMethodType } from "@/lib/transactions";
 export type DunningLogChannel = "whatsapp" | "sms" | "email";
 export type DunningLogStatus = "sent" | "failed";
 
+// dunning_logs non ha (ancora) un tipo di evento dedicato per la conferma di
+// recupero: piuttosto che una migration solo per questo, riusiamo lo schema
+// esistente con uno step_days sentinella, impossibile da collidere con un
+// vero step di sollecito (sempre >= 0, vedi step_days in dunning-settings.ts
+// e il commento su "immediate" = 0 in startDunningSequence). Le funzioni di
+// lettura sotto lo escludono esplicitamente per non gonfiare i "Tentativi
+// Dunning" mostrati in dashboard con un evento che non è un sollecito.
+export const RECOVERY_STEP_DAYS = -1;
+
 // Codice errore Postgres per violazione di un vincolo unique: due esecuzioni
 // concorrenti del cron dei solleciti hanno provato a registrare lo stesso
 // step per la stessa fattura, la seconda arriva qui e va ignorata (non è un
@@ -83,6 +92,7 @@ export async function getDunningLogSummaries(
     .select("invoice_id, channel, status, sent_at")
     .in("invoice_id", invoiceIds)
     .eq("user_id", userId)
+    .neq("step_days", RECOVERY_STEP_DAYS)
     .order("sent_at", { ascending: true });
 
   if (error) {
@@ -119,6 +129,7 @@ export async function listAllDunningLogs(
     .from("dunning_logs")
     .select("invoice_id, step_days, status")
     .eq("user_id", userId)
+    .neq("step_days", RECOVERY_STEP_DAYS)
     .order("sent_at", { ascending: false })
     .limit(2000);
 
@@ -154,6 +165,7 @@ export async function listGlobalDunningLogs(limit: number): Promise<GlobalDunnin
   const { data, error } = await supabaseAdmin
     .from("dunning_logs")
     .select("id, user_id, invoice_id, step_days, customer_email, channel, status, sent_at")
+    .neq("step_days", RECOVERY_STEP_DAYS)
     .order("sent_at", { ascending: false })
     .limit(limit);
 

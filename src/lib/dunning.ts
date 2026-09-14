@@ -1,7 +1,7 @@
 import { markFirstNoticeSent, type FailedTransaction } from "@/lib/transactions";
 import { getDunningSettings, type DunningChannel } from "@/lib/dunning-settings";
 import { getDunningTemplates } from "@/lib/dunning-templates";
-import { recordDunningLog } from "@/lib/dunning-logs";
+import { recordDunningLog, RECOVERY_STEP_DAYS } from "@/lib/dunning-logs";
 import { sendDunningEmail, sendSddDunningEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
 
@@ -161,10 +161,30 @@ export async function startDunningSequence(
 
 /**
  * Interrompe la sequenza dunning per una fattura, tipicamente perché il pagamento è stato recuperato.
+ * Registra anche l'evento su dunning_logs (step_days sentinella, vedi
+ * RECOVERY_STEP_DAYS) così il recupero resta in audit trail insieme ai
+ * solleciti che lo hanno preceduto, letto da /dashboard/developer.
  * TODO: cancellare eventuali job/reminder pianificati presso i provider di notifica.
  */
 export async function stopDunningSequence(transaction: FailedTransaction) {
   console.log(
     `[dunning] interrotta sequenza per fattura ${transaction.invoiceId} (${transaction.customerEmail}): pagamento recuperato`
   );
+
+  try {
+    await recordDunningLog({
+      userId: transaction.userId,
+      invoiceId: transaction.invoiceId,
+      stepDays: RECOVERY_STEP_DAYS,
+      customerEmail: transaction.customerEmail,
+      channel: "email",
+      status: "sent",
+      paymentMethodType: transaction.paymentMethodType,
+    });
+  } catch (error) {
+    console.error(
+      `[dunning] impossibile registrare l'evento di recupero su dunning_logs per la fattura ${transaction.invoiceId}:`,
+      error
+    );
+  }
 }

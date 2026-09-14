@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Landmark, Loader2, RefreshCw } from "lucide-react";
+import { Check, CheckCircle2, Copy, Landmark, Loader2, RefreshCw, Send, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -66,6 +66,9 @@ export function SddWebhookSettingsPanel({
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
   async function handleRegenerate() {
     if (
       !window.confirm(
@@ -86,6 +89,53 @@ export function SddWebhookSettingsPanel({
       setError(err instanceof Error ? err.message : "Errore durante la rigenerazione.");
     } finally {
       setRegenerating(false);
+    }
+  }
+
+  // Invia un vero insoluto di prova al webhook (stesso endpoint usato da un
+  // gestionale/CRM esterno reale): a differenza dell'esempio payload qui
+  // sotto, che è solo testo da copiare, questo pulsante esegue davvero la
+  // chiamata con la API Key corrente, così il merchant può verificare
+  // l'integrazione end-to-end senza uscire dalla dashboard. Genera una
+  // fattura di test reale (visibile in /dashboard/recuperi) e avvia la
+  // sequenza di dunning verso l'email di prova.
+  //
+  // Chiamata same-origin (percorso relativo), non all'URL assoluto mostrato
+  // in `webhookUrl` (sempre il dominio di produzione, vedi getAppBaseUrl):
+  // da dashboard servite altrove (es. `next dev` in locale) una fetch
+  // cross-origin verso quell'URL verrebbe bloccata dal CORS del browser,
+  // dato che l'endpoint non espone Access-Control-Allow-Origin per chiamate
+  // browser esterne — solo per POST server-to-server come quelle di un
+  // gestionale reale.
+  async function handleSendTestEvent() {
+    setTestResult(null);
+    setSendingTest(true);
+    try {
+      const response = await fetch("/api/v1/webhooks/sdd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Api-Key": apiKey },
+        body: JSON.stringify({
+          customer_email: "test@example.com",
+          amount: 4900,
+          currency: "EUR",
+          mandate_ref: `TEST-${Date.now()}`,
+          failure_reason: "Evento di test inviato dalla dashboard OmniRev",
+          failure_code: "AC01",
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error ?? "Invio dell'evento di test non riuscito.");
+      setTestResult({
+        ok: true,
+        message: `Evento registrato con successo. ID fattura di test: ${data.invoiceId}`,
+      });
+    } catch (err) {
+      setTestResult({
+        ok: false,
+        message: err instanceof Error ? err.message : "Invio dell'evento di test non riuscito.",
+      });
+    } finally {
+      setSendingTest(false);
     }
   }
 
@@ -137,6 +187,41 @@ export function SddWebhookSettingsPanel({
             dedicata SDD verso <code className="rounded bg-zinc-200 px-1 py-0.5">customer_email</code>, senza alcun
             intervento manuale.
           </p>
+
+          <div className="mt-4 border-t border-zinc-200/80 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={sendingTest}
+              className="border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900"
+              onClick={handleSendTestEvent}
+            >
+              {sendingTest ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+              Invia Evento di Test
+            </Button>
+            <p className="mt-1.5 text-xs text-zinc-500">
+              Invia davvero l&apos;esempio payload qui sopra a questo webhook con la tua API Key: crea una fattura
+              di test reale e avvia il dunning verso <code className="rounded bg-zinc-200 px-1 py-0.5">test@example.com</code>.
+            </p>
+
+            {testResult && (
+              <div
+                className={`mt-3 flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs ${
+                  testResult.ok
+                    ? "border-emerald-500/30 bg-emerald-50 text-emerald-700"
+                    : "border-rose-500/30 bg-rose-50 text-rose-700"
+                }`}
+              >
+                {testResult.ok ? (
+                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0" />
+                ) : (
+                  <XCircle className="mt-0.5 size-3.5 shrink-0" />
+                )}
+                <span>{testResult.message}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
