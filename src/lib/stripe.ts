@@ -5,8 +5,8 @@ import { getIntegrationSettings } from "@/lib/integration-settings";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 /**
- * Client Stripe della piattaforma RecoverPulse (mai di un merchant
- * connesso): usato per il billing SaaS di RecoverPulse stesso
+ * Client Stripe della piattaforma OmniRev (mai di un merchant
+ * connesso): usato per il billing SaaS di OmniRev stesso
  * (src/app/api/checkout/route.ts, src/app/api/dashboard/billing-portal/route.ts)
  * e per lo scambio del codice OAuth Stripe Connect
  * (src/app/api/stripe/connect/*), che deve avvenire con la Secret Key della
@@ -58,7 +58,7 @@ export async function getStripePublishableKeyForAccount(stripeAccountId: string)
 
 /**
  * @deprecated Risolveva la Secret Key dall'unica riga globale
- * `integration_settings`, da quando RecoverPulse era single-tenant. Nessun
+ * `integration_settings`, da quando OmniRev era single-tenant. Nessun
  * chiamante rimasto (sostituito da getPlatformStripeClient/
  * getStripeClientForAccount) — tenuta solo per non rompere import esterni
  * non ancora aggiornati; non aggiungere nuovi chiamanti.

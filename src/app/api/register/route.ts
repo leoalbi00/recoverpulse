@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   // registrazione pubblica resta comunque invito-only: non esiste ancora un
   // paywall reale a prova scaduta (src/lib/trial.ts è solo informativo) né uno
   // stato abbonamento persistito (src/lib/billing.ts è in-memory), quindi
-  // aprirla senza controllo esporrebbe RecoverPulse ad abusi del piano
+  // aprirla senza controllo esporrebbe OmniRev ad abusi del piano
   // gratuito. Nessun REGISTRATION_INVITE_CODE configurato in produzione =
   // registrazione disabilitata di default (fail closed).
   const expectedInviteCode = process.env.REGISTRATION_INVITE_CODE;

@@ -12,11 +12,11 @@ import "server-only";
 type Bucket = { count: number; resetAt: number };
 
 declare global {
-  var __recoverpulseRateLimitBuckets: Map<string, Bucket> | undefined;
+  var __omnirevRateLimitBuckets: Map<string, Bucket> | undefined;
 }
 
-const buckets = globalThis.__recoverpulseRateLimitBuckets ?? new Map<string, Bucket>();
-globalThis.__recoverpulseRateLimitBuckets = buckets;
+const buckets = globalThis.__omnirevRateLimitBuckets ?? new Map<string, Bucket>();
+globalThis.__omnirevRateLimitBuckets = buckets;
 
 const MAX_TRACKED_KEYS = 5000;
 

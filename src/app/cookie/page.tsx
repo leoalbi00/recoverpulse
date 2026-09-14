@@ -1,7 +1,7 @@
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export const metadata = {
-  title: "Cookie Policy — RecoverPulse",
+  title: "Cookie Policy — OmniRev",
 };
 
 const TOC = [
@@ -20,13 +20,13 @@ export default function CookiePage() {
         <p>
           I cookie sono piccoli file di testo che i siti visitati inviano al dispositivo dell&apos;utente, dove
           vengono memorizzati per essere poi ritrasmessi agli stessi siti alla visita successiva. Il sito e la
-          dashboard RecoverPulse adottano una politica <strong>cookie-essenziale</strong>: sono utilizzati
+          dashboard OmniRev adottano una politica <strong>cookie-essenziale</strong>: sono utilizzati
           esclusivamente cookie tecnici, strettamente necessari all&apos;erogazione del Servizio.
         </p>
       </LegalSection>
 
       <LegalSection id="cookie-tecnici" title="2. Cookie tecnici utilizzati">
-        <p>Il sito e la dashboard RecoverPulse utilizzano esclusivamente le seguenti categorie di cookie tecnici:</p>
+        <p>Il sito e la dashboard OmniRev utilizzano esclusivamente le seguenti categorie di cookie tecnici:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
             <strong>Cookie di autenticazione di sessione:</strong> necessari a mantenere l&apos;utente
@@ -47,7 +47,7 @@ export default function CookiePage() {
 
       <LegalSection id="nessuna-profilazione" title="3. Assenza di cookie di profilazione">
         <p>
-          RecoverPulse <strong>non utilizza cookie di profilazione, analytics di terze parti o cookie
+          OmniRev <strong>non utilizza cookie di profilazione, analytics di terze parti o cookie
           pubblicitari</strong> di alcun tipo, né propri né di terze parti. Alcune pagine possono caricare
           risorse necessarie all&apos;erogazione del Servizio da fornitori terzi (es. Stripe per
           l&apos;elaborazione dei pagamenti), i quali potrebbero impostare propri cookie tecnici secondo le

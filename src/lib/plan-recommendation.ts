@@ -18,7 +18,7 @@ export type PlanRecommendation = {
 };
 
 /**
- * "Consiglio Abbonamento RecoverPulse" (pannello Accordion Abbonamento in
+ * "Consiglio Abbonamento OmniRev" (pannello Accordion Abbonamento in
  * /dashboard/impostazioni): consiglia il piano più piccolo che copre il
  * volume di fatture fallite gestite nel periodo di riferimento — l'intero
  * trial se ancora attivo (non c'è ancora uno storico mensile "vero"),

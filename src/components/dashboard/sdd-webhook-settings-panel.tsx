@@ -133,7 +133,7 @@ export function SddWebhookSettingsPanel({
             {EXAMPLE_PAYLOAD}
           </pre>
           <p className="mt-3 text-xs text-zinc-600">
-            RecoverPulse registra l&apos;insoluto e avvia subito, in automatico, la sequenza di email di dunning
+            OmniRev registra l&apos;insoluto e avvia subito, in automatico, la sequenza di email di dunning
             dedicata SDD verso <code className="rounded bg-zinc-200 px-1 py-0.5">customer_email</code>, senza alcun
             intervento manuale.
           </p>

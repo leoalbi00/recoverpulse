@@ -38,7 +38,7 @@ function mapRow(row: ConnectedStripeAccountRow): ConnectedStripeAccount {
  * payload: la colonna ha un default `now()` applicato solo al primo insert,
  * mai toccato da un conflitto successivo, così i 14 giorni di prova restano
  * legati allo Stripe account per sempre, anche se viene ricollegato da un
- * altro utente RecoverPulse (vedi il trasferimento di proprietà nella route
+ * altro utente OmniRev (vedi il trasferimento di proprietà nella route
  * di callback, che chiama questa funzione).
  */
 export async function upsertConnectedStripeAccount(input: {
@@ -89,7 +89,7 @@ export async function getConnectedAccountForUser(userId: string): Promise<Connec
   return data ? mapRow(data) : null;
 }
 
-/** Usata dal webhook (`event.account`) per risolvere quale utente RecoverPulse possiede l'account che ha generato l'evento. */
+/** Usata dal webhook (`event.account`) per risolvere quale utente OmniRev possiede l'account che ha generato l'evento. */
 export async function getUserIdForStripeAccount(stripeAccountId: string): Promise<string | null> {
   const { data, error } = await supabaseAdmin
     .from("connected_stripe_accounts")

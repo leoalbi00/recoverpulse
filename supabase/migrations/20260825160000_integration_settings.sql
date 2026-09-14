@@ -4,7 +4,7 @@
 -- è stata salvata) così un aggiornamento dalla dashboard ha effetto immediato
 -- senza toccare i file .env né rideployare.
 --
--- Tabella singleton, stessa postura di public.merchant_settings: RecoverPulse
+-- Tabella singleton, stessa postura di public.merchant_settings: OmniRev
 -- è a singolo merchant per deploy, un'unica riga identificata dall'id fisso
 -- usato in src/lib/integration-settings.ts. RLS abilitata senza policy
 -- anon/authenticated: accesso solo via service role lato server. Le chiavi

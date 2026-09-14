@@ -18,7 +18,7 @@ export type MerchantSettings = {
 export const DEFAULT_MERCHANT_SETTINGS: MerchantSettings = {
   firstName: "",
   lastName: "",
-  companyName: "RecoverPulse",
+  companyName: "OmniRev",
   vatNumber: "",
   legalAddress: "",
   supportEmail: "",
@@ -82,7 +82,7 @@ export function isMerchantProfileComplete(settings: MerchantSettings): boolean {
 /**
  * Legge le impostazioni del merchant collegato `userId`. Se la riga non
  * esiste ancora (nessun salvataggio da /dashboard/impostazioni) o Supabase
- * non è raggiungibile, ritorna i default RecoverPulse invece di far fallire
+ * non è raggiungibile, ritorna i default OmniRev invece di far fallire
  * la pagina /pay o l'invio delle email di dunning.
  */
 export async function getMerchantSettings(userId: string): Promise<MerchantSettings> {

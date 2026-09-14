@@ -1,12 +1,12 @@
 declare global {
-  var __recoverpulsePaymentLinks: Map<string, string> | undefined;
+  var __omnirevPaymentLinks: Map<string, string> | undefined;
 }
 
 // In-memory demo store (token -> invoiceId) — sopravvive ai reload del dev server
 // grazie a `globalThis`, ma va sostituito con un database vero prima della produzione.
-const paymentLinks = globalThis.__recoverpulsePaymentLinks ?? new Map<string, string>();
+const paymentLinks = globalThis.__omnirevPaymentLinks ?? new Map<string, string>();
 if (process.env.NODE_ENV !== "production") {
-  globalThis.__recoverpulsePaymentLinks = paymentLinks;
+  globalThis.__omnirevPaymentLinks = paymentLinks;
 }
 
 /**

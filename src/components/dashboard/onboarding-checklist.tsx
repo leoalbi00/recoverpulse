@@ -33,7 +33,7 @@ export function OnboardingChecklist({
     },
     {
       label: "Connetti il tuo account Stripe",
-      description: "Un click autorizza RecoverPulse a leggere i pagamenti falliti e intervenire per te.",
+      description: "Un click autorizza OmniRev a leggere i pagamenti falliti e intervenire per te.",
       done: stripeConnected,
       href: "/dashboard/impostazioni#stripe",
     },

@@ -1,7 +1,7 @@
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export const metadata = {
-  title: "Data Processing Agreement — RecoverPulse",
+  title: "Data Processing Agreement — OmniRev",
 };
 
 const TOC = [
@@ -34,7 +34,7 @@ export default function DpaPage() {
         <p>
           Il presente accordo (&quot;DPA&quot;), stipulato ai sensi dell&apos;art. 28 del Regolamento (UE)
           2016/679 (&quot;GDPR&quot;), integra e forma parte inscindibile dei Termini e Condizioni di Servizio
-          RecoverPulse, e disciplina il trattamento dei dati personali che RecoverPulse effettua per conto del
+          OmniRev, e disciplina il trattamento dei dati personali che OmniRev effettua per conto del
           Merchant nell&apos;ambito dell&apos;erogazione del Servizio. In caso di conflitto tra il presente DPA
           e i Termini, in relazione al trattamento dei dati personali, prevale il presente DPA.
         </p>
@@ -58,14 +58,14 @@ export default function DpaPage() {
             Clienti Finali;
           </li>
           <li>
-            <strong>RecoverPulse</strong> agisce quale <strong>Responsabile del Trattamento (Data
+            <strong>OmniRev</strong> agisce quale <strong>Responsabile del Trattamento (Data
             Processor)</strong>, trattando i dati personali esclusivamente per conto e secondo le istruzioni
             documentate del Merchant, nei limiti e per le finalità previste dal presente DPA.
           </li>
         </ul>
         <p>
           Resta inteso che, per i dati personali relativi al Merchant medesimo raccolti in fase di registrazione
-          e gestione dell&apos;account (es. dati dei referenti aziendali), RecoverPulse agisce quale autonomo
+          e gestione dell&apos;account (es. dati dei referenti aziendali), OmniRev agisce quale autonomo
           titolare del trattamento, come descritto nella{" "}
           <a href="/privacy" className="text-emerald-400 hover:underline">
             Privacy Policy
@@ -76,12 +76,12 @@ export default function DpaPage() {
 
       <LegalSection id="oggetto-durata" title="4. Oggetto, natura e durata del trattamento">
         <p>
-          RecoverPulse tratta i dati personali dei Clienti Finali del Merchant esclusivamente per individuare i
+          OmniRev tratta i dati personali dei Clienti Finali del Merchant esclusivamente per individuare i
           pagamenti Stripe non andati a buon fine, generare e inviare le comunicazioni di sollecito (dunning)
           configurate dal Merchant e rendere disponibile il portale self-service di aggiornamento del metodo di
           pagamento. Il trattamento ha natura automatizzata (rilevazione di eventi webhook, generazione e invio
           di comunicazioni, archiviazione di log) e ha durata pari alla durata del contratto di Servizio in
-          essere tra RecoverPulse e il Merchant, fatto salvo quanto previsto all&apos;art. 15.
+          essere tra OmniRev e il Merchant, fatto salvo quanto previsto all&apos;art. 15.
         </p>
       </LegalSection>
 
@@ -111,9 +111,9 @@ export default function DpaPage() {
 
       <LegalSection id="istruzioni" title="6. Istruzioni documentate del Titolare">
         <p>
-          RecoverPulse tratta i dati personali unicamente sulla base di istruzioni documentate impartite dal
+          OmniRev tratta i dati personali unicamente sulla base di istruzioni documentate impartite dal
           Merchant, anche tramite le impostazioni della dashboard (es. regole di sollecito, canali attivi,
-          contenuto dei template email) e i presenti Termini. Qualora RecoverPulse ritenga che un&apos;istruzione
+          contenuto dei template email) e i presenti Termini. Qualora OmniRev ritenga che un&apos;istruzione
           impartita dal Merchant violi il GDPR o altre disposizioni relative alla protezione dei dati, ne informa
           immediatamente il Merchant, fermo restando il diritto di sospendere l&apos;esecuzione
           dell&apos;istruzione contestata fino a chiarimento.
@@ -121,7 +121,7 @@ export default function DpaPage() {
       </LegalSection>
 
       <LegalSection id="obblighi-responsabile" title="7. Obblighi del Responsabile del Trattamento">
-        <p>RecoverPulse, in qualità di Responsabile del Trattamento, si impegna a:</p>
+        <p>OmniRev, in qualità di Responsabile del Trattamento, si impegna a:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>trattare i dati personali esclusivamente per le finalità e secondo le istruzioni di cui al presente DPA;</li>
           <li>garantire che il personale autorizzato al trattamento sia vincolato da obblighi di riservatezza;</li>
@@ -135,7 +135,7 @@ export default function DpaPage() {
 
       <LegalSection id="riservatezza-personale" title="8. Riservatezza del personale">
         <p>
-          RecoverPulse garantisce che le persone autorizzate al trattamento dei dati personali si siano
+          OmniRev garantisce che le persone autorizzate al trattamento dei dati personali si siano
           impegnate a rispettare la riservatezza o siano soggette a un adeguato obbligo di riservatezza legale, e
           che l&apos;accesso ai dati sia limitato al personale per il quale tale accesso sia strettamente
           necessario allo svolgimento delle proprie mansioni.
@@ -144,7 +144,7 @@ export default function DpaPage() {
 
       <LegalSection id="misure-sicurezza" title="9. Misure di sicurezza (art. 32 GDPR)">
         <p>
-          RecoverPulse adotta misure tecniche e organizzative adeguate a garantire un livello di sicurezza
+          OmniRev adotta misure tecniche e organizzative adeguate a garantire un livello di sicurezza
           adeguato al rischio, tra cui in particolare:
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
@@ -159,7 +159,7 @@ export default function DpaPage() {
 
       <LegalSection id="sub-responsabili" title="10. Sub-responsabili autorizzati">
         <p>
-          Il Titolare autorizza in via generale RecoverPulse al ricorso ai seguenti Sub-responsabili per
+          Il Titolare autorizza in via generale OmniRev al ricorso ai seguenti Sub-responsabili per
           l&apos;erogazione del Servizio:
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
@@ -169,10 +169,10 @@ export default function DpaPage() {
           <li><strong>Vercel, Inc.</strong> — hosting dell&apos;applicazione ed esecuzione delle funzioni automatizzate (incluso il cron di dunning);</li>
         </ul>
         <p>
-          RecoverPulse garantisce che ciascun Sub-responsabile sia vincolato, mediante accordo scritto, a
+          OmniRev garantisce che ciascun Sub-responsabile sia vincolato, mediante accordo scritto, a
           obblighi in materia di protezione dei dati non meno stringenti di quelli previsti dal presente DPA.
-          RecoverPulse resta pienamente responsabile nei confronti del Titolare per l&apos;adempimento degli
-          obblighi dei Sub-responsabili. RecoverPulse informerà il Merchant di eventuali modifiche riguardanti
+          OmniRev resta pienamente responsabile nei confronti del Titolare per l&apos;adempimento degli
+          obblighi dei Sub-responsabili. OmniRev informerà il Merchant di eventuali modifiche riguardanti
           l&apos;aggiunta o la sostituzione di Sub-responsabili, dando al Merchant la possibilità di opporsi per
           motivate ragioni connesse alla protezione dei dati.
         </p>
@@ -180,7 +180,7 @@ export default function DpaPage() {
 
       <LegalSection id="assistenza-titolare" title="11. Assistenza al Titolare">
         <p>
-          Tenuto conto della natura del trattamento e delle informazioni a disposizione, RecoverPulse assiste il
+          Tenuto conto della natura del trattamento e delle informazioni a disposizione, OmniRev assiste il
           Titolare, mediante misure tecniche e organizzative adeguate e nei limiti delle proprie possibilità
           tecniche, nel:
         </p>
@@ -194,7 +194,7 @@ export default function DpaPage() {
 
       <LegalSection id="data-breach" title="12. Gestione dei Data Breach">
         <p>
-          In caso di violazione dei dati personali trattati per conto del Titolare, RecoverPulse ne dà
+          In caso di violazione dei dati personali trattati per conto del Titolare, OmniRev ne dà
           comunicazione al Titolare <strong>senza ingiustificato ritardo</strong> e comunque non oltre
           <strong> 48 (quarantotto) ore</strong> dal momento in cui ne è venuta a conoscenza, fornendo, nella
           misura in cui le informazioni siano disponibili: natura della violazione, categorie e numero
@@ -207,18 +207,18 @@ export default function DpaPage() {
 
       <LegalSection id="audit" title="13. Verifiche e audit">
         <p>
-          RecoverPulse mette a disposizione del Titolare, su richiesta scritta e con ragionevole preavviso non
+          OmniRev mette a disposizione del Titolare, su richiesta scritta e con ragionevole preavviso non
           inferiore a 30 giorni, le informazioni necessarie a dimostrare il rispetto degli obblighi previsti dal
           presente DPA, e consente e contribuisce alle attività di revisione, comprese le ispezioni, condotte dal
           Titolare o da un revisore da questi incaricato, con oneri a carico del Titolare, salvo che
-          l&apos;audit rilevi una violazione sostanziale del presente DPA imputabile a RecoverPulse.
+          l&apos;audit rilevi una violazione sostanziale del presente DPA imputabile a OmniRev.
         </p>
       </LegalSection>
 
       <LegalSection id="trasferimenti-extra-ue" title="14. Trasferimenti extra-UE">
         <p>
           Alcuni Sub-responsabili di cui all&apos;art. 10 possono trattare i dati personali anche al di fuori
-          dello Spazio Economico Europeo. In tali casi, RecoverPulse garantisce che il trasferimento avvenga sulla
+          dello Spazio Economico Europeo. In tali casi, OmniRev garantisce che il trasferimento avvenga sulla
           base di una decisione di adeguatezza della Commissione Europea, di Clausole Contrattuali Standard
           approvate dalla Commissione Europea, o di altro strumento di trasferimento riconosciuto idoneo ai sensi
           del Capo V del GDPR.
@@ -227,10 +227,10 @@ export default function DpaPage() {
 
       <LegalSection id="cancellazione-restituzione" title="15. Cancellazione o restituzione dei dati">
         <p>
-          Alla cessazione del Servizio, per qualsiasi causa, RecoverPulse cancella o, su richiesta del Titolare
+          Alla cessazione del Servizio, per qualsiasi causa, OmniRev cancella o, su richiesta del Titolare
           formulata entro 30 giorni dalla cessazione, restituisce al Titolare tutti i dati personali trattati per
           suo conto, cancellando le copie esistenti, salvo che la conservazione dei dati sia richiesta dal diritto
-          dell&apos;Unione o degli Stati membri applicabile a RecoverPulse (es. obblighi fiscali, contabili o di
+          dell&apos;Unione o degli Stati membri applicabile a OmniRev (es. obblighi fiscali, contabili o di
           difesa in giudizio), nel qual caso i dati saranno conservati esclusivamente per tale finalità e per il
           relativo periodo, mantenendo riservatezza e adottando le misure di sicurezza di cui all&apos;art. 9.
         </p>

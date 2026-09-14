@@ -49,7 +49,7 @@ const RECOMMENDATION_COPY: Record<PlanRecommendation["action"], (planName: strin
  * Contenuto del pannello Accordion "Abbonamento" in /dashboard/impostazioni:
  * stato del piano + data di rinnovo/scadenza + fatture (da Stripe, vedi
  * src/lib/subscription-overview.ts) e il box "Consiglio Abbonamento
- * RecoverPulse" (src/lib/plan-recommendation.ts). Puramente presentazionale:
+ * OmniRev" (src/lib/plan-recommendation.ts). Puramente presentazionale:
  * nessuna interattività, quindi resta un Server Component come il resto
  * della pagina.
  */
@@ -138,7 +138,7 @@ export function SubscriptionOverviewPanel({
       <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-5">
         <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
           <Lightbulb className="size-4" />
-          Consiglio Abbonamento RecoverPulse
+          Consiglio Abbonamento OmniRev
         </div>
         <p className="mt-2 text-sm text-zinc-700">
           Hai gestito <strong>{recommendation.volume}</strong> fatture fallite {recommendation.windowLabel}

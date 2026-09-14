@@ -58,7 +58,7 @@ export async function createPilotRequest(input: {
   }
 
   // Notifica in-app all'account Sviluppatore/Admin (ADMIN_EMAIL): un lead
-  // pilota riguarda RecoverPulse stesso, non un merchant, quindi instradarlo a
+  // pilota riguarda OmniRev stesso, non un merchant, quindi instradarlo a
   // un account cliente a caso mostrerebbe dati di un lead di vendita nella
   // sua dashboard. L'unico account a cui ha senso destinarla è quello admin.
   // Non propaga errori: la richiesta è già salvata con successo qui sopra, e

@@ -1,7 +1,7 @@
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export const metadata = {
-  title: "Privacy Policy — RecoverPulse",
+  title: "Privacy Policy — OmniRev",
 };
 
 const TOC = [
@@ -24,20 +24,20 @@ export default function PrivacyPage() {
     <LegalPage title="Privacy Policy" updatedAt="5 settembre 2026" toc={TOC}>
       <LegalSection id="titolare" title="1. Titolare del trattamento">
         <p>
-          Titolare del trattamento dei dati personali raccolti tramite il sito e la dashboard RecoverPulse è la
-          società indicata nei Termini e Condizioni di Servizio (di seguito, &quot;RecoverPulse&quot; o il
+          Titolare del trattamento dei dati personali raccolti tramite il sito e la dashboard OmniRev è la
+          società indicata nei Termini e Condizioni di Servizio (di seguito, &quot;OmniRev&quot; o il
           &quot;Titolare&quot;), contattabile all&apos;indirizzo email di supporto indicato in fase di
           registrazione e nella dashboard.
         </p>
         <p>
           La presente informativa disciplina il trattamento dei dati personali dei referenti e utenti del
           Merchant (persona fisica che opera per conto dell&apos;azienda cliente). Il trattamento dei dati
-          personali dei Clienti Finali del Merchant, effettuato da RecoverPulse in qualità di responsabile del
+          personali dei Clienti Finali del Merchant, effettuato da OmniRev in qualità di responsabile del
           trattamento per conto del Merchant, è disciplinato dal{" "}
           <a href="/dpa" className="text-emerald-400 hover:underline">
             Data Processing Agreement (DPA)
           </a>
-          , stipulato tra RecoverPulse e il Merchant medesimo.
+          , stipulato tra OmniRev e il Merchant medesimo.
         </p>
       </LegalSection>
 
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Dati di fatturazione:</strong> gestiti direttamente da Stripe in qualità di responsabile
-            del pagamento; RecoverPulse riceve unicamente informazioni sintetiche sullo stato
+            del pagamento; OmniRev riceve unicamente informazioni sintetiche sullo stato
             dell&apos;abbonamento e sugli importi fatturati, non i dati dello strumento di pagamento.
           </li>
           <li>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
           Il trattamento è effettuato con strumenti informatici e telematici, con logiche strettamente correlate
           alle finalità indicate e, comunque, in modo da garantire la sicurezza e la riservatezza dei dati.
         </p>
-        <p>RecoverPulse adotta misure tecniche e organizzative adeguate, tra cui in particolare:</p>
+        <p>OmniRev adotta misure tecniche e organizzative adeguate, tra cui in particolare:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li><strong>cifratura dei dati in transito</strong> mediante protocollo TLS su tutte le comunicazioni tra client, dashboard e API;</li>
           <li><strong>cifratura dei dati a riposo</strong> sui sistemi di archiviazione dei Sub-fornitori infrastrutturali;</li>

@@ -57,7 +57,7 @@ function DashboardMockup() {
           <span className="size-2.5 rounded-full bg-zinc-700" />
           <span className="size-2.5 rounded-full bg-zinc-700" />
           <span className="size-2.5 rounded-full bg-zinc-700" />
-          <span className="ml-3 truncate text-xs text-zinc-500">recoverpulse.app/dashboard</span>
+          <span className="ml-3 truncate text-xs text-zinc-500">omnirev.app/dashboard</span>
         </div>
 
         <div className="p-5">
@@ -191,7 +191,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
-            RecoverPulse intercetta ogni pagamento fallito su Stripe e avvia in
+            OmniRev intercetta ogni pagamento fallito su Stripe e avvia in
             automatico una sequenza di solleciti via Email con link 1-click
             per aggiornare la carta — senza che il tuo team debba inseguire un
             solo cliente.
@@ -226,7 +226,7 @@ export function Hero() {
           </div>
 
           <p className="mt-5 text-xs text-zinc-500">
-            RecoverPulse è in Beta Gratuita &mdash; nessuna carta di
+            OmniRev è in Beta Gratuita &mdash; nessuna carta di
             credito richiesta per registrarsi &middot; connetti Stripe in pochi
             minuti, no-code
           </p>

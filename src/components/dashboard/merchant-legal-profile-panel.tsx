@@ -157,7 +157,7 @@ export function MerchantLegalProfilePanel({
             maxLength={120}
             value={companyName}
             onChange={(event) => setCompanyName(event.target.value)}
-            placeholder="RecoverPulse S.r.l."
+            placeholder="OmniRev S.r.l."
             className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>

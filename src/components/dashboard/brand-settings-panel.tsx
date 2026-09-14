@@ -178,7 +178,7 @@ export function BrandSettingsPanel({
               maxLength={120}
               value={senderName}
               onChange={(event) => setSenderName(event.target.value)}
-              placeholder={companyName || "RecoverPulse"}
+              placeholder={companyName || "OmniRev"}
               className="h-10 rounded-lg border border-zinc-200/80 bg-zinc-100 px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
             <p className="text-xs text-zinc-600">
@@ -266,7 +266,7 @@ export function BrandSettingsPanel({
               />
             </div>
             <p className="text-xs text-zinc-600">
-              Lascia vuoto per usare il logo predefinito di RecoverPulse.
+              Lascia vuoto per usare il logo predefinito di OmniRev.
               Consigliato: quadrato su sfondo trasparente.
             </p>
           </div>
@@ -329,7 +329,7 @@ export function BrandSettingsPanel({
               </span>
             )}
             <span className="truncate text-sm font-semibold text-zinc-900">
-              {senderName || companyName || "RecoverPulse"}
+              {senderName || companyName || "OmniRev"}
             </span>
           </div>
 

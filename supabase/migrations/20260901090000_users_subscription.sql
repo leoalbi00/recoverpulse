@@ -1,8 +1,8 @@
--- Stato dell'abbonamento SaaS di RecoverPulse (il piano Starter/Growth/Scale
--- che l'utente paga per usare RecoverPulse, src/lib/plans.ts) — non va
+-- Stato dell'abbonamento SaaS di OmniRev (il piano Starter/Growth/Scale
+-- che l'utente paga per usare OmniRev, src/lib/plans.ts) — non va
 -- confuso con lo Stripe account COLLEGATO del merchant (connected_stripe_accounts,
 -- 20260831170000): sono due relazioni Stripe distinte, questa è quella con
--- l'account PIATTAFORMA di RecoverPulse (src/lib/stripe.ts getPlatformStripeClient).
+-- l'account PIATTAFORMA di OmniRev (src/lib/stripe.ts getPlatformStripeClient).
 --
 -- Sostituisce la Map in-memory di src/lib/billing.ts (non sopravviveva ai
 -- cold start in produzione, la sua stessa nota lo segnalava). Popolata dal

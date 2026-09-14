@@ -56,7 +56,7 @@ export async function startDunningSequence(
   const channels = (["whatsapp", "sms", "email"] as DunningChannel[]).filter(
     (channel) => settings.channels[channel]
   );
-  // Link di recupero: il portale RecoverPulse (1-click, monouso, tracciato)
+  // Link di recupero: il portale OmniRev (1-click, monouso, tracciato)
   // resta la scelta primaria; il link Stripe hosted_invoice_url è solo un
   // fallback per il raro caso in cui il token del portale non sia
   // disponibile (createPaymentToken fallito a monte).

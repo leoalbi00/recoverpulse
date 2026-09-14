@@ -1,4 +1,4 @@
--- Schema iniziale RecoverPulse: utenti applicativi, token del portale 1-click
+-- Schema iniziale OmniRev: utenti applicativi, token del portale 1-click
 -- di aggiornamento carta, e log degli invii delle sequenze di dunning.
 --
 -- Nota di sicurezza: RLS è abilitata su tutte e tre le tabelle e non vengono
@@ -25,7 +25,7 @@ alter table public.users enable row level security;
 create table if not exists public.tokens (
   id uuid primary key default gen_random_uuid(),
   -- Nullable: i token vengono generati dal webhook Stripe (invoice.payment_failed),
-  -- che non ha modo di risalire in modo affidabile all'utente RecoverPulse
+  -- che non ha modo di risalire in modo affidabile all'utente OmniRev
   -- proprietario della fattura fallita senza Stripe Connect. `customer_id` (Stripe
   -- Customer ID del cliente finale a cui va chiesto l'aggiornamento carta) resta
   -- invece obbligatorio: è la chiave usata per risolvere il token nel portale.

@@ -200,7 +200,7 @@ async function handleCustomerSourceExpiring(stripe: Stripe, source: Stripe.Custo
  * collegato in precedenza, infine l'email del cliente Stripe — utile se il
  * checkout è ripartito da un contesto senza client_reference_id (es. un
  * link di pagamento generato a mano) ma l'email coincide con quella
- * dell'account RecoverPulse.
+ * dell'account OmniRev.
  */
 async function resolvePlatformUserId(input: {
   clientReferenceId?: string | null;
@@ -242,7 +242,7 @@ async function handleCheckoutSessionCompleted(stripe: Stripe, session: Stripe.Ch
 
   if (!userId) {
     console.warn(
-      `[stripe-webhook] checkout.session.completed ${session.id}: nessun utente RecoverPulse risolto (client_reference_id assente, customer/email non associati). Sottoscrizione non collegata.`
+      `[stripe-webhook] checkout.session.completed ${session.id}: nessun utente OmniRev risolto (client_reference_id assente, customer/email non associati). Sottoscrizione non collegata.`
     );
     return;
   }
@@ -267,7 +267,7 @@ async function handleCheckoutSessionCompleted(stripe: Stripe, session: Stripe.Ch
 
 /**
  * customer.subscription.created/updated/deleted lato PIATTAFORMA (event.account
- * assente): traccia l'abbonamento SaaS di RecoverPulse dell'utente (per il
+ * assente): traccia l'abbonamento SaaS di OmniRev dell'utente (per il
  * paywall, src/lib/paywall.ts), non va confuso con l'omonimo evento lato
  * account collegato (handleSubscriptionDeleted sopra, chiamato solo dal ramo
  * connectedAccountId, riguarda l'abbonamento di un CLIENTE del merchant).
@@ -303,7 +303,7 @@ async function handlePlatformSubscriptionChange(stripe: Stripe, subscription: St
 
   if (!userId) {
     console.warn(
-      `[stripe-webhook] abbonamento piattaforma ${subscription.id} per il customer ${customerId} non associato a nessun utente RecoverPulse: ignorato.`
+      `[stripe-webhook] abbonamento piattaforma ${subscription.id} per il customer ${customerId} non associato a nessun utente OmniRev: ignorato.`
     );
     return;
   }
@@ -381,9 +381,9 @@ export async function POST(request: Request) {
 
   // event.account presente = evento generato da un account collegato via
   // Stripe Connect (il merchant il cui pagamento è fallito/recuperato):
-  // risolviamo quale utente RecoverPulse lo possiede e usiamo il suo client
+  // risolviamo quale utente OmniRev lo possiede e usiamo il suo client
   // Stripe per ogni chiamata API a valle. event.account assente = evento
-  // della piattaforma RecoverPulse stessa (oggi solo checkout.session.completed,
+  // della piattaforma OmniRev stessa (oggi solo checkout.session.completed,
   // il proprio billing SaaS) — nessun merchant coinvolto.
   const connectedAccountId = "account" in event ? (event.account as string | null | undefined) : null;
 
@@ -392,7 +392,7 @@ export async function POST(request: Request) {
       const userId = await getUserIdForStripeAccount(connectedAccountId);
       if (!userId) {
         console.warn(
-          `[stripe-webhook] evento ${event.type} per l'account Stripe ${connectedAccountId}, non collegato a nessun utente RecoverPulse (disconnesso?): ignorato.`
+          `[stripe-webhook] evento ${event.type} per l'account Stripe ${connectedAccountId}, non collegato a nessun utente OmniRev (disconnesso?): ignorato.`
         );
         return NextResponse.json({ received: true });
       }
@@ -420,7 +420,7 @@ export async function POST(request: Request) {
           break;
       }
     } else {
-      // Nessun event.account: evento della piattaforma RecoverPulse stessa
+      // Nessun event.account: evento della piattaforma OmniRev stessa
       // (il proprio billing SaaS), non di un merchant collegato.
       switch (event.type) {
         case "checkout.session.completed":

@@ -25,7 +25,7 @@ export function LegalPage({
               <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
             </span>
             <span className="text-base font-semibold tracking-tight text-zinc-100">
-              RecoverPulse
+              OmniRev
             </span>
           </Link>
           <Link href="/" className="text-sm text-zinc-400 transition-colors hover:text-zinc-100">

@@ -10,7 +10,7 @@ import {
   type DunningTemplateStepId,
 } from "@/lib/dunning-templates";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "RecoverPulse <onboarding@resend.dev>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "OmniRev <onboarding@resend.dev>";
 
 /**
  * Sostituisce il nome visualizzato di FROM_ADDRESS con quello scelto dal
@@ -661,14 +661,14 @@ function buildRecoveryEmailHtml({
 </html>`;
 }
 
-const RECOVERPULSE_BRAND_COLOR = "#10b981";
+const OMNIREV_BRAND_COLOR = "#10b981";
 
 /**
  * Email di conferma inviata a chi compila il form "Integrazione Pilota" in
  * Home. A differenza delle altre email qui sotto non riguarda un merchant
- * cliente (nessun logo/colore/nome azienda personalizzato): è RecoverPulse
+ * cliente (nessun logo/colore/nome azienda personalizzato): è OmniRev
  * stesso a scrivere al lead, quindi il brand è fisso invece di venire da
- * getMerchantSettings() (quello è il brand del *cliente* RecoverPulse, usato
+ * getMerchantSettings() (quello è il brand del *cliente* OmniRev, usato
  * nelle sue email di dunning verso i propri utenti finali).
  */
 function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): string {
@@ -699,12 +699,12 @@ function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): str
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${RECOVERPULSE_BRAND_COLOR}; border-radius:8px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
                         <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
                       </table>
                     </td>
                     <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
-                      RecoverPulse
+                      OmniRev
                     </td>
                   </tr>
                 </table>
@@ -716,7 +716,7 @@ function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): str
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 
                   <tr>
-                    <td height="4" style="background-color:${RECOVERPULSE_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
+                    <td height="4" style="background-color:${OMNIREV_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
                   </tr>
 
                   <tr>
@@ -725,7 +725,7 @@ function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): str
                         Richiesta ricevuta, ${firstName}!
                       </h1>
                       <p style="margin:0 0 16px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
-                        Grazie per aver richiesto l&#39;integrazione pilota di RecoverPulse. Il nostro
+                        Grazie per aver richiesto l&#39;integrazione pilota di OmniRev. Il nostro
                         team esaminerà i dettagli e ti contatterà entro <strong>1 giorno lavorativo</strong>
                         per organizzare il collegamento del tuo account Stripe di test.
                       </p>
@@ -751,7 +751,7 @@ function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): str
             <tr>
               <td align="center" style="padding:24px 16px 0 16px;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
-                  Inviato da RecoverPulse in seguito alla tua richiesta su recoverpulse.app.
+                  Inviato da OmniRev in seguito alla tua richiesta su omnirev.app.
                 </p>
               </td>
             </tr>
@@ -1319,8 +1319,8 @@ export async function sendCardExpiringEmail({
 
 /**
  * Email di autenticazione (reset password, Magic Link): come
- * sendPilotRequestConfirmationEmail, brand RecoverPulse fisso — è
- * RecoverPulse stesso a scrivere all'utente del proprio account, non un
+ * sendPilotRequestConfirmationEmail, brand OmniRev fisso — è
+ * OmniRev stesso a scrivere all'utente del proprio account, non un
  * merchant, quindi niente getMerchantSettings qui.
  */
 function buildAuthEmailHtml({
@@ -1366,12 +1366,12 @@ function buildAuthEmailHtml({
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${RECOVERPULSE_BRAND_COLOR}; border-radius:8px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
                         <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
                       </table>
                     </td>
                     <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
-                      RecoverPulse
+                      OmniRev
                     </td>
                   </tr>
                 </table>
@@ -1383,7 +1383,7 @@ function buildAuthEmailHtml({
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 
                   <tr>
-                    <td height="4" style="background-color:${RECOVERPULSE_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
+                    <td height="4" style="background-color:${OMNIREV_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
                   </tr>
 
                   <tr>
@@ -1401,7 +1401,7 @@ function buildAuthEmailHtml({
                     <td style="padding:0 32px 8px 32px;" align="center">
                       <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
-                          <td align="center" style="border-radius:10px; background-color:${RECOVERPULSE_BRAND_COLOR};">
+                          <td align="center" style="border-radius:10px; background-color:${OMNIREV_BRAND_COLOR};">
                             <a
                               href="${safeCtaLink}"
                               style="display:block; width:100%; box-sizing:border-box; color:#052e21; text-decoration:none; font-size:16px; font-weight:700; text-align:center; padding:15px 24px;"
@@ -1438,7 +1438,7 @@ function buildAuthEmailHtml({
             <tr>
               <td align="center" style="padding:24px 16px 0 16px;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
-                  Inviato da RecoverPulse su richiesta da recoverpulse.app.
+                  Inviato da OmniRev su richiesta da omnirev.app.
                 </p>
               </td>
             </tr>
@@ -1478,12 +1478,12 @@ export async function sendPasswordResetEmail({
     const html = buildAuthEmailHtml({
       name,
       title: "Reimposta la tua password",
-      bodyHtml: "abbiamo ricevuto una richiesta di reimpostazione della password per il tuo account RecoverPulse. Clicca qui sotto per sceglierne una nuova.",
+      bodyHtml: "abbiamo ricevuto una richiesta di reimpostazione della password per il tuo account OmniRev. Clicca qui sotto per sceglierne una nuova.",
       ctaLabel: "Reimposta password",
       ctaLink: resetLink,
       ttlLabel: "1 ora",
     });
-    const subject = "Reimposta la tua password RecoverPulse";
+    const subject = "Reimposta la tua password OmniRev";
 
     console.log(`[email] invio email di reset password tramite Resend: to="${to}" from="${FROM_ADDRESS}"`);
 
@@ -1524,13 +1524,13 @@ export async function sendMagicLinkEmail({
 
     const html = buildAuthEmailHtml({
       name,
-      title: "Accedi a RecoverPulse",
+      title: "Accedi a OmniRev",
       bodyHtml: "ecco il tuo link per accedere senza password. Clicca qui sotto per entrare nella dashboard.",
-      ctaLabel: "Accedi a RecoverPulse",
+      ctaLabel: "Accedi a OmniRev",
       ctaLink: signInLink,
       ttlLabel: "15 minuti",
     });
-    const subject = "Il tuo link di accesso a RecoverPulse";
+    const subject = "Il tuo link di accesso a OmniRev";
 
     console.log(`[email] invio Magic Link tramite Resend: to="${to}" from="${FROM_ADDRESS}"`);
 
@@ -1554,7 +1554,7 @@ export async function sendMagicLinkEmail({
 function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; code: string; ttlLabel: string }): string {
   const safeFirstName = escapeHtml(firstName);
   const safeCode = escapeHtml(code);
-  const preheader = `Il tuo codice di attivazione RecoverPulse: ${code}`;
+  const preheader = `Il tuo codice di attivazione OmniRev: ${code}`;
 
   return `<!DOCTYPE html>
 <html lang="it">
@@ -1562,7 +1562,7 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>Il tuo codice di attivazione RecoverPulse</title>
+    <title>Il tuo codice di attivazione OmniRev</title>
   </head>
   <body style="margin:0; padding:0; background-color:#f4f4f5; font-family:${FONT_STACK};">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;">
@@ -1579,12 +1579,12 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${RECOVERPULSE_BRAND_COLOR}; border-radius:8px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
                         <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
                       </table>
                     </td>
                     <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
-                      RecoverPulse
+                      OmniRev
                     </td>
                   </tr>
                 </table>
@@ -1596,7 +1596,7 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 
                   <tr>
-                    <td height="4" style="background-color:${RECOVERPULSE_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
+                    <td height="4" style="background-color:${OMNIREV_BRAND_COLOR}; line-height:4px; font-size:4px;">&nbsp;</td>
                   </tr>
 
                   <tr>
@@ -1605,7 +1605,7 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
                         Il tuo codice di attivazione
                       </h1>
                       <p style="margin:0 0 20px 0; font-size:15px; line-height:1.6; color:#3f3f46;">
-                        Ciao ${safeFirstName}, usa questo codice per completare la registrazione alla prova gratuita di RecoverPulse.
+                        Ciao ${safeFirstName}, usa questo codice per completare la registrazione alla prova gratuita di OmniRev.
                       </p>
                     </td>
                   </tr>
@@ -1647,7 +1647,7 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
             <tr>
               <td align="center" style="padding:24px 16px 0 16px;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#a1a1aa;">
-                  Inviato da RecoverPulse su richiesta da recoverpulse.app.
+                  Inviato da OmniRev su richiesta da omnirev.app.
                 </p>
               </td>
             </tr>
@@ -1689,7 +1689,7 @@ export async function sendTrialActivationCodeEmail({
 
     const ttlLabel = "10 minuti";
     const html = buildOtpEmailHtml({ firstName, code, ttlLabel });
-    const subject = `${code} è il tuo codice di attivazione RecoverPulse`;
+    const subject = `${code} è il tuo codice di attivazione OmniRev`;
 
     console.log(`[email] invio codice di attivazione tramite Resend: to="${to}" from="${FROM_ADDRESS}"`);
 

@@ -10,7 +10,7 @@ export type PaywallStatus = {
 };
 
 /**
- * RecoverPulse è in Beta Gratuita Pubblica: il paywall a prova scaduta è
+ * OmniRev è in Beta Gratuita Pubblica: il paywall a prova scaduta è
  * temporaneamente disattivato per TUTTI gli utenti (nuovi e storici), non
  * solo per chi viene taggato `subscription_plan: "free_beta"` alla
  * registrazione (vedi trial-signup/complete e register routes) — così un

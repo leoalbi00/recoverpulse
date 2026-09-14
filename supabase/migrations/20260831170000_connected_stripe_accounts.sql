@@ -3,11 +3,11 @@
 -- (src/app/api/stripe/connect/*, sostituisce l'inserimento manuale in
 -- src/components/dashboard/integration-keys-panel.tsx).
 --
--- Una riga per Stripe account collegato, mai per utente RecoverPulse: questo
+-- Una riga per Stripe account collegato, mai per utente OmniRev: questo
 -- è intenzionale. trial_started_at NON viene mai sovrascritto dagli upsert
 -- successivi (né qui né in src/lib/connected-stripe-accounts.ts, che omette
 -- deliberatamente questa colonna dal payload di upsert): i 14 giorni di prova
--- sono legati allo Stripe account, non all'account RecoverPulse che lo ha
+-- sono legati allo Stripe account, non all'account OmniRev che lo ha
 -- collegato, così ri-registrarsi con una nuova email e ricollegare lo stesso
 -- account Stripe non resetta la prova. La riga non viene mai cancellata alla
 -- disconnessione (src/app/api/stripe/connect/route.ts DELETE pulisce solo
@@ -40,7 +40,7 @@ create index if not exists connected_stripe_accounts_user_id_idx on public.conne
 alter table public.connected_stripe_accounts enable row level security;
 grant select, insert, update, delete on public.connected_stripe_accounts to service_role;
 
--- Un utente RecoverPulse ha al più un account Stripe collegato alla volta.
+-- Un utente OmniRev ha al più un account Stripe collegato alla volta.
 alter table public.users
   add column if not exists stripe_account_id text
     references public.connected_stripe_accounts (stripe_account_id);

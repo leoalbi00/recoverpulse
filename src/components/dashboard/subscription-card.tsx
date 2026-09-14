@@ -50,7 +50,7 @@ export function SubscriptionCard({
           <div>
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-zinc-900">
-                Abbonamento RecoverPulse
+                Abbonamento OmniRev
               </p>
               {hasSubscription && (
                 <Badge className="h-auto bg-emerald-100 px-2 py-0.5 text-emerald-800">

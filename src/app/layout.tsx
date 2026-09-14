@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RecoverPulse — Recupera più forte. Performa più a lungo.",
+  title: "OmniRev — Recupera più forte. Performa più a lungo.",
   description:
-    "RecoverPulse trasforma i dati del tuo corpo in un punteggio di recupero chiaro e in un piano d'azione quotidiano per atleti e appassionati di performance.",
+    "OmniRev trasforma i dati del tuo corpo in un punteggio di recupero chiaro e in un piano d'azione quotidiano per atleti e appassionati di performance.",
 };
 
 export const viewport: Viewport = {

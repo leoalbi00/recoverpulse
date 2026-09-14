@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 // Assunzioni usate per la stima, dichiarate esplicitamente sotto al widget:
 // il tasso di pagamenti falliti è una media di settore per business in
 // abbonamento, il tasso di recupero è quello dichiarato in Hero per
-// RecoverPulse. Numeri indicativi, non una previsione garantita.
+// OmniRev. Numeri indicativi, non una previsione garantita.
 const AVERAGE_FAILED_PAYMENT_RATE = 0.09;
 const RECOVERY_RATE = 0.4;
 
@@ -53,7 +53,7 @@ export function RoiCalculator() {
           </h2>
           <p className="mt-4 text-base leading-relaxed text-zinc-400">
             Inserisci il tuo fatturato mensile ricorrente e scopri all&apos;istante
-            quanto potresti recuperare ogni mese con RecoverPulse.
+            quanto potresti recuperare ogni mese con OmniRev.
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export function RoiCalculator() {
               <p className="mt-1 text-[11px] text-zinc-600">~9% del MRR in media</p>
             </div>
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center ring-1 ring-emerald-500/20">
-              <p className="text-xs text-emerald-300/80">Recuperabile / mese con RecoverPulse</p>
+              <p className="text-xs text-emerald-300/80">Recuperabile / mese con OmniRev</p>
               <p className="mt-2 text-3xl font-semibold text-emerald-400">{formatCurrency(recoverableMonthly)}</p>
               <p className="mt-1 text-[11px] text-emerald-300/60">fino al 40% recuperato</p>
             </div>

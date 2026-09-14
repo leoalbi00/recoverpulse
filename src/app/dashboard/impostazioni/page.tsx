@@ -87,7 +87,7 @@ export default async function ImpostazioniPage() {
         </h1>
         <p className="mt-1.5 text-sm text-zinc-400">
           Collega Stripe, i dati aziendali e gestisci l&apos;abbonamento a
-          RecoverPulse.
+          OmniRev.
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default async function ImpostazioniPage() {
           <AccordionContent>
             <p className="text-xs text-zinc-400">
               Nessuna chiave da incollare né webhook da configurare a mano: un
-              click autorizza RecoverPulse a leggere i pagamenti falliti del
+              click autorizza OmniRev a leggere i pagamenti falliti del
               tuo account e a intervenire per te.
             </p>
             <div className="mt-3">
@@ -197,7 +197,7 @@ export default async function ImpostazioniPage() {
             <p className="text-xs text-zinc-400">
               Se addebiti i tuoi clienti via SEPA Direct Debit fuori da
               Stripe, collega qui il tuo gestionale/CRM esterno: al primo
-              insoluto segnalato al webhook, RecoverPulse avvia in automatico
+              insoluto segnalato al webhook, OmniRev avvia in automatico
               la sequenza di email di dunning dedicata, senza alcun
               intervento manuale.
             </p>

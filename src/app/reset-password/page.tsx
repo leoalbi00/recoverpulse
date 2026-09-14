@@ -146,7 +146,7 @@ function ResetPasswordContent() {
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-semibold tracking-tight text-zinc-100">RecoverPulse</span>
+        <span className="text-base font-semibold tracking-tight text-zinc-100">OmniRev</span>
       </Link>
 
       <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">

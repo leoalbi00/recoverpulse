@@ -27,7 +27,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { Switch } from "@/components/ui/switch";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
-const DEV_VIEW_STORAGE_KEY = "recoverpulse:dev-view";
+const DEV_VIEW_STORAGE_KEY = "omnirev:dev-view";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -102,7 +102,7 @@ function SidebarContent({
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
         <span className="text-base font-bold tracking-tight text-zinc-100">
-          RecoverPulse
+          OmniRev
         </span>
       </Link>
 
@@ -246,7 +246,7 @@ function ProfileSwitcher({
             </div>
 
             <p className="mt-2.5 text-[11px] text-zinc-600">
-              Gestione multi-account in arrivo: qui potrai passare tra più profili RecoverPulse o account Stripe collegati.
+              Gestione multi-account in arrivo: qui potrai passare tra più profili OmniRev o account Stripe collegati.
             </p>
           </div>
 
@@ -300,7 +300,7 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
             <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
           </span>
           <span className="text-base font-semibold tracking-tight text-zinc-100">
-            RecoverPulse
+            OmniRev
           </span>
         </Link>
         <div className="flex items-center gap-1">

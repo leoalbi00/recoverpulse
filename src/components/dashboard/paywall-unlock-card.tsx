@@ -10,7 +10,7 @@ import type { TrialStatus } from "@/lib/trial";
  * Sostituisce grafico recupero + performance sequenze in
  * src/components/dashboard/dashboard-overview.tsx quando la prova di 14
  * giorni (legata allo Stripe account collegato, src/lib/trial.ts) è scaduta
- * e non risulta un abbonamento SaaS RecoverPulse attivo (src/lib/paywall.ts).
+ * e non risulta un abbonamento SaaS OmniRev attivo (src/lib/paywall.ts).
  */
 export function PaywallUnlockCard({ trial }: { trial: TrialStatus }) {
   const expiredOn = trial.trialEndsAt

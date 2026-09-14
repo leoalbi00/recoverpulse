@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 // Prefisso riconoscibile (stile Stripe `sk_live_...`) così una chiave che
 // finisce per errore in un log o in un repo pubblico è immediatamente
-// identificabile come credenziale RecoverPulse.
+// identificabile come credenziale OmniRev.
 const API_KEY_PREFIX = "rp_sdd_";
 
 function generateApiKey(): string {
@@ -78,7 +78,7 @@ export async function regenerateMerchantApiKey(userId: string): Promise<string> 
 }
 
 /**
- * Risolve l'utente RecoverPulse proprietario di una API Key, usata dal
+ * Risolve l'utente OmniRev proprietario di una API Key, usata dal
  * webhook universale SDD (/api/v1/webhooks/sdd) per autenticare le chiamate
  * in arrivo dai gestionali/CRM esterni.
  */

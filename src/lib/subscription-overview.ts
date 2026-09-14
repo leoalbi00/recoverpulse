@@ -25,7 +25,7 @@ const EMPTY_OVERVIEW: SubscriptionOverview = {
 };
 
 /**
- * Dettaglio dell'abbonamento SaaS RecoverPulse (data di prossimo rinnovo +
+ * Dettaglio dell'abbonamento SaaS OmniRev (data di prossimo rinnovo +
  * ultime fatture) letto live dall'account piattaforma Stripe invece che da
  * Supabase: `users.subscription_status/plan` (src/lib/billing.ts) bastano
  * per il paywall ma non conservano rinnovo o storico fatture. Usata dal

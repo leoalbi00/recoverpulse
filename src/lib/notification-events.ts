@@ -2,7 +2,7 @@
 // della dashboard) e i pannelli che modificano le notifiche altrove (es.
 // /dashboard/notifiche): un CustomEvent sul window evita di introdurre un
 // context/state manager globale solo per tenere sincronizzato il badge.
-const NOTIFICATIONS_CHANGED_EVENT = "recoverpulse:notifications-changed";
+const NOTIFICATIONS_CHANGED_EVENT = "omnirev:notifications-changed";
 
 export function broadcastNotificationsChanged() {
   window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));

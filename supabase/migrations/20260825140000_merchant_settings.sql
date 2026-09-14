@@ -1,9 +1,9 @@
 -- Impostazioni di brand del merchant (nome azienda, email di supporto, logo,
 -- colore primario), lette dinamicamente dal template email di dunning
 -- (src/lib/email.ts) e dal portale /pay/[token] per personalizzare
--- l'esperienza con il brand del cliente invece del solo brand RecoverPulse.
+-- l'esperienza con il brand del cliente invece del solo brand OmniRev.
 --
--- Tabella singleton: RecoverPulse qui è un'app a singolo merchant (un solo
+-- Tabella singleton: OmniRev qui è un'app a singolo merchant (un solo
 -- account Stripe/Resend per deploy, vedi src/lib/dunning-settings.ts e
 -- src/lib/integration-settings.ts, entrambe globali e non per-utente), quindi
 -- esiste una sola riga identificata dall'id fisso usato in
@@ -12,7 +12,7 @@
 
 create table if not exists public.merchant_settings (
   id uuid primary key,
-  company_name text not null default 'RecoverPulse',
+  company_name text not null default 'OmniRev',
   support_email text not null default '',
   logo_url text,
   primary_color text not null default '#10b981',

@@ -93,7 +93,7 @@ export function Footer() {
                 <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
               </span>
               <span className="text-base font-semibold tracking-tight text-zinc-100">
-                RecoverPulse
+                OmniRev
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-zinc-400">
@@ -139,7 +139,7 @@ export function Footer() {
 
         <div className="mt-14 flex flex-col items-center gap-4 border-t border-zinc-800 pt-8 text-sm text-zinc-500 sm:flex-row sm:justify-between">
           <span>
-            &copy; {new Date().getFullYear()} RecoverPulse. Tutti i diritti
+            &copy; {new Date().getFullYear()} OmniRev. Tutti i diritti
             riservati.
           </span>
           <div className="flex gap-6">

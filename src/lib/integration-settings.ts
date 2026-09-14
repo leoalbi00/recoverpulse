@@ -15,7 +15,7 @@ export type IntegrationSettings = {
 // A differenza delle tabelle applicative (transazioni, notifiche, impostazioni
 // dunning/brand — tutte per-utente, vedi supabase/migrations/20260831170000_...),
 // questa riga resta un singleton globale per scelta: Resend/Twilio sono le
-// credenziali di invio della PIATTAFORMA RecoverPulse (non del merchant
+// credenziali di invio della PIATTAFORMA OmniRev (non del merchant
 // collegato), quindi condivise da ogni account. Un unico id fisso, sempre lo
 // stesso a ogni upsert.
 const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";

@@ -47,7 +47,7 @@ export function ProblemSolution() {
                 <XCircle className="size-5 text-rose-400" />
               </span>
               <div>
-                <p className="text-xs font-medium tracking-wide text-rose-400 uppercase">Senza RecoverPulse</p>
+                <p className="text-xs font-medium tracking-wide text-rose-400 uppercase">Senza OmniRev</p>
                 <p className="text-lg font-semibold text-zinc-100">Carta Scaduta</p>
               </div>
             </div>
@@ -85,7 +85,7 @@ export function ProblemSolution() {
                 <CheckCircle2 className="size-5 text-emerald-400" />
               </span>
               <div>
-                <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">Con RecoverPulse</p>
+                <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">Con OmniRev</p>
                 <p className="text-lg font-semibold text-zinc-100">Sollecito Automatico</p>
               </div>
             </div>

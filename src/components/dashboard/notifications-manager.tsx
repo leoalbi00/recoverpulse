@@ -216,7 +216,7 @@ export function NotificationsManager({
       // spenta finché non scatta il prossimo poll (fino a 30s).
       broadcastNotificationsChanged();
     } catch {
-      setSimulateError("Impossibile contattare RecoverPulse. Riprova.");
+      setSimulateError("Impossibile contattare OmniRev. Riprova.");
     } finally {
       setSimulating(false);
     }

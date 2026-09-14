@@ -42,7 +42,7 @@ function TrialInfoPanel() {
       <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
         Beta Gratuita
       </span>
-      <h1 className="mt-4 text-xl font-semibold text-zinc-100">Prova RecoverPulse senza rischi</h1>
+      <h1 className="mt-4 text-xl font-semibold text-zinc-100">Prova OmniRev senza rischi</h1>
       <p className="mt-1.5 text-sm text-zinc-400">
         Recupera i pagamenti falliti in automatico, senza impegno e senza costi di abbonamento.
       </p>
@@ -487,7 +487,7 @@ export default function StartTrialPage() {
         <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-500">
           <Activity className="size-4 text-zinc-950" strokeWidth={2.5} />
         </span>
-        <span className="text-base font-semibold tracking-tight text-zinc-100">RecoverPulse</span>
+        <span className="text-base font-semibold tracking-tight text-zinc-100">OmniRev</span>
       </Link>
 
       <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">

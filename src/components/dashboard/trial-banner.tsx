@@ -4,7 +4,7 @@ import type { TrialStatus } from "@/lib/trial";
 import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 /**
- * RecoverPulse è in Beta Gratuita Pubblica: il paywall a prova scaduta è
+ * OmniRev è in Beta Gratuita Pubblica: il paywall a prova scaduta è
  * disattivato (src/lib/paywall.ts), quindi questo banner non conta più alla
  * rovescia verso un'attivazione a pagamento — è un promemoria persistente
  * dello stato Beta, mostrato a chiunque abbia una prova avviata (`connected`,

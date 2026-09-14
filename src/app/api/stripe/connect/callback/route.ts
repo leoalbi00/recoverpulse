@@ -49,7 +49,7 @@ export async function GET(request: Request) {
     }
 
     // Trasferimento silenzioso di proprietà: se questo Stripe account era già
-    // collegato a un altro utente RecoverPulse, gli viene tolto il
+    // collegato a un altro utente OmniRev, gli viene tolto il
     // collegamento prima di riassegnarlo. trial_started_at non viene mai
     // toccato da upsertConnectedStripeAccount, quindi la prova resta quella
     // originale indipendentemente da chi possiede l'account ora.

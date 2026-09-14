@@ -5,7 +5,7 @@
 --
 -- `user_id` diventa nullable per lo stesso motivo di public.tokens.user_id
 -- (vedi 20260816120000_init_schema.sql): il cron lavora su
--- failed_transactions, che non ha un RecoverPulse user_id associato senza
+-- failed_transactions, che non ha un OmniRev user_id associato senza
 -- Stripe Connect.
 
 alter table public.dunning_logs

@@ -1,7 +1,7 @@
 -- Motore di dunning automatico per insoluti SDD (SEPA Direct Debit),
 -- alimentato da un webhook universale (/api/v1/webhooks/sdd) per gestionali/
 -- CRM esterni che non passano da Stripe: un merchant che addebita i propri
--- clienti via SEPA Direct Debit può notificare RecoverPulse di un insoluto
+-- clienti via SEPA Direct Debit può notificare OmniRev di un insoluto
 -- (storno bancario, codici tipo AC01/MD01/MS02) e ricevere lo stesso
 -- trattamento di dunning automatico già in produzione per le carte
 -- (src/lib/dunning.ts, src/app/api/cron/dunning/route.ts).

@@ -46,7 +46,7 @@ export function SimulatedPaymentForm({ token, planName, amountFormatted, primary
 
       setSuccess(true);
     } catch {
-      setError("Impossibile contattare RecoverPulse. Riprova.");
+      setError("Impossibile contattare OmniRev. Riprova.");
       setSubmitting(false);
     }
   }
