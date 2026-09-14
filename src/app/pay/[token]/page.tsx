@@ -7,9 +7,11 @@ import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transa
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS, type MerchantSettings } from "@/lib/merchant-settings";
 import { getReadableTextColor } from "@/lib/color";
 import { tryCreateSetupIntent } from "@/lib/payment-portal";
+import { getPaypalSettings } from "@/lib/paypal-settings";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
 import { SimulatedPaymentForm } from "@/components/update-payment/simulated-payment-form";
+import { PaypalUpdateForm } from "@/components/update-payment/paypal-update-form";
 import { SecurityBadges } from "@/components/update-payment/security-badges";
 
 const DEMO_TOKENS = ["test-token-123", "demo"];
@@ -268,6 +270,70 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   }
 
   const amountFormatted = formatAmount(transaction.amount, transaction.currency);
+
+  // Ramo PayPal: nessun SetupIntent Stripe possibile (customer_id sintetico
+  // "paypal:<subscriptionId>", non un vero Customer Stripe), quindi va
+  // gestito prima e separatamente dal resto — a differenza degli insoluti
+  // SDD, che ricadono volutamente in "Modalità Simulazione" qui sotto, per
+  // PayPal esiste un percorso di recupero reale (Smart Buttons + revise
+  // della subscription) da mostrare invece.
+  if (transaction.paymentMethodType === "paypal") {
+    const paypalSettings = await getPaypalSettings(transaction.userId).catch(() => null);
+
+    if (!paypalSettings?.clientId || !transaction.paypalSubscriptionId) {
+      return (
+        <Shell merchant={merchant}>
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
+              <XCircle className="size-7 text-red-400" />
+            </span>
+            <div>
+              <p className="text-lg font-semibold text-white">Servizio non disponibile</p>
+              <p className="mt-1.5 text-sm text-zinc-400">
+                Non riusciamo ad aggiornare il tuo abbonamento PayPal in questo momento. Contatta il tuo fornitore
+                per assistenza.
+              </p>
+            </div>
+          </div>
+        </Shell>
+      );
+    }
+
+    return (
+      <Shell merchant={merchant}>
+        <div className="mb-6 text-center">
+          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+            Aggiornamento metodo di pagamento
+          </p>
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            Riattiva il tuo abbonamento
+          </h1>
+          <p className="mt-1.5 text-sm text-zinc-400">
+            Ciao {transaction.customerName}, il tuo ultimo pagamento su PayPal non è andato a buon fine. Aggiorna il
+            metodo su PayPal per continuare senza interruzioni.
+          </p>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+          <ActionRequiredBadge />
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-zinc-400">{transaction.planName}</p>
+            <p className="text-sm font-semibold text-white">{amountFormatted}</p>
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">{transaction.reason}</p>
+        </div>
+
+        <PaypalUpdateForm
+          token={token}
+          subscriptionId={transaction.paypalSubscriptionId}
+          paypalClientId={paypalSettings.clientId}
+          planName={transaction.planName}
+          amountFormatted={amountFormatted}
+        />
+      </Shell>
+    );
+  }
+
   const clientSecret = await tryCreateSetupIntent({ userId: transaction.userId, customerId: transaction.customerId });
 
   // Nessun vero SetupIntent Stripe ottenibile: transazione di test generata

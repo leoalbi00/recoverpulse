@@ -11,12 +11,11 @@ import {
 } from "@/components/ui/accordion";
 import { MerchantLegalProfilePanel } from "@/components/dashboard/merchant-legal-profile-panel";
 import { BrandSettingsPanel } from "@/components/dashboard/brand-settings-panel";
-import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
+import { PaymentIntegrationsPanel } from "@/components/dashboard/payment-integrations-panel";
 import { DunningChannelTabs } from "@/components/dashboard/dunning-channel-tabs";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { SubscriptionOverviewPanel } from "@/components/dashboard/subscription-overview-panel";
 import { BetaStatusCard } from "@/components/dashboard/beta-status-card";
-import { SddWebhookSettingsPanel } from "@/components/dashboard/sdd-webhook-settings-panel";
 import { getMerchantSettings, isMerchantProfileComplete } from "@/lib/merchant-settings";
 import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
 import { getBillingInfoForUser } from "@/lib/billing";
@@ -27,6 +26,7 @@ import { getTrialStatus } from "@/lib/trial";
 import { listTransactions, type FailedTransaction } from "@/lib/transactions";
 import { computePlanRecommendation } from "@/lib/plan-recommendation";
 import { getOrCreateMerchantApiKey } from "@/lib/merchant-api-keys";
+import { getPaypalSettings, isPaypalConfigured } from "@/lib/paypal-settings";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
@@ -70,6 +70,12 @@ export default async function ImpostazioniPage() {
     console.error("[impostazioni] errore nel recupero della API Key SDD:", error);
   }
   const sddWebhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/sdd`;
+  const paypalWebhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/paypal/${merchantApiKey}`;
+
+  const paypalSettings = await getPaypalSettings(session.user.id).catch((error) => {
+    console.error("[impostazioni] errore nel recupero delle credenziali PayPal:", error);
+    return null;
+  });
 
   const profileComplete = isMerchantProfileComplete(merchantSettings);
   const currentPlanName = PLANS.find((plan) => plan.id === billingInfo.subscriptionPlan)?.name ?? null;
@@ -143,19 +149,28 @@ export default async function ImpostazioniPage() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="stripe" className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5">
-          <AccordionTrigger className="py-4 text-zinc-100">Account Stripe</AccordionTrigger>
+        <AccordionItem
+          id="metodi-pagamento"
+          value="payments"
+          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+        >
+          <AccordionTrigger className="py-4 text-zinc-100">Metodi di Pagamento</AccordionTrigger>
           <AccordionContent>
             <p className="text-xs text-zinc-400">
-              Nessuna chiave da incollare né webhook da configurare a mano: un
-              click autorizza OmniRev a leggere i pagamenti falliti del
-              tuo account e a intervenire per te.
+              Stripe (1-click via OAuth), PayPal Subscriptions e il webhook universale SDD/SEPA: OmniRev intercetta
+              e recupera automaticamente gli insoluti di ciascun gateway collegato.
             </p>
             <div className="mt-3">
-              <StripeConnectCard
-                connected={connectedAccount !== null}
+              <PaymentIntegrationsPanel
+                stripeConnected={connectedAccount !== null}
                 stripeAccountId={connectedAccount?.stripeAccountId ?? null}
-                livemode={connectedAccount?.livemode ?? null}
+                stripeLivemode={connectedAccount?.livemode ?? null}
+                paypalConnected={paypalSettings ? isPaypalConfigured(paypalSettings) : false}
+                paypalClientId={paypalSettings?.clientId ?? ""}
+                paypalWebhookId={paypalSettings?.webhookId ?? ""}
+                paypalWebhookUrl={paypalWebhookUrl}
+                sddApiKey={merchantApiKey}
+                sddWebhookUrl={sddWebhookUrl}
               />
             </div>
           </AccordionContent>
@@ -180,31 +195,6 @@ export default async function ImpostazioniPage() {
               <DunningChannelTabs
                 initialTemplatesSettings={dunningTemplates}
                 initialChannelEmailEnabled={dunningChannelSettings.channels.email}
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem
-          id="integrazione-sdd"
-          value="sdd"
-          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
-        >
-          <AccordionTrigger className="py-4 text-zinc-100">
-            Integrazione SDD / SEPA
-          </AccordionTrigger>
-          <AccordionContent>
-            <p className="text-xs text-zinc-400">
-              Se addebiti i tuoi clienti via SEPA Direct Debit fuori da
-              Stripe, collega qui il tuo gestionale/CRM esterno: al primo
-              insoluto segnalato al webhook, OmniRev avvia in automatico
-              la sequenza di email di dunning dedicata, senza alcun
-              intervento manuale.
-            </p>
-            <div className="mt-3">
-              <SddWebhookSettingsPanel
-                initialApiKey={merchantApiKey}
-                webhookUrl={sddWebhookUrl}
               />
             </div>
           </AccordionContent>

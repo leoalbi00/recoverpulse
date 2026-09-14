@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export type TransactionStatus = "in_corso" | "recuperato" | "perso";
 
-export type PaymentMethodType = "card" | "sepa_debit";
+export type PaymentMethodType = "card" | "sepa_debit" | "paypal";
 
 export type FailedTransaction = {
   id: string;
@@ -34,6 +34,10 @@ export type FailedTransaction = {
   mandateReference: string | null;
   /** Codice di storno SEPA (es. AC01, MD01, MS02), solo per paymentMethodType 'sepa_debit'. */
   failureCode: string | null;
+  /** ID della subscription PayPal, solo per paymentMethodType 'paypal'. */
+  paypalSubscriptionId: string | null;
+  /** ID cliente/payer lato gateway esterno (es. PayPal Payer ID), solo per paymentMethodType 'paypal'. */
+  gatewayCustomerId: string | null;
 };
 
 type FailedTransactionRow = {
@@ -58,6 +62,8 @@ type FailedTransactionRow = {
   iban_last4: string | null;
   mandate_reference: string | null;
   failure_code: string | null;
+  paypal_subscription_id: string | null;
+  gateway_customer_id: string | null;
 };
 
 function mapRow(row: FailedTransactionRow): FailedTransaction {
@@ -83,6 +89,8 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
     ibanLast4: row.iban_last4,
     mandateReference: row.mandate_reference,
     failureCode: row.failure_code,
+    paypalSubscriptionId: row.paypal_subscription_id,
+    gatewayCustomerId: row.gateway_customer_id,
   };
 }
 
@@ -117,6 +125,10 @@ export async function recordFailedPayment(input: {
   mandateReference?: string | null;
   /** Codice di storno SEPA (AC01, MD01, MS02, ...), solo per 'sepa_debit'. */
   failureCode?: string | null;
+  /** ID della subscription PayPal, solo per 'paypal'. */
+  paypalSubscriptionId?: string | null;
+  /** ID cliente/payer lato gateway esterno, solo per 'paypal'. */
+  gatewayCustomerId?: string | null;
 }): Promise<FailedTransaction> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
@@ -141,6 +153,8 @@ export async function recordFailedPayment(input: {
         iban_last4: input.ibanLast4 ?? null,
         mandate_reference: input.mandateReference ?? null,
         failure_code: input.failureCode ?? null,
+        paypal_subscription_id: input.paypalSubscriptionId ?? null,
+        gateway_customer_id: input.gatewayCustomerId ?? null,
       },
       { onConflict: "invoice_id" }
     )

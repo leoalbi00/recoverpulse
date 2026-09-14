@@ -8,11 +8,14 @@ import { getTransactionByCustomerId, markInvoiceRecovered, type FailedTransactio
 import { stopDunningSequence } from "@/lib/dunning";
 import { notifyPaymentRecovered } from "@/lib/notifications";
 import { tryCreateSetupIntent } from "@/lib/payment-portal";
+import { getPaypalSettings } from "@/lib/paypal-settings";
+import { getPaypalSubscription } from "@/lib/paypal";
 import { sendRecoveryConfirmationEmail } from "@/lib/email";
 
 const confirmSchema = z.union([
   z.object({ setupIntentId: z.string().min(1) }),
   z.object({ simulate: z.literal(true) }),
+  z.object({ paypalSubscriptionId: z.string().min(1) }),
 ]);
 
 function formatAmount(amount: number, currency: string): string {
@@ -147,6 +150,47 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     }
 
     return NextResponse.json({ success: true, planName: transaction.planName, simulated: true });
+  }
+
+  if ("paypalSubscriptionId" in parsed.data) {
+    if (transaction.paymentMethodType !== "paypal" || transaction.paypalSubscriptionId !== parsed.data.paypalSubscriptionId) {
+      return NextResponse.json({ error: "Subscription PayPal non corrispondente alla fattura." }, { status: 409 });
+    }
+
+    const paypalSettings = await getPaypalSettings(transaction.userId);
+    if (!paypalSettings.clientId || !paypalSettings.clientSecret) {
+      return NextResponse.json({ error: "Nessun account PayPal collegato per questo merchant." }, { status: 409 });
+    }
+
+    // Non ci fidiamo del solo callback onApprove lato client (PaypalUpdateForm):
+    // verifichiamo lato server, con una vera chiamata all'API PayPal, che la
+    // subscription sia davvero tornata attiva prima di segnare la fattura
+    // come recuperata — stessa cautela della verifica del SetupIntent Stripe
+    // qui sopra.
+    let subscription: Awaited<ReturnType<typeof getPaypalSubscription>>;
+    try {
+      subscription = await getPaypalSubscription(
+        { clientId: paypalSettings.clientId, clientSecret: paypalSettings.clientSecret },
+        parsed.data.paypalSubscriptionId
+      );
+    } catch (error) {
+      console.error(`[update-payment-confirm] verifica subscription PayPal ${parsed.data.paypalSubscriptionId} non riuscita:`, error);
+      return NextResponse.json({ error: "Verifica dell'abbonamento PayPal non riuscita." }, { status: 502 });
+    }
+
+    if (subscription.status !== "ACTIVE") {
+      return NextResponse.json({ error: "L'abbonamento PayPal non risulta ancora attivo." }, { status: 400 });
+    }
+
+    await markPaymentTokenUsed(token);
+
+    const updated = await markInvoiceRecovered(transaction.invoiceId, transaction.userId);
+    if (updated) {
+      await stopDunningSequence(updated);
+      await notifyRecovery(updated);
+    }
+
+    return NextResponse.json({ success: true, planName: transaction.planName });
   }
 
   const stripeAccountId = await getStripeAccountIdForUser(transaction.userId).catch(() => null);
