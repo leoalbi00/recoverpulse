@@ -26,7 +26,13 @@ declare global {
 
 const SDK_SCRIPT_ID = "paypal-sdk-script";
 
-function loadPaypalSdk(clientId: string): Promise<void> {
+// Integrazione Partner: il client-id nell'SDK è quello della PIATTAFORMA
+// OmniRev (NEXT_PUBLIC_PAYPAL_PARTNER_CLIENT_ID, pubblico per costruzione,
+// analogo alla Publishable Key Stripe), non più un'app PayPal del singolo
+// merchant — il parametro merchant-id seleziona per conto di quale account
+// collegato via OAuth Partner (src/lib/paypal-partner.ts) vengono renderizzati
+// i pulsanti.
+function loadPaypalSdk(partnerClientId: string, merchantId: string): Promise<void> {
   if (window.paypal) return Promise.resolve();
 
   const existing = document.getElementById(SDK_SCRIPT_ID) as HTMLScriptElement | null;
@@ -40,7 +46,7 @@ function loadPaypalSdk(clientId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.id = SDK_SCRIPT_ID;
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&vault=true&intent=subscription`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(partnerClientId)}&merchant-id=${encodeURIComponent(merchantId)}&vault=true&intent=subscription`;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Caricamento SDK PayPal non riuscito."));
     document.body.appendChild(script);
@@ -50,7 +56,8 @@ function loadPaypalSdk(clientId: string): Promise<void> {
 type PaypalUpdateFormProps = {
   token: string;
   subscriptionId: string;
-  paypalClientId: string;
+  partnerClientId: string;
+  merchantId: string;
   planName: string;
   amountFormatted: string;
 };
@@ -63,7 +70,14 @@ type PaypalUpdateFormProps = {
  * l'utente riapprova lo stesso abbonamento con un metodo di pagamento
  * valido, senza doverne creare uno nuovo lato merchant.
  */
-export function PaypalUpdateForm({ token, subscriptionId, paypalClientId, planName, amountFormatted }: PaypalUpdateFormProps) {
+export function PaypalUpdateForm({
+  token,
+  subscriptionId,
+  partnerClientId,
+  merchantId,
+  planName,
+  amountFormatted,
+}: PaypalUpdateFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "confirming" | "success" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +85,7 @@ export function PaypalUpdateForm({ token, subscriptionId, paypalClientId, planNa
   useEffect(() => {
     let cancelled = false;
 
-    loadPaypalSdk(paypalClientId)
+    loadPaypalSdk(partnerClientId, merchantId)
       .then(() => {
         if (cancelled || !containerRef.current || !window.paypal) return;
 
@@ -114,7 +128,7 @@ export function PaypalUpdateForm({ token, subscriptionId, paypalClientId, planNa
     return () => {
       cancelled = true;
     };
-  }, [paypalClientId, subscriptionId, token]);
+  }, [partnerClientId, merchantId, subscriptionId, token]);
 
   if (status === "success") {
     return <PaymentSuccessStep planName={planName} amountFormatted={amountFormatted} />;

@@ -6,6 +6,7 @@ import { Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StripeConnectCard } from "@/components/dashboard/stripe-connect-card";
 import { PaypalSettingsPanel } from "@/components/dashboard/paypal-settings-panel";
+import { GoCardlessConnectCard } from "@/components/dashboard/gocardless-connect-card";
 import { SddWebhookSettingsPanel } from "@/components/dashboard/sdd-webhook-settings-panel";
 
 type ProviderTabId = "stripe" | "paypal" | "sepa";
@@ -30,9 +31,11 @@ export function PaymentIntegrationsPanel({
   stripeAccountId,
   stripeLivemode,
   paypalConnected,
-  paypalClientId,
-  paypalWebhookId,
-  paypalWebhookUrl,
+  paypalMerchantId,
+  paypalEmail,
+  gocardlessConnected,
+  gocardlessOrganisationId,
+  gocardlessOrganisationName,
   sddApiKey,
   sddWebhookUrl,
 }: {
@@ -40,9 +43,11 @@ export function PaymentIntegrationsPanel({
   stripeAccountId: string | null;
   stripeLivemode: boolean | null;
   paypalConnected: boolean;
-  paypalClientId: string;
-  paypalWebhookId: string;
-  paypalWebhookUrl: string;
+  paypalMerchantId: string | null;
+  paypalEmail: string | null;
+  gocardlessConnected: boolean;
+  gocardlessOrganisationId: string | null;
+  gocardlessOrganisationName: string | null;
   sddApiKey: string;
   sddWebhookUrl: string;
 }) {
@@ -92,15 +97,24 @@ export function PaymentIntegrationsPanel({
         )}
 
         {activeTab === "paypal" && (
-          <PaypalSettingsPanel
-            initialConnected={paypalConnected}
-            initialClientId={paypalClientId}
-            initialWebhookId={paypalWebhookId}
-            webhookUrl={paypalWebhookUrl}
-          />
+          <PaypalSettingsPanel connected={paypalConnected} merchantId={paypalMerchantId} email={paypalEmail} />
         )}
 
-        {activeTab === "sepa" && <SddWebhookSettingsPanel initialApiKey={sddApiKey} webhookUrl={sddWebhookUrl} />}
+        {activeTab === "sepa" && (
+          <div className="flex flex-col gap-6">
+            <GoCardlessConnectCard
+              connected={gocardlessConnected}
+              organisationId={gocardlessOrganisationId}
+              organisationName={gocardlessOrganisationName}
+            />
+            <div className="border-t border-zinc-200/80 pt-6">
+              <p className="mb-3 text-xs font-medium text-zinc-500">
+                In alternativa, se usi un gestionale/CRM diverso da GoCardless: webhook universale SDD/SEPA
+              </p>
+              <SddWebhookSettingsPanel initialApiKey={sddApiKey} webhookUrl={sddWebhookUrl} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

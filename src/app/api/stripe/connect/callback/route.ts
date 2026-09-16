@@ -27,17 +27,17 @@ export async function GET(request: Request) {
 
   if (oauthError) {
     console.warn(`[stripe-connect] autorizzazione annullata o rifiutata su Stripe: ${oauthError}`);
-    return NextResponse.redirect(`${settingsUrl}?connected=cancelled`);
+    return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=cancelled#metodi-pagamento`);
   }
 
   if (!code || !state) {
-    return NextResponse.redirect(`${settingsUrl}?connected=error`);
+    return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=error#metodi-pagamento`);
   }
 
   const verified = verifyConnectState(state);
   if (!verified) {
     console.error("[stripe-connect] state OAuth mancante, non valido o scaduto.");
-    return NextResponse.redirect(`${settingsUrl}?connected=error`);
+    return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=error#metodi-pagamento`);
   }
 
   try {
@@ -70,9 +70,9 @@ export async function GET(request: Request) {
 
     await setStripeAccountIdForUser(verified.userId, token.stripe_user_id);
 
-    return NextResponse.redirect(`${settingsUrl}?connected=success`);
+    return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=success#metodi-pagamento`);
   } catch (error) {
     console.error('Stripe Connect Callback Error:', error);
-    return NextResponse.redirect(`${settingsUrl}?connected=error`);
+    return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=error#metodi-pagamento`);
   }
 }

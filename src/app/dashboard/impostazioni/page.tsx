@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import { auth } from "@/auth";
@@ -12,12 +13,14 @@ import {
 import { MerchantLegalProfilePanel } from "@/components/dashboard/merchant-legal-profile-panel";
 import { BrandSettingsPanel } from "@/components/dashboard/brand-settings-panel";
 import { PaymentIntegrationsPanel } from "@/components/dashboard/payment-integrations-panel";
+import { ConnectStatusToast } from "@/components/dashboard/connect-status-toast";
 import { DunningChannelTabs } from "@/components/dashboard/dunning-channel-tabs";
 import { SubscriptionCard } from "@/components/dashboard/subscription-card";
 import { SubscriptionOverviewPanel } from "@/components/dashboard/subscription-overview-panel";
 import { BetaStatusCard } from "@/components/dashboard/beta-status-card";
 import { getMerchantSettings, isMerchantProfileComplete } from "@/lib/merchant-settings";
 import { getConnectedAccountForUser } from "@/lib/connected-stripe-accounts";
+import { getConnectedGoCardlessAccountForUser } from "@/lib/connected-gocardless-accounts";
 import { getBillingInfoForUser } from "@/lib/billing";
 import { getSubscriptionOverview } from "@/lib/subscription-overview";
 import { getDunningTemplates } from "@/lib/dunning-templates";
@@ -70,10 +73,14 @@ export default async function ImpostazioniPage() {
     console.error("[impostazioni] errore nel recupero della API Key SDD:", error);
   }
   const sddWebhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/sdd`;
-  const paypalWebhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/paypal/${merchantApiKey}`;
 
   const paypalSettings = await getPaypalSettings(session.user.id).catch((error) => {
-    console.error("[impostazioni] errore nel recupero delle credenziali PayPal:", error);
+    console.error("[impostazioni] errore nel recupero della connessione PayPal:", error);
+    return null;
+  });
+
+  const gocardlessAccount = await getConnectedGoCardlessAccountForUser(session.user.id).catch((error) => {
+    console.error("[impostazioni] errore nel recupero dell'account GoCardless collegato:", error);
     return null;
   });
 
@@ -87,6 +94,9 @@ export default async function ImpostazioniPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
+      <Suspense fallback={null}>
+        <ConnectStatusToast />
+      </Suspense>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
           Impostazioni
@@ -166,9 +176,11 @@ export default async function ImpostazioniPage() {
                 stripeAccountId={connectedAccount?.stripeAccountId ?? null}
                 stripeLivemode={connectedAccount?.livemode ?? null}
                 paypalConnected={paypalSettings ? isPaypalConfigured(paypalSettings) : false}
-                paypalClientId={paypalSettings?.clientId ?? ""}
-                paypalWebhookId={paypalSettings?.webhookId ?? ""}
-                paypalWebhookUrl={paypalWebhookUrl}
+                paypalMerchantId={paypalSettings?.merchantId || null}
+                paypalEmail={paypalSettings?.email ?? null}
+                gocardlessConnected={gocardlessAccount !== null}
+                gocardlessOrganisationId={gocardlessAccount?.organisationId ?? null}
+                gocardlessOrganisationName={gocardlessAccount?.organisationName ?? null}
                 sddApiKey={merchantApiKey}
                 sddWebhookUrl={sddWebhookUrl}
               />

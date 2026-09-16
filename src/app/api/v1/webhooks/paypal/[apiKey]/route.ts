@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 
 import { getUserIdForApiKey } from "@/lib/merchant-api-keys";
 import { getPaypalSettings, isPaypalConfigured } from "@/lib/paypal-settings";
+import { getValidPaypalAccessToken } from "@/lib/paypal-partner";
 import { verifyPaypalWebhookSignature, type PaypalWebhookHeaders } from "@/lib/paypal";
 import { recordFailedPayment } from "@/lib/transactions";
 import { createPaymentToken } from "@/lib/tokens";
@@ -112,12 +113,8 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
   }
 
   try {
-    const verified = await verifyPaypalWebhookSignature(
-      { clientId: settings.clientId, clientSecret: settings.clientSecret },
-      settings.webhookId,
-      signatureHeaders,
-      event
-    );
+    const accessToken = await getValidPaypalAccessToken(userId);
+    const verified = await verifyPaypalWebhookSignature(accessToken, settings.webhookId, signatureHeaders, event);
     if (!verified) {
       return NextResponse.json({ error: "Firma dell'evento PayPal non valida." }, { status: 401 });
     }

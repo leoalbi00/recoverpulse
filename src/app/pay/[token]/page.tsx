@@ -279,8 +279,9 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   // della subscription) da mostrare invece.
   if (transaction.paymentMethodType === "paypal") {
     const paypalSettings = await getPaypalSettings(transaction.userId).catch(() => null);
+    const paypalPartnerClientId = process.env.NEXT_PUBLIC_PAYPAL_PARTNER_CLIENT_ID ?? null;
 
-    if (!paypalSettings?.clientId || !transaction.paypalSubscriptionId) {
+    if (!paypalSettings?.merchantId || !paypalPartnerClientId || !transaction.paypalSubscriptionId) {
       return (
         <Shell merchant={merchant}>
           <div className="flex flex-col items-center gap-4 py-4 text-center">
@@ -326,7 +327,8 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
         <PaypalUpdateForm
           token={token}
           subscriptionId={transaction.paypalSubscriptionId}
-          paypalClientId={paypalSettings.clientId}
+          partnerClientId={paypalPartnerClientId}
+          merchantId={paypalSettings.merchantId}
           planName={transaction.planName}
           amountFormatted={amountFormatted}
         />

@@ -8,7 +8,8 @@ import { getTransactionByCustomerId, markInvoiceRecovered, type FailedTransactio
 import { stopDunningSequence } from "@/lib/dunning";
 import { notifyPaymentRecovered } from "@/lib/notifications";
 import { tryCreateSetupIntent } from "@/lib/payment-portal";
-import { getPaypalSettings } from "@/lib/paypal-settings";
+import { getPaypalSettings, isPaypalConfigured } from "@/lib/paypal-settings";
+import { getValidPaypalAccessToken } from "@/lib/paypal-partner";
 import { getPaypalSubscription } from "@/lib/paypal";
 import { sendRecoveryConfirmationEmail } from "@/lib/email";
 
@@ -158,7 +159,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     }
 
     const paypalSettings = await getPaypalSettings(transaction.userId);
-    if (!paypalSettings.clientId || !paypalSettings.clientSecret) {
+    if (!isPaypalConfigured(paypalSettings)) {
       return NextResponse.json({ error: "Nessun account PayPal collegato per questo merchant." }, { status: 409 });
     }
 
@@ -169,10 +170,8 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     // qui sopra.
     let subscription: Awaited<ReturnType<typeof getPaypalSubscription>>;
     try {
-      subscription = await getPaypalSubscription(
-        { clientId: paypalSettings.clientId, clientSecret: paypalSettings.clientSecret },
-        parsed.data.paypalSubscriptionId
-      );
+      const accessToken = await getValidPaypalAccessToken(transaction.userId);
+      subscription = await getPaypalSubscription(accessToken, parsed.data.paypalSubscriptionId);
     } catch (error) {
       console.error(`[update-payment-confirm] verifica subscription PayPal ${parsed.data.paypalSubscriptionId} non riuscita:`, error);
       return NextResponse.json({ error: "Verifica dell'abbonamento PayPal non riuscita." }, { status: 502 });

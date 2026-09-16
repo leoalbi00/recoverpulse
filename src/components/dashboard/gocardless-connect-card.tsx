@@ -1,36 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { CircleDollarSign, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import { Banknote, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-type PaypalSettingsPanelProps = {
+type GoCardlessConnectCardProps = {
   connected: boolean;
-  merchantId: string | null;
-  email: string | null;
+  organisationId: string | null;
+  organisationName: string | null;
 };
 
-function maskMerchantId(id: string): string {
+function maskOrganisationId(id: string): string {
   return id.length <= 4 ? id : `••••${id.slice(-4)}`;
 }
 
 /**
- * Sostituisce l'inserimento manuale di Client ID/Secret/Webhook ID
- * (rimosso da src/app/api/dashboard/paypal-settings/route.ts) con il flusso
- * OAuth PayPal Partner Onboarding: src/app/api/paypal/connect/authorize/route.ts
- * avvia l'onboarding, .../callback/route.ts lo completa (scambio codice,
- * registrazione automatica del webhook). Stesso schema del pulsante
- * "Connetti con Stripe" (src/components/dashboard/stripe-connect-card.tsx).
+ * Flusso OAuth2 GoCardless Partner App per il collegamento 1-click SEPA
+ * Direct Debit, alternativo al webhook universale gestito da
+ * SddWebhookSettingsPanel per chi usa un gestionale/CRM diverso da
+ * GoCardless. Vedi src/app/api/gocardless/connect/{authorize,callback}/route.ts.
  */
-export function PaypalSettingsPanel({ connected, merchantId, email }: PaypalSettingsPanelProps) {
+export function GoCardlessConnectCard({ connected, organisationId, organisationName }: GoCardlessConnectCardProps) {
   const [disconnecting, setDisconnecting] = useState(false);
 
   async function handleDisconnect() {
     setDisconnecting(true);
     try {
-      const response = await fetch("/api/paypal/connect", { method: "DELETE" });
+      const response = await fetch("/api/gocardless/connect", { method: "DELETE" });
       if (response.ok) window.location.reload();
     } finally {
       setDisconnecting(false);
@@ -42,14 +40,14 @@ export function PaypalSettingsPanel({ connected, merchantId, email }: PaypalSett
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-            <CircleDollarSign className="size-4 text-emerald-700" />
+            <Banknote className="size-4 text-emerald-700" />
           </span>
           <div>
-            <p className="text-sm font-medium text-zinc-900">Account PayPal</p>
+            <p className="text-sm font-medium text-zinc-900">Account GoCardless</p>
             <p className="mt-0.5 text-xs text-zinc-600">
               {connected
-                ? `Collegato${email ? ` · ${email}` : ""}: webhook e credenziali gestiti in automatico, nessuna configurazione manuale.`
-                : "Collega il tuo account PayPal in 1-click tramite l'onboarding ufficiale Partner PayPal: nessuna chiave da incollare, nessun webhook da configurare a mano."}
+                ? `Collegato${organisationName ? ` · ${organisationName}` : ""}: gli addebiti SEPA falliti sul tuo account GoCardless vengono intercettati automaticamente.`
+                : "Collega il tuo account GoCardless in 1-click via OAuth per recuperare in automatico gli addebiti SEPA Direct Debit falliti, senza copiare API key o configurare webhook a mano."}
             </p>
           </div>
         </div>
@@ -58,7 +56,7 @@ export function PaypalSettingsPanel({ connected, merchantId, email }: PaypalSett
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <Badge className="h-auto items-center gap-1 bg-emerald-100 px-2.5 py-1 text-emerald-800">
               <ShieldCheck className="size-3.5" />
-              Connesso{merchantId ? ` · ${maskMerchantId(merchantId)}` : ""}
+              Connesso{organisationId ? ` · ${maskOrganisationId(organisationId)}` : ""}
             </Badge>
             <Button
               type="button"
@@ -76,10 +74,10 @@ export function PaypalSettingsPanel({ connected, merchantId, email }: PaypalSett
           <Button
             type="button"
             size="sm"
-            render={<a href="/api/paypal/connect/authorize" />}
+            render={<a href="/api/gocardless/connect/authorize" />}
             className="shrink-0 gap-1.5"
           >
-            Connetti PayPal (1-Click)
+            Connetti SEPA / GoCardless (1-Click)
             <ExternalLink className="size-3.5" data-icon="inline-end" />
           </Button>
         )}
