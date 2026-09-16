@@ -171,7 +171,11 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
     let subscription: Awaited<ReturnType<typeof getPaypalSubscription>>;
     try {
       const accessToken = await getValidPaypalAccessToken(transaction.userId);
-      subscription = await getPaypalSubscription(accessToken, parsed.data.paypalSubscriptionId);
+      subscription = await getPaypalSubscription(
+        accessToken,
+        parsed.data.paypalSubscriptionId,
+        paypalSettings.environment
+      );
     } catch (error) {
       console.error(`[update-payment-confirm] verifica subscription PayPal ${parsed.data.paypalSubscriptionId} non riuscita:`, error);
       return NextResponse.json({ error: "Verifica dell'abbonamento PayPal non riuscita." }, { status: 502 });

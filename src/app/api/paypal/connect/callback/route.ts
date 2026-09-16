@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { verifyConnectState } from "@/lib/oauth-connect-state";
 import { exchangeAuthorizationCode, getMerchantIdentity, registerMerchantWebhook } from "@/lib/paypal-partner";
+import { resolvePaypalEnvironment } from "@/lib/paypal";
 import { savePaypalConnection } from "@/lib/paypal-settings";
 import { getOrCreateMerchantApiKey } from "@/lib/merchant-api-keys";
 
@@ -39,12 +40,13 @@ export async function GET(request: Request) {
   }
 
   try {
-    const tokens = await exchangeAuthorizationCode(code);
-    const identity = await getMerchantIdentity(tokens.accessToken);
+    const environment = resolvePaypalEnvironment();
+    const tokens = await exchangeAuthorizationCode(code, environment);
+    const identity = await getMerchantIdentity(tokens.accessToken, environment);
 
     const merchantApiKey = await getOrCreateMerchantApiKey(verified.userId);
     const webhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/paypal/${merchantApiKey}`;
-    const webhookId = await registerMerchantWebhook(tokens.accessToken, webhookUrl);
+    const webhookId = await registerMerchantWebhook(tokens.accessToken, webhookUrl, environment);
 
     await savePaypalConnection(verified.userId, {
       merchantId:
@@ -57,6 +59,7 @@ export async function GET(request: Request) {
       refreshToken: tokens.refreshToken,
       expiresInSeconds: tokens.expiresIn,
       webhookId,
+      environment,
     });
 
     return NextResponse.redirect(`${settingsUrl}?provider=paypal&connected=success#metodi-pagamento`);

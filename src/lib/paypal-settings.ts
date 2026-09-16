@@ -2,6 +2,7 @@ import "server-only";
 
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { encryptSecret, decryptSecret } from "@/lib/encryption";
+import type { PaypalEnvironment } from "@/lib/paypal";
 
 export type PaypalSettings = {
   /** Merchant/Payer ID assegnato da PayPal al merchant collegato (identity, non credenziale). */
@@ -14,6 +15,8 @@ export type PaypalSettings = {
   /** Webhook ID assegnato da PayPal alla registrazione automatica dell'URL webhook (src/lib/paypal-partner.ts). */
   webhookId: string;
   connectedAt: string | null;
+  /** Ambiente PayPal (live/sandbox) usato al momento del collegamento (src/lib/paypal.ts, PAYPAL_ENV): fissato per questa connessione, indipendentemente da eventuali cambi successivi della variabile d'ambiente globale. */
+  environment: PaypalEnvironment;
 };
 
 const EMPTY_SETTINGS: PaypalSettings = {
@@ -24,6 +27,7 @@ const EMPTY_SETTINGS: PaypalSettings = {
   tokenExpiresAt: null,
   webhookId: "",
   connectedAt: null,
+  environment: "live",
 };
 
 type PaypalSettingsRow = {
@@ -34,6 +38,7 @@ type PaypalSettingsRow = {
   token_expires_at: string | null;
   webhook_id: string;
   connected_at: string | null;
+  environment: PaypalEnvironment;
 };
 
 function mapRow(row: PaypalSettingsRow): PaypalSettings {
@@ -45,6 +50,7 @@ function mapRow(row: PaypalSettingsRow): PaypalSettings {
     tokenExpiresAt: row.token_expires_at,
     webhookId: row.webhook_id,
     connectedAt: row.connected_at,
+    environment: row.environment ?? "live",
   };
 }
 
@@ -52,7 +58,7 @@ function mapRow(row: PaypalSettingsRow): PaypalSettings {
 export async function getPaypalSettings(userId: string): Promise<PaypalSettings> {
   const { data, error } = await supabaseAdmin
     .from("paypal_settings")
-    .select("merchant_id, email, access_token, refresh_token, token_expires_at, webhook_id, connected_at")
+    .select("merchant_id, email, access_token, refresh_token, token_expires_at, webhook_id, connected_at, environment")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -77,6 +83,7 @@ export async function savePaypalConnection(
     refreshToken: string | null;
     expiresInSeconds: number | null;
     webhookId: string;
+    environment: PaypalEnvironment;
   }
 ): Promise<void> {
   const tokenExpiresAt = input.expiresInSeconds
@@ -92,6 +99,7 @@ export async function savePaypalConnection(
       refresh_token: input.refreshToken ? encryptSecret(input.refreshToken) : null,
       token_expires_at: tokenExpiresAt,
       webhook_id: input.webhookId,
+      environment: input.environment,
       connected_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },

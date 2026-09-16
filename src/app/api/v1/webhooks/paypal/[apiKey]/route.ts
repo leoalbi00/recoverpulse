@@ -114,7 +114,13 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
 
   try {
     const accessToken = await getValidPaypalAccessToken(userId);
-    const verified = await verifyPaypalWebhookSignature(accessToken, settings.webhookId, signatureHeaders, event);
+    const verified = await verifyPaypalWebhookSignature(
+      accessToken,
+      settings.webhookId,
+      signatureHeaders,
+      event,
+      settings.environment
+    );
     if (!verified) {
       return NextResponse.json({ error: "Firma dell'evento PayPal non valida." }, { status: 401 });
     }

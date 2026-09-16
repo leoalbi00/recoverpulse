@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getAppBaseUrl } from "@/lib/app-url";
+import { getPaypalApiBase, type PaypalEnvironment } from "@/lib/paypal";
 import { getPaypalSettings, updatePaypalTokens } from "@/lib/paypal-settings";
 
 // PayPal Partner Referrals API: genera l'onboarding "Connetti PayPal
@@ -8,7 +9,6 @@ import { getPaypalSettings, updatePaypalTokens } from "@/lib/paypal-settings";
 // il merchant debba mai creare una propria app PayPal REST o incollare
 // Client ID/Secret — sostituisce il flusso manuale precedente
 // (src/app/api/dashboard/paypal-settings/route.ts, rimosso).
-const PAYPAL_API_BASE = "https://api-m.paypal.com";
 
 function getPartnerCredentials(): { clientId: string; clientSecret: string; bnCode: string | null } {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_PARTNER_CLIENT_ID;
@@ -21,10 +21,10 @@ function getPartnerCredentials(): { clientId: string; clientSecret: string; bnCo
   return { clientId, clientSecret, bnCode: process.env.PAYPAL_PARTNER_BN_CODE ?? null };
 }
 
-async function getPartnerAccessToken(): Promise<string> {
+async function getPartnerAccessToken(environment: PaypalEnvironment): Promise<string> {
   const { clientId, clientSecret } = getPartnerCredentials();
 
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
@@ -49,12 +49,12 @@ async function getPartnerAccessToken(): Promise<string> {
  * authorization code (integrazione THIRD_PARTY, vedi
  * "Get a third-party access token" nella documentazione PayPal REST).
  */
-export async function createPartnerReferralUrl(state: string): Promise<string> {
+export async function createPartnerReferralUrl(state: string, environment: PaypalEnvironment): Promise<string> {
   const { bnCode } = getPartnerCredentials();
-  const accessToken = await getPartnerAccessToken();
+  const accessToken = await getPartnerAccessToken(environment);
   const returnUrl = `${getAppBaseUrl()}/api/paypal/connect/callback?state=${encodeURIComponent(state)}`;
 
-  const response = await fetch(`${PAYPAL_API_BASE}/v2/customer/partner-referrals`, {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v2/customer/partner-referrals`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -98,10 +98,13 @@ export async function createPartnerReferralUrl(state: string): Promise<string> {
 export type PaypalPartnerTokens = { accessToken: string; refreshToken: string | null; expiresIn: number | null };
 
 /** Scambia l'authorization code ricevuto nel redirect di ritorno con un access/refresh token scoped sul merchant. */
-export async function exchangeAuthorizationCode(code: string): Promise<PaypalPartnerTokens> {
+export async function exchangeAuthorizationCode(
+  code: string,
+  environment: PaypalEnvironment
+): Promise<PaypalPartnerTokens> {
   const { clientId, clientSecret } = getPartnerCredentials();
 
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
@@ -128,8 +131,11 @@ export async function exchangeAuthorizationCode(code: string): Promise<PaypalPar
 export type PaypalMerchantIdentity = { merchantId: string | null; email: string | null };
 
 /** Recupera identità (Payer ID/email) del merchant appena collegato, per salvarla accanto ai token. */
-export async function getMerchantIdentity(accessToken: string): Promise<PaypalMerchantIdentity> {
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/identity/oauth2/userinfo?schema=paypalv1.1`, {
+export async function getMerchantIdentity(
+  accessToken: string,
+  environment: PaypalEnvironment
+): Promise<PaypalMerchantIdentity> {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/identity/oauth2/userinfo?schema=paypalv1.1`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (!response.ok) return { merchantId: null, email: null };
@@ -139,8 +145,12 @@ export async function getMerchantIdentity(accessToken: string): Promise<PaypalMe
 }
 
 /** Registra in automatico il webhook universale PayPal per conto del merchant appena collegato (POST /v1/notifications/webhooks), con le credenziali del merchant stesso. */
-export async function registerMerchantWebhook(accessToken: string, webhookUrl: string): Promise<string> {
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/notifications/webhooks`, {
+export async function registerMerchantWebhook(
+  accessToken: string,
+  webhookUrl: string,
+  environment: PaypalEnvironment
+): Promise<string> {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/notifications/webhooks`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -182,7 +192,7 @@ export async function getValidPaypalAccessToken(userId: string): Promise<string>
   }
 
   const { clientId, clientSecret } = getPartnerCredentials();
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+  const response = await fetch(`${getPaypalApiBase(settings.environment)}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAppBaseUrl } from "@/lib/app-url";
 import { verifyConnectState } from "@/lib/oauth-connect-state";
-import { exchangeAuthorizationCode, getOrganisation } from "@/lib/gocardless";
+import { exchangeAuthorizationCode, getOrganisation, resolveGoCardlessEnvironment } from "@/lib/gocardless";
 import { upsertConnectedGoCardlessAccount } from "@/lib/connected-gocardless-accounts";
 
 export const dynamic = "force-dynamic";
@@ -36,19 +36,21 @@ export async function GET(request: Request) {
   }
 
   try {
+    const environment = resolveGoCardlessEnvironment();
     const redirectUri = `${getAppBaseUrl()}/api/gocardless/connect/callback`;
-    const tokens = await exchangeAuthorizationCode(code, redirectUri);
+    const tokens = await exchangeAuthorizationCode(code, redirectUri, environment);
     if (!tokens.organisationId) {
       throw new Error("Risposta GoCardless senza organisation_id.");
     }
 
-    const organisation = await getOrganisation(tokens.accessToken, tokens.organisationId);
+    const organisation = await getOrganisation(tokens.accessToken, tokens.organisationId, environment);
 
     await upsertConnectedGoCardlessAccount({
       organisationId: tokens.organisationId,
       userId: verified.userId,
       accessToken: tokens.accessToken,
       organisationName: organisation.name,
+      environment,
     });
 
     // Il webhook GoCardless è "universale" per design del prodotto: si

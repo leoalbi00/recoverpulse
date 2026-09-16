@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createConnectState } from "@/lib/oauth-connect-state";
-import { buildAuthorizeUrl } from "@/lib/gocardless";
+import { buildAuthorizeUrl, resolveGoCardlessEnvironment } from "@/lib/gocardless";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
   try {
     const redirectUri = `${getAppBaseUrl()}/api/gocardless/connect/callback`;
-    const authorizeUrl = buildAuthorizeUrl(state, redirectUri);
+    const authorizeUrl = buildAuthorizeUrl(state, redirectUri, resolveGoCardlessEnvironment());
     return NextResponse.redirect(authorizeUrl);
   } catch (error) {
     console.error("[gocardless-connect] errore nella generazione dell'URL di autorizzazione:", error);

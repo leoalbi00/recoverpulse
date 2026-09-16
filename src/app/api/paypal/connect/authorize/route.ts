@@ -5,6 +5,7 @@ import { getAppBaseUrl } from "@/lib/app-url";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createConnectState } from "@/lib/oauth-connect-state";
 import { createPartnerReferralUrl } from "@/lib/paypal-partner";
+import { resolvePaypalEnvironment } from "@/lib/paypal";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
   const state = createConnectState("paypal", session.user.id);
 
   try {
-    const actionUrl = await createPartnerReferralUrl(state);
+    const actionUrl = await createPartnerReferralUrl(state, resolvePaypalEnvironment());
     return NextResponse.redirect(actionUrl);
   } catch (error) {
     console.error("[paypal-connect] errore nella generazione dell'URL di onboarding:", error);

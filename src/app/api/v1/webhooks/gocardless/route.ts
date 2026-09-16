@@ -79,9 +79,13 @@ export async function POST(request: Request) {
       const account = await getConnectedGoCardlessAccountForUser(userId);
       if (!account) continue;
 
-      const payment = await getPayment(account.accessToken, paymentId);
-      const mandate = payment.links?.mandate ? await getMandate(account.accessToken, payment.links.mandate) : null;
-      const customer = mandate?.links?.customer ? await getCustomer(account.accessToken, mandate.links.customer) : null;
+      const payment = await getPayment(account.accessToken, paymentId, account.environment);
+      const mandate = payment.links?.mandate
+        ? await getMandate(account.accessToken, payment.links.mandate, account.environment)
+        : null;
+      const customer = mandate?.links?.customer
+        ? await getCustomer(account.accessToken, mandate.links.customer, account.environment)
+        : null;
 
       const customerEmail = customer?.email;
       if (!customerEmail) continue;

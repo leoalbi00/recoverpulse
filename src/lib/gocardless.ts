@@ -5,9 +5,33 @@ import "server-only";
 // alternativo al webhook universale generico (src/lib/merchant-api-keys.ts,
 // src/app/api/v1/webhooks/sdd/route.ts) per i merchant che processano gli
 // addebiti direttamente su GoCardless.
-const GOCARDLESS_OAUTH_BASE = "https://connect.gocardless.com";
-const GOCARDLESS_API_BASE = "https://api.gocardless.com";
 const GOCARDLESS_API_VERSION = "2015-07-06";
+
+export type GoCardlessEnvironment = "live" | "sandbox";
+
+const GOCARDLESS_OAUTH_BASES: Record<GoCardlessEnvironment, string> = {
+  live: "https://connect.gocardless.com",
+  sandbox: "https://connect-sandbox.gocardless.com",
+};
+
+const GOCARDLESS_API_BASES: Record<GoCardlessEnvironment, string> = {
+  live: "https://api.gocardless.com",
+  sandbox: "https://api-sandbox.gocardless.com",
+};
+
+/**
+ * Legge GOCARDLESS_ENV (default "live"): quale ambiente usare per le NUOVE
+ * connessioni Partner. L'ambiente di una connessione già esistente resta
+ * invece quello salvato al momento del collegamento
+ * (connected_gocardless_accounts.environment), così cambiare questa
+ * variabile non rompe i merchant già collegati in un ambiente diverso.
+ */
+export function resolveGoCardlessEnvironment(): GoCardlessEnvironment {
+  const raw = process.env.GOCARDLESS_ENV?.trim().toLowerCase();
+  if (!raw || raw === "live") return "live";
+  if (raw === "sandbox") return "sandbox";
+  throw new Error(`GOCARDLESS_ENV non valido: "${raw}" (atteso "live" o "sandbox").`);
+}
 
 function getPartnerCredentials(): { clientId: string; clientSecret: string } {
   const clientId = process.env.GOCARDLESS_CLIENT_ID;
@@ -19,9 +43,9 @@ function getPartnerCredentials(): { clientId: string; clientSecret: string } {
 }
 
 /** URL di autorizzazione OAuth2 per il pulsante "Connetti SEPA / GoCardless (1-Click)". */
-export function buildAuthorizeUrl(state: string, redirectUri: string): string {
+export function buildAuthorizeUrl(state: string, redirectUri: string, environment: GoCardlessEnvironment): string {
   const { clientId } = getPartnerCredentials();
-  const url = new URL(`${GOCARDLESS_OAUTH_BASE}/oauth/authorize`);
+  const url = new URL(`${GOCARDLESS_OAUTH_BASES[environment]}/oauth/authorize`);
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("initial_view", "login");
   url.searchParams.set("redirect_uri", redirectUri);
@@ -34,10 +58,14 @@ export function buildAuthorizeUrl(state: string, redirectUri: string): string {
 export type GoCardlessTokens = { accessToken: string; organisationId: string | null; scope: string | null };
 
 /** Scambia l'authorization code con un access_token scoped sull'organisation GoCardless del merchant. */
-export async function exchangeAuthorizationCode(code: string, redirectUri: string): Promise<GoCardlessTokens> {
+export async function exchangeAuthorizationCode(
+  code: string,
+  redirectUri: string,
+  environment: GoCardlessEnvironment
+): Promise<GoCardlessTokens> {
   const { clientId, clientSecret } = getPartnerCredentials();
 
-  const response = await fetch(`${GOCARDLESS_OAUTH_BASE}/oauth/access_token`, {
+  const response = await fetch(`${GOCARDLESS_OAUTH_BASES[environment]}/oauth/access_token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -67,8 +95,12 @@ export async function exchangeAuthorizationCode(code: string, redirectUri: strin
 export type GoCardlessOrganisation = { id: string; name: string | null };
 
 /** Recupera i dettagli dell'organisation collegata (nome mostrato in dashboard). */
-export async function getOrganisation(accessToken: string, organisationId: string): Promise<GoCardlessOrganisation> {
-  const response = await fetch(`${GOCARDLESS_API_BASE}/organisations/${organisationId}`, {
+export async function getOrganisation(
+  accessToken: string,
+  organisationId: string,
+  environment: GoCardlessEnvironment
+): Promise<GoCardlessOrganisation> {
+  const response = await fetch(`${GOCARDLESS_API_BASES[environment]}/organisations/${organisationId}`, {
     headers: { Authorization: `Bearer ${accessToken}`, "GoCardless-Version": GOCARDLESS_API_VERSION },
   });
   if (!response.ok) return { id: organisationId, name: null };
@@ -85,8 +117,12 @@ export type GoCardlessPayment = {
 };
 
 /** Usata dal webhook universale (src/app/api/v1/webhooks/gocardless/route.ts) per recuperare i dettagli di un pagamento fallito. */
-export async function getPayment(accessToken: string, paymentId: string): Promise<GoCardlessPayment> {
-  const response = await fetch(`${GOCARDLESS_API_BASE}/payments/${paymentId}`, {
+export async function getPayment(
+  accessToken: string,
+  paymentId: string,
+  environment: GoCardlessEnvironment
+): Promise<GoCardlessPayment> {
+  const response = await fetch(`${GOCARDLESS_API_BASES[environment]}/payments/${paymentId}`, {
     headers: { Authorization: `Bearer ${accessToken}`, "GoCardless-Version": GOCARDLESS_API_VERSION },
   });
   if (!response.ok) {
@@ -98,8 +134,12 @@ export async function getPayment(accessToken: string, paymentId: string): Promis
 
 export type GoCardlessMandate = { id: string; reference: string | null; links?: { customer?: string } };
 
-export async function getMandate(accessToken: string, mandateId: string): Promise<GoCardlessMandate> {
-  const response = await fetch(`${GOCARDLESS_API_BASE}/mandates/${mandateId}`, {
+export async function getMandate(
+  accessToken: string,
+  mandateId: string,
+  environment: GoCardlessEnvironment
+): Promise<GoCardlessMandate> {
+  const response = await fetch(`${GOCARDLESS_API_BASES[environment]}/mandates/${mandateId}`, {
     headers: { Authorization: `Bearer ${accessToken}`, "GoCardless-Version": GOCARDLESS_API_VERSION },
   });
   if (!response.ok) {
@@ -116,8 +156,12 @@ export type GoCardlessCustomer = {
   family_name: string | null;
 };
 
-export async function getCustomer(accessToken: string, customerId: string): Promise<GoCardlessCustomer> {
-  const response = await fetch(`${GOCARDLESS_API_BASE}/customers/${customerId}`, {
+export async function getCustomer(
+  accessToken: string,
+  customerId: string,
+  environment: GoCardlessEnvironment
+): Promise<GoCardlessCustomer> {
+  const response = await fetch(`${GOCARDLESS_API_BASES[environment]}/customers/${customerId}`, {
     headers: { Authorization: `Bearer ${accessToken}`, "GoCardless-Version": GOCARDLESS_API_VERSION },
   });
   if (!response.ok) {

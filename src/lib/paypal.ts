@@ -4,16 +4,37 @@ import "server-only";
 // - src/app/api/v1/webhooks/paypal/[apiKey]/route.ts (verifica firma evento)
 // - src/app/api/update-payment/[token]/confirm/route.ts (verifica stato subscription dopo la revise sul portale)
 //
-// v1: solo ambiente live (api-m.paypal.com), coerente con l'approccio già
-// seguito per Stripe in questo progetto.
-//
 // A differenza della versione precedente (credenziali Client ID/Secret
 // incollate a mano dal merchant, con grant_type=client_credentials), le
 // funzioni qui sotto operano direttamente con l'access_token "third-party"
 // ottenuto dall'onboarding OAuth Partner (src/lib/paypal-partner.ts) e
 // salvato cifrato in paypal_settings (src/lib/paypal-settings.ts) — nessuno
 // scambio di credenziali avviene più in questo modulo.
-const PAYPAL_API_BASE = "https://api-m.paypal.com";
+
+export type PaypalEnvironment = "live" | "sandbox";
+
+const PAYPAL_API_BASES: Record<PaypalEnvironment, string> = {
+  live: "https://api-m.paypal.com",
+  sandbox: "https://api-m.sandbox.paypal.com",
+};
+
+/**
+ * Legge PAYPAL_ENV (default "live"): quale ambiente usare per le NUOVE
+ * connessioni Partner (src/lib/paypal-partner.ts). L'ambiente di una
+ * connessione già esistente resta invece quello salvato al momento del
+ * collegamento (paypal_settings.environment), così cambiare questa variabile
+ * non rompe i merchant già collegati in un ambiente diverso.
+ */
+export function resolvePaypalEnvironment(): PaypalEnvironment {
+  const raw = process.env.PAYPAL_ENV?.trim().toLowerCase();
+  if (!raw || raw === "live") return "live";
+  if (raw === "sandbox") return "sandbox";
+  throw new Error(`PAYPAL_ENV non valido: "${raw}" (atteso "live" o "sandbox").`);
+}
+
+export function getPaypalApiBase(environment: PaypalEnvironment): string {
+  return PAYPAL_API_BASES[environment];
+}
 
 export type PaypalWebhookHeaders = {
   transmissionId: string;
@@ -35,9 +56,10 @@ export async function verifyPaypalWebhookSignature(
   accessToken: string,
   webhookId: string,
   headers: PaypalWebhookHeaders,
-  webhookEvent: unknown
+  webhookEvent: unknown,
+  environment: PaypalEnvironment
 ): Promise<boolean> {
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/notifications/verify-webhook-signature`, {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/notifications/verify-webhook-signature`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -77,8 +99,12 @@ export type PaypalSubscription = {
 };
 
 /** Usata da /api/update-payment/[token]/confirm per verificare, lato server, che la subscription sia davvero tornata attiva prima di segnare la fattura come recuperata. */
-export async function getPaypalSubscription(accessToken: string, subscriptionId: string): Promise<PaypalSubscription> {
-  const response = await fetch(`${PAYPAL_API_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
+export async function getPaypalSubscription(
+  accessToken: string,
+  subscriptionId: string,
+  environment: PaypalEnvironment
+): Promise<PaypalSubscription> {
+  const response = await fetch(`${getPaypalApiBase(environment)}/v1/billing/subscriptions/${subscriptionId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
