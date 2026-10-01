@@ -94,10 +94,7 @@ function SidebarContent({
 
   return (
     <div className="flex h-full flex-col">
-      <Link
-        href="/"
-        className="px-6 py-5 transition-opacity hover:opacity-80"
-      >
+      <Link href="/" aria-label="OmniRev — home" className="px-6 py-5">
         <Logo />
       </Link>
 
@@ -287,11 +284,8 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
       </div>
 
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:hidden">
-        <Link
-          href="/"
-          className="transition-opacity hover:opacity-80"
-        >
-          <Logo className="h-7" />
+        <Link href="/" aria-label="OmniRev — home">
+          <Logo size="sm" />
         </Link>
         <div className="flex items-center gap-1">
           <NotificationBell />

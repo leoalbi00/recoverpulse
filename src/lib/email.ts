@@ -4,6 +4,8 @@ import { Resend } from "resend";
 import { render } from "@react-email/components";
 
 import { RecoveryEmail } from "@/components/emails/recovery-email";
+import { getAppBaseUrl } from "@/lib/app-url";
+import { buildBrandMarkSvg } from "@/lib/brand";
 
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
 import { getIntegrationSettings } from "@/lib/integration-settings";
@@ -51,12 +53,17 @@ function escapeHtml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-// Marchio di fallback (nessun logo caricato dal merchant): stesso tracciato
-// dell'icona "Activity" di lucide-react usata nell'app, in SVG inline così è
-// visibile anche con il blocco immagini attivo di default nei client email.
+// Marchio di fallback (nessun logo caricato dal merchant): il simbolo
+// "Orbit" di OmniRev (src/lib/brand.ts) in tinta unica col colore leggibile
+// sul colore primario del merchant, in SVG inline così segue quel colore.
 function buildLogoMarkSvg(textColor: string): string {
-  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${textColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+  return buildBrandMarkSvg({ size: 18, monochrome: textColor });
 }
+
+// Logo delle email inviate da OmniRev stessa (pilota, accesso, OTP): PNG
+// ospitato (public/brand/, generato da scripts/generate-brand-assets.mjs)
+// perché Gmail e Outlook rimuovono gli SVG inline; 56px per schermi 2x.
+const OMNIREV_EMAIL_MARK = `<img src="${getAppBaseUrl()}/brand/omnirev-mark-email.png" width="28" height="28" alt="" style="display:block; border:0; border-radius:7px;" />`;
 
 function buildShieldSvg(color: string): string {
   return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle; margin-right:5px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>`;
@@ -703,11 +710,9 @@ function buildPilotRequestConfirmationEmailHtml({ name }: { name: string }): str
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
-                        <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
-                      </table>
+                      ${OMNIREV_EMAIL_MARK}
                     </td>
-                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                    <td style="vertical-align:middle; font-size:16px; font-weight:600; color:#09090b; letter-spacing:-0.03em;">
                       OmniRev
                     </td>
                   </tr>
@@ -1370,11 +1375,9 @@ function buildAuthEmailHtml({
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
-                        <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
-                      </table>
+                      ${OMNIREV_EMAIL_MARK}
                     </td>
-                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                    <td style="vertical-align:middle; font-size:16px; font-weight:600; color:#09090b; letter-spacing:-0.03em;">
                       OmniRev
                     </td>
                   </tr>
@@ -1583,11 +1586,9 @@ function buildOtpEmailHtml({ firstName, code, ttlLabel }: { firstName: string; c
                 <table role="presentation" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-right:8px; vertical-align:middle;">
-                      <table role="presentation" cellpadding="0" cellspacing="0" width="28" height="28" style="background-color:${OMNIREV_BRAND_COLOR}; border-radius:8px;">
-                        <tr><td align="center" valign="middle">${buildLogoMarkSvg("#052e21")}</td></tr>
-                      </table>
+                      ${OMNIREV_EMAIL_MARK}
                     </td>
-                    <td style="vertical-align:middle; font-size:16px; font-weight:700; color:#18181b; letter-spacing:-0.01em;">
+                    <td style="vertical-align:middle; font-size:16px; font-weight:600; color:#09090b; letter-spacing:-0.03em;">
                       OmniRev
                     </td>
                   </tr>

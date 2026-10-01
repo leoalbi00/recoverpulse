@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "OmniRev",
     short_name: "OmniRev",
     description:
-      "OmniRev trasforma i dati del tuo corpo in un punteggio di recupero chiaro e in un piano d'azione quotidiano per atleti e appassionati di performance.",
+      "Smart dunning per SaaS e abbonamenti: OmniRev recupera in automatico i pagamenti falliti.",
     start_url: "/",
     display: "standalone",
     background_color: "#09090b",
