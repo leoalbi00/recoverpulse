@@ -15,45 +15,38 @@ const TRUST_BADGES = [
 ];
 
 /**
- * Hero in scrollytelling: il titolo resta in primo piano all'inizio, poi
- * l'anteprima della dashboard si raddrizza dalla prospettiva 3D e si
- * ingrandisce fino a occupare lo schermo mentre il testo sfuma. Con
- * prefers-reduced-motion la dashboard resta piatta e ferma.
+ * Hero: testo e CTA in alto, anteprima della dashboard subito sotto, nel
+ * normale flusso del documento (nessun elemento sovrapposto, nessuna
+ * altezza fissa). Lo scroll pilota solo la card: entra inclinata in
+ * prospettiva 3D e si raddrizza ingrandendosi mentre arriva al centro dello
+ * schermo. Su schermi bassi (variante `short:`, max-height 700px, es.
+ * laptop 11-13") titolo, spaziature e card si riducono in proporzione. Con
+ * prefers-reduced-motion la card resta piatta e ferma.
  */
 export function HeroScroll() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const mockupRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
 
+  // 0 = bordo superiore della card al fondo del viewport, 1 = card centrata.
   const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
+    target: mockupRef,
+    offset: ["start end", "center center"],
   });
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 });
 
-  const rotateX = useTransform(progress, [0, 0.6], [reduceMotion ? 0 : 32, 0]);
-  const scale = useTransform(progress, [0, 0.6, 1], reduceMotion ? [1, 1, 1] : [0.82, 1.08, 1.14]);
-  const cardY = useTransform(progress, [0, 0.6], reduceMotion ? ["0%", "0%"] : ["10%", "-32%"]);
-  const headlineOpacity = useTransform(progress, [0, 0.3], [1, 0]);
-  const headlineY = useTransform(progress, [0, 0.3], [0, -80]);
-  const glowOpacity = useTransform(progress, [0, 0.6], [0.35, 0.8]);
+  const rotateX = useTransform(progress, [0, 1], [reduceMotion ? 0 : 28, 0]);
+  const scale = useTransform(progress, [0, 1], reduceMotion ? [1, 1] : [0.88, 1.04]);
+  const glowOpacity = useTransform(progress, [0, 1], [0.3, 0.75]);
 
   return (
-    <section ref={containerRef} className="relative h-[200vh] sm:h-[230vh]">
-      <div className="sticky top-0 flex h-svh flex-col items-center overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_0)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,black_20%,transparent_75%)]"
-        />
-        <motion.div
-          aria-hidden
-          style={{ opacity: glowOpacity }}
-          className="absolute top-1/3 left-1/2 -z-10 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-emerald-500/25 blur-[140px]"
-        />
+    <section className="relative overflow-x-clip">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_0)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,black_20%,transparent_75%)]"
+      />
 
-        <motion.div
-          style={{ opacity: headlineOpacity, y: headlineY }}
-          className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 pt-14 text-center sm:pt-20"
-        >
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-10 px-6 py-12 md:gap-14 md:py-20 short:gap-8 short:py-10">
+        <div className="flex max-w-4xl flex-col items-center gap-6 text-center short:gap-4">
           <Badge
             variant="outline"
             className="h-auto gap-1.5 rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-zinc-300"
@@ -62,17 +55,17 @@ export function HeroScroll() {
             Il churn involontario costa in media il 9% dell&apos;MRR
           </Badge>
 
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-6xl">
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl md:text-6xl md:leading-[1.05] short:md:text-5xl">
             Recupera fino al <span className="text-emerald-400">40% del fatturato</span> perso per
             pagamenti falliti.
           </h1>
 
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-pretty text-zinc-400 sm:text-lg">
+          <p className="max-w-2xl text-base leading-relaxed text-pretty text-zinc-400 sm:text-lg short:sm:text-base">
             OmniRev intercetta ogni addebito rifiutato, ne classifica la causa, ritenta al momento giusto e
             invia al cliente un link 1-click per aggiornare la carta. Il tuo team non insegue nessuno.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button
               size="lg"
               render={<a href="/start-trial" />}
@@ -91,7 +84,7 @@ export function HeroScroll() {
             </Button>
           </div>
 
-          <div className="mt-5 hidden flex-wrap items-center justify-center gap-x-6 gap-y-2 sm:flex">
+          <div className="hidden flex-wrap items-center justify-center gap-x-6 gap-y-2 sm:flex">
             {TRUST_BADGES.map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
                 <Icon className="size-3.5 text-emerald-500/80" />
@@ -99,12 +92,17 @@ export function HeroScroll() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        <div className="absolute inset-x-0 bottom-0 flex justify-center px-4 [perspective:1400px] sm:px-6">
+        <div ref={mockupRef} className="relative w-full max-w-4xl [perspective:1400px] short:max-w-2xl">
           <motion.div
-            style={{ rotateX, scale, y: cardY, transformOrigin: "50% 100%" }}
-            className="w-full max-w-3xl translate-y-[38%] will-change-transform sm:translate-y-[30%]"
+            aria-hidden
+            style={{ opacity: glowOpacity }}
+            className="pointer-events-none absolute inset-x-[10%] top-[15%] bottom-0 -z-10 rounded-full bg-emerald-500/25 blur-[120px]"
+          />
+          <motion.div
+            style={{ rotateX, scale, transformOrigin: "50% 0%" }}
+            className="mx-auto w-full max-w-full will-change-transform"
           >
             <DashboardMockup />
           </motion.div>

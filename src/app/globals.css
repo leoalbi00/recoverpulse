@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Viewport bassi (laptop 11-13", finestre ridotte): spaziature e scale più
+   compatte nelle sezioni a tutta altezza della landing. */
+@custom-variant short (@media (max-height: 700px));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

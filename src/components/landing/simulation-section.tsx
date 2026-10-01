@@ -52,8 +52,10 @@ export function SimulationSection() {
 
   return (
     <section ref={containerRef} aria-labelledby="simulation-title" className="relative h-[260vh]">
-      <div className="sticky top-0 flex h-svh items-center overflow-hidden">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-16">
+      {/* pt-24 = altezza della navbar sticky (banner Beta + barra da 64px); min-h-fit
+          lascia crescere il riquadro invece di tagliare il contenuto su schermi bassi. */}
+      <div className="sticky top-0 flex h-svh min-h-fit items-center overflow-hidden pt-24 pb-6 short:pb-4">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-2 lg:gap-16 short:gap-6">
           <div>
             <Badge
               variant="outline"
@@ -63,12 +65,12 @@ export function SimulationSection() {
             </Badge>
             <h2
               id="simulation-title"
-              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl"
+              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl short:text-2xl short:sm:text-3xl"
             >
               Cosa succede quando un pagamento fallisce
             </h2>
 
-            <ol className="mt-6 flex flex-col gap-3 lg:mt-10">
+            <ol className="mt-6 flex flex-col gap-3 lg:mt-10 short:mt-4 short:lg:mt-5">
               {STAGES.map((item, index) => (
                 <li
                   key={item.label}
@@ -77,14 +79,14 @@ export function SimulationSection() {
                     "rounded-xl border px-4 py-3 transition-all duration-500 sm:px-5 sm:py-4",
                     stage === index
                       ? "border-zinc-700 bg-zinc-900/80 opacity-100"
-                      : "hidden border-transparent opacity-40 lg:block"
+                      : "hidden border-transparent opacity-40 lg:block short:lg:hidden"
                   )}
                 >
                   <p className="font-mono text-[11px] tracking-wider text-zinc-500 uppercase">{item.label}</p>
                   <p className="mt-1 text-base font-semibold text-zinc-100">{item.title}</p>
                   <p
                     className={cn(
-                      "text-sm leading-relaxed text-zinc-400 transition-all duration-500",
+                      "text-sm leading-relaxed text-zinc-400 transition-all duration-500 max-sm:short:hidden",
                       stage === index ? "mt-1 max-h-24" : "max-h-0 overflow-hidden lg:mt-1 lg:max-h-24"
                     )}
                   >
@@ -123,7 +125,7 @@ function InvoiceCard({ stage }: { stage: Stage }) {
         transition={{ duration: 0.5 }}
         className="overflow-hidden rounded-2xl bg-white text-zinc-900 shadow-2xl shadow-black/50"
       >
-        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 short:py-3">
           <div>
             <p className="text-xs text-zinc-500">Fattura</p>
             <p className="font-mono text-sm font-medium">in_1Q8x2LZv · Growth</p>
@@ -155,11 +157,11 @@ function InvoiceCard({ stage }: { stage: Stage }) {
           </AnimatePresence>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 short:py-4">
           <p className="text-sm text-zinc-500">Importo</p>
           <p
             className={cn(
-              "mt-1 text-5xl font-semibold tracking-tight tabular-nums transition-colors duration-500",
+              "mt-1 text-5xl font-semibold tracking-tight tabular-nums short:text-4xl transition-colors duration-500",
               failed ? "text-rose-600" : "text-zinc-900"
             )}
           >
@@ -178,7 +180,7 @@ function InvoiceCard({ stage }: { stage: Stage }) {
           )}
         >
           <div className="overflow-hidden">
-            <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-5">
+            <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-5 short:py-3">
               <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
                 <BrainCircuit className="size-4 text-emerald-600" />
                 Diagnosi OmniRev

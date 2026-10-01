@@ -121,7 +121,7 @@ export function DashboardMockup() {
 
       {/* Badge fluttuanti fuori dalla carta: rinforzano il messaggio
           "recupero automatico" con un tocco di profondità, senza immagini. */}
-      <div className="absolute top-2 -right-2 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-right-6">
+      <div className="absolute top-2 -right-2 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-right-4">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
           <TrendingUp className="size-3.5 text-emerald-400" />
         </span>
@@ -131,7 +131,7 @@ export function DashboardMockup() {
         </div>
       </div>
 
-      <div className="absolute -bottom-2 -left-2 hidden items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-left-6 sm:flex">
+      <div className="absolute -bottom-2 -left-2 hidden items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 py-2.5 shadow-xl shadow-black/40 sm:-left-4 sm:flex">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-400/15">
           <Bell className="size-3.5 text-amber-400" />
         </span>
