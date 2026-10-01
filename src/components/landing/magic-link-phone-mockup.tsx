@@ -54,8 +54,10 @@ export function MagicLinkPhoneMockup() {
 
   return (
     <section ref={containerRef} aria-labelledby="magic-link-title" className="relative h-[220vh]">
-      <div className="sticky top-0 flex h-svh items-center overflow-hidden">
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 px-6 lg:grid-cols-2 lg:gap-16">
+      {/* pt-24 = altezza della navbar sticky (banner Beta + barra da 64px); min-h-fit
+          lascia crescere il riquadro invece di tagliare il contenuto su schermi bassi. */}
+      <div className="sticky top-0 flex h-svh min-h-fit items-center overflow-hidden pt-24 pb-6 short:pb-4">
+        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 px-6 lg:grid-cols-2 lg:gap-16 short:gap-5">
           <div className="order-2 lg:order-1">
             <Badge
               variant="outline"
@@ -65,11 +67,11 @@ export function MagicLinkPhoneMockup() {
             </Badge>
             <h2
               id="magic-link-title"
-              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl"
+              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl short:mt-3 short:text-2xl short:sm:text-3xl"
             >
               Dal rifiuto al recupero, senza che il tuo team muova un dito
             </h2>
-            <ul className="mt-8 hidden flex-col gap-5 sm:flex">
+            <ul className="mt-8 hidden flex-col gap-5 sm:flex short:mt-5 short:gap-3">
               {STEPS.map(({ icon: Icon, title, detail }) => (
                 <li key={title} className="flex gap-4">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 ring-1 ring-zinc-800">
@@ -97,7 +99,7 @@ function Phone({ recovered, ref }: { recovered: boolean; ref: React.Ref<HTMLDivE
   return (
     <div
       ref={ref}
-      className="relative h-[460px] w-[230px] rounded-[2.75rem] border border-zinc-700 bg-zinc-900 p-2.5 shadow-2xl shadow-black/60 sm:h-[560px] sm:w-[280px]"
+      className="relative h-[460px] w-[230px] rounded-[2.75rem] border border-zinc-700 bg-zinc-900 p-2.5 shadow-2xl shadow-black/60 sm:h-[560px] sm:w-[280px] short:h-[380px] short:w-[190px] short:sm:h-[440px] short:sm:w-[220px]"
     >
       <div
         aria-hidden
@@ -109,12 +111,12 @@ function Phone({ recovered, ref }: { recovered: boolean; ref: React.Ref<HTMLDivE
       <div className="relative flex h-full flex-col overflow-hidden rounded-[2.25rem] bg-gradient-to-b from-zinc-800 via-zinc-900 to-zinc-950">
         <div aria-hidden className="mx-auto mt-2.5 h-6 w-24 rounded-full bg-black" />
 
-        <div className="mt-8 text-center text-white">
-          <p className="text-5xl font-light tabular-nums sm:text-6xl">9:41</p>
+        <div className="mt-8 text-center text-white short:mt-4">
+          <p className="text-5xl font-light tabular-nums sm:text-6xl short:text-4xl short:sm:text-5xl">9:41</p>
           <p className="mt-1 text-xs text-zinc-400">giovedì 1 ottobre</p>
         </div>
 
-        <div className="mt-8 px-3" aria-live="polite">
+        <div className="mt-8 px-3 short:mt-4" aria-live="polite">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={recovered ? "recovered" : "failed"}
@@ -143,10 +145,10 @@ function Phone({ recovered, ref }: { recovered: boolean; ref: React.Ref<HTMLDivE
           </AnimatePresence>
         </div>
 
-        <div className="mt-auto px-6 pb-6">
+        <div className="mt-auto px-6 pb-6 short:px-4 short:pb-4">
           <div
             className={cn(
-              "flex h-11 items-center justify-center rounded-xl text-sm font-semibold transition-colors duration-500",
+              "flex h-11 items-center justify-center rounded-xl px-2 text-center text-sm leading-tight font-semibold whitespace-nowrap transition-colors duration-500 short:text-[11px]",
               recovered ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40" : "bg-white text-zinc-900"
             )}
           >
