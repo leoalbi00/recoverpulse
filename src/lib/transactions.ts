@@ -32,12 +32,22 @@ export type FailedTransaction = {
   ibanLast4: string | null;
   /** Riferimento al mandato SEPA (SDD), solo per paymentMethodType 'sepa_debit'. */
   mandateReference: string | null;
-  /** Codice di storno SEPA (es. AC01, MD01, MS02), solo per paymentMethodType 'sepa_debit'. */
+  /** Codice di rifiuto grezzo del gateway: codice di storno SEPA (es. AC01, MD01, MS02) per 'sepa_debit', decline/error code Stripe per 'card'. */
   failureCode: string | null;
   /** ID della subscription PayPal, solo per paymentMethodType 'paypal'. */
   paypalSubscriptionId: string | null;
   /** ID cliente/payer lato gateway esterno (es. PayPal Payer ID), solo per paymentMethodType 'paypal'. */
   gatewayCustomerId: string | null;
+  /** Categoria del motivo di rifiuto (src/lib/dunning-error-categorization.ts), null se non ancora classificato (es. eventi PayPal, privi di un codice di rifiuto strutturato). */
+  errorCategory: string | null;
+  /** Prossimo tentativo "intelligente" pianificato dal cron (src/app/api/cron/dunning/route.ts), override del calendario a step del template. Null = nessun override in corso. */
+  nextRetryAt: string | null;
+  /** true per expired_card/invalid_card: niente ulteriori solleciti a giorni fissi, si è già inviato il Magic Link nello step immediato. */
+  retryBypassed: boolean;
+  /** Tentativi di riaddebito automatico già eseguiti dal cron (src/app/api/cron/smart-retry/route.ts), max MAX_CHARGE_RETRIES. */
+  chargeRetryCount: number;
+  /** Prossimo tentativo di riaddebito via stripe.invoices.pay, null = nessuno pianificato. */
+  nextChargeRetryAt: string | null;
 };
 
 type FailedTransactionRow = {
@@ -64,6 +74,11 @@ type FailedTransactionRow = {
   failure_code: string | null;
   paypal_subscription_id: string | null;
   gateway_customer_id: string | null;
+  error_category: string | null;
+  next_retry_at: string | null;
+  retry_bypassed: boolean;
+  charge_retry_count: number | null;
+  next_charge_retry_at: string | null;
 };
 
 function mapRow(row: FailedTransactionRow): FailedTransaction {
@@ -91,6 +106,11 @@ function mapRow(row: FailedTransactionRow): FailedTransaction {
     failureCode: row.failure_code,
     paypalSubscriptionId: row.paypal_subscription_id,
     gatewayCustomerId: row.gateway_customer_id,
+    errorCategory: row.error_category,
+    nextRetryAt: row.next_retry_at,
+    retryBypassed: row.retry_bypassed ?? false,
+    chargeRetryCount: row.charge_retry_count ?? 0,
+    nextChargeRetryAt: row.next_charge_retry_at ?? null,
   };
 }
 
@@ -123,12 +143,18 @@ export async function recordFailedPayment(input: {
   ibanLast4?: string | null;
   /** Riferimento al mandato SEPA, solo per 'sepa_debit'. */
   mandateReference?: string | null;
-  /** Codice di storno SEPA (AC01, MD01, MS02, ...), solo per 'sepa_debit'. */
+  /** Codice di rifiuto grezzo del gateway: codice di storno SEPA (AC01, MD01, MS02, ...) per 'sepa_debit', decline/error code Stripe per 'card'. */
   failureCode?: string | null;
   /** ID della subscription PayPal, solo per 'paypal'. */
   paypalSubscriptionId?: string | null;
   /** ID cliente/payer lato gateway esterno, solo per 'paypal'. */
   gatewayCustomerId?: string | null;
+  /** Categoria del motivo di rifiuto (src/lib/dunning-error-categorization.ts), null se non classificabile. */
+  errorCategory?: string | null;
+  /** Prossimo tentativo "intelligente" già pianificato al momento della registrazione (insufficient_funds/bank_system_error). */
+  nextRetryAt?: Date | null;
+  /** true per expired_card/invalid_card: il cron non pianifica ulteriori solleciti a giorni fissi per questa fattura. */
+  retryBypassed?: boolean;
 }): Promise<FailedTransaction> {
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
@@ -155,6 +181,9 @@ export async function recordFailedPayment(input: {
         failure_code: input.failureCode ?? null,
         paypal_subscription_id: input.paypalSubscriptionId ?? null,
         gateway_customer_id: input.gatewayCustomerId ?? null,
+        error_category: input.errorCategory ?? null,
+        next_retry_at: input.nextRetryAt ? input.nextRetryAt.toISOString() : null,
+        retry_bypassed: input.retryBypassed ?? false,
       },
       { onConflict: "invoice_id" }
     )
@@ -173,12 +202,17 @@ export async function recordFailedPayment(input: {
  * o dal token del portale); resta opzionale solo per non rompere percorsi
  * legacy che non lo hanno ancora — se passato, filtra anche per proprietario
  * come difesa in profondità.
+ *
+ * Restituisce `null` se la fattura era già "recuperato": più percorsi possono
+ * segnare lo stesso recupero (portale /pay, cron di riaddebito, poi
+ * invoice.paid dal webhook) e solo il primo deve notificare/registrare.
  */
 export async function markInvoiceRecovered(invoiceId: string, userId?: string): Promise<FailedTransaction | null> {
   let query = supabaseAdmin
     .from("failed_transactions")
     .update({ status: "recuperato" satisfies TransactionStatus, recovered_at: new Date().toISOString() })
-    .eq("invoice_id", invoiceId);
+    .eq("invoice_id", invoiceId)
+    .neq("status", "recuperato" satisfies TransactionStatus);
   if (userId) query = query.eq("user_id", userId);
 
   const { data, error } = await query.select().maybeSingle();
@@ -209,6 +243,25 @@ export async function markFirstNoticeSent(invoiceId: string, userId: string): Pr
 
   if (error) {
     throw new Error(`Errore nell'aggiornamento di first_notice_sent_at su Supabase: ${error.message}`);
+  }
+}
+
+/**
+ * Consuma l'override "smart retry" (src/lib/dunning-error-categorization.ts)
+ * dopo che il cron di dunning lo ha usato per inviare un sollecito fuori dal
+ * calendario a giorni fissi: azzera `next_retry_at` così non rifiora alla
+ * prossima esecuzione, il calendario a step del template riprende da qui in
+ * poi in aggiunta al tentativo intelligente appena inviato.
+ */
+export async function clearNextRetryAt(invoiceId: string, userId: string): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ next_retry_at: null })
+    .eq("invoice_id", invoiceId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`Errore nell'aggiornamento di next_retry_at su Supabase: ${error.message}`);
   }
 }
 
@@ -344,3 +397,82 @@ export async function listActiveFailedTransactions(userId: string): Promise<Fail
 // stati spostati in src/lib/dashboard-analytics.ts: sono funzioni pure senza
 // dipendenze da Supabase, richiamabili anche dal componente client che
 // gestisce il filtro temporale della dashboard (niente "server-only" lì).
+
+/** Tentativi massimi di riaddebito automatico per fattura (vedi 20261001120000_stripe_charge_retry.sql). */
+export const MAX_CHARGE_RETRIES = 3;
+
+/**
+ * Pianifica il PRIMO riaddebito automatico di una fattura appena fallita.
+ * Condizionato a charge_retry_count = 0 e nessun tentativo già pianificato:
+ * un invoice.payment_failed generato dal nostro stesso tentativo fallito (o
+ * da una ridelivery) non riporta indietro il calendario dei riaddebiti.
+ */
+export async function scheduleFirstChargeRetry(invoiceId: string, userId: string, at: Date): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ next_charge_retry_at: at.toISOString() })
+    .eq("invoice_id", invoiceId)
+    .eq("user_id", userId)
+    .eq("charge_retry_count", 0)
+    .is("next_charge_retry_at", null);
+
+  if (error) {
+    throw new Error(`Errore nella pianificazione del riaddebito automatico su Supabase: ${error.message}`);
+  }
+}
+
+/** Fatture Stripe (carta) in corso con un riaddebito automatico scaduto, su tutti gli account. */
+export async function listDueChargeRetries(now: Date, limit: number): Promise<FailedTransaction[]> {
+  const { data, error } = await supabaseAdmin
+    .from("failed_transactions")
+    .select("*")
+    .eq("status", "in_corso" satisfies TransactionStatus)
+    .eq("payment_method_type", "card" satisfies PaymentMethodType)
+    .eq("retry_bypassed", false)
+    .lt("charge_retry_count", MAX_CHARGE_RETRIES)
+    .lte("next_charge_retry_at", now.toISOString())
+    .order("next_charge_retry_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Errore nel recupero dei riaddebiti pianificati su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map(mapRow);
+}
+
+/**
+ * Prenota il tentativo successivo PRIMA di chiamare Stripe: incrementa
+ * charge_retry_count e azzera next_charge_retry_at solo se il contatore è
+ * ancora quello letto da listDueChargeRetries. `null` = un'altra esecuzione
+ * concorrente ha già preso questa fattura (o non è più in corso).
+ */
+export async function claimChargeRetry(transaction: FailedTransaction): Promise<FailedTransaction | null> {
+  const { data, error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ charge_retry_count: transaction.chargeRetryCount + 1, next_charge_retry_at: null })
+    .eq("id", transaction.id)
+    .eq("status", "in_corso" satisfies TransactionStatus)
+    .eq("charge_retry_count", transaction.chargeRetryCount)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Errore nella prenotazione del riaddebito su Supabase: ${error.message}`);
+  }
+
+  return data ? mapRow(data) : null;
+}
+
+/** Pianifica il riaddebito successivo dopo un tentativo fallito (`null` = tentativi esauriti). */
+export async function scheduleNextChargeRetry(transactionId: string, at: Date | null): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("failed_transactions")
+    .update({ next_charge_retry_at: at ? at.toISOString() : null })
+    .eq("id", transactionId)
+    .eq("status", "in_corso" satisfies TransactionStatus);
+
+  if (error) {
+    throw new Error(`Errore nella pianificazione del riaddebito successivo su Supabase: ${error.message}`);
+  }
+}

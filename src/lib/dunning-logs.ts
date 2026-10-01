@@ -15,6 +15,23 @@ export type DunningLogStatus = "sent" | "failed";
 // Dunning" mostrati in dashboard con un evento che non è un sollecito.
 export const RECOVERY_STEP_DAYS = -1;
 
+// Sentinella distinta (non esclusa dalle letture sotto, a differenza di
+// RECOVERY_STEP_DAYS): il tentativo "smart retry" fuori calendario pianificato
+// da next_retry_at (src/lib/dunning-error-categorization.ts, consumato dal
+// cron in src/app/api/cron/dunning/route.ts) è a tutti gli effetti
+// un'email inviata al cliente, quindi resta visibile in "Tentativi
+// Dunning"/"Ultima Azione" (getDunningLogSummaries) e nel log di sistema
+// (listGlobalDunningLogs) — computeSequencePerformance (dashboard-analytics.ts)
+// lo ignora comunque da sé, perché non coincide mai col delayDays di uno step
+// reale del template (sempre >= 0). Il vincolo unique su (invoice_id,
+// step_days) fa sì che una fattura possa registrare al più UN tentativo smart
+// retry: se lo stesso invoice_id ricade una seconda volta in una categoria
+// con next_retry_at (es. un nuovo insufficient_funds sullo stesso invoice_id
+// riaperto da Stripe), il cron lo salta invece di inviarlo due volte — un
+// limite noto, accettabile rispetto alla complessità di uno step_days
+// variabile per data.
+export const SMART_RETRY_STEP_DAYS = -2;
+
 // Codice errore Postgres per violazione di un vincolo unique: due esecuzioni
 // concorrenti del cron dei solleciti hanno provato a registrare lo stesso
 // step per la stessa fattura, la seconda arriva qui e va ignorata (non è un

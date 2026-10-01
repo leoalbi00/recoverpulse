@@ -33,13 +33,17 @@ function mapRow(row: ConnectedStripeAccountRow): ConnectedStripeAccount {
 
 /**
  * Registra (o riassocia) un account Stripe collegato via OAuth
- * (src/app/api/stripe/connect/callback/route.ts). L'upsert è su
- * `stripe_account_id` e OMETTE deliberatamente `trial_started_at` dal
- * payload: la colonna ha un default `now()` applicato solo al primo insert,
- * mai toccato da un conflitto successivo, così i 14 giorni di prova restano
- * legati allo Stripe account per sempre, anche se viene ricollegato da un
- * altro utente OmniRev (vedi il trasferimento di proprietà nella route
- * di callback, che chiama questa funzione).
+ * (src/app/api/stripe/connect/callback/route.ts) e collega
+ * `users.stripe_account_id` nella STESSA transazione Postgres, tramite la
+ * funzione `connect_stripe_account` (20260920120000_webhook_idempotency_and_smart_retry.sql):
+ * prima di questa funzione erano due scritture separate (questo upsert +
+ * setStripeAccountIdForUser), un errore di rete tra le due poteva lasciare
+ * connected_stripe_accounts popolata ma l'utente senza l'account collegato
+ * (o viceversa dopo il trasferimento di proprietà gestito dal chiamante).
+ * L'RPC OMETTE deliberatamente `trial_started_at`: la colonna ha un default
+ * `now()` applicato solo al primo insert, mai toccato da un conflitto
+ * successivo, così i 14 giorni di prova restano legati allo Stripe account
+ * per sempre, anche se viene ricollegato da un altro utente OmniRev.
  */
 export async function upsertConnectedStripeAccount(input: {
   stripeAccountId: string;
@@ -50,26 +54,28 @@ export async function upsertConnectedStripeAccount(input: {
   scope?: string | null;
   livemode: boolean;
 }): Promise<ConnectedStripeAccount> {
+  const { error: rpcError } = await supabaseAdmin.rpc("connect_stripe_account", {
+    p_stripe_account_id: input.stripeAccountId,
+    p_user_id: input.userId,
+    p_access_token: input.accessToken,
+    p_refresh_token: input.refreshToken ?? null,
+    p_publishable_key: input.publishableKey ?? null,
+    p_scope: input.scope ?? null,
+    p_livemode: input.livemode,
+  });
+
+  if (rpcError) {
+    throw new Error(`Errore nel salvataggio atomico dell'account Stripe collegato su Supabase: ${rpcError.message}`);
+  }
+
   const { data, error } = await supabaseAdmin
     .from("connected_stripe_accounts")
-    .upsert(
-      {
-        stripe_account_id: input.stripeAccountId,
-        user_id: input.userId,
-        access_token: input.accessToken,
-        refresh_token: input.refreshToken ?? null,
-        publishable_key: input.publishableKey ?? null,
-        scope: input.scope ?? null,
-        livemode: input.livemode,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "stripe_account_id" }
-    )
     .select("stripe_account_id, user_id, access_token, publishable_key, livemode, trial_started_at")
+    .eq("stripe_account_id", input.stripeAccountId)
     .single();
 
   if (error) {
-    throw new Error(`Errore nel salvataggio dell'account Stripe collegato su Supabase: ${error.message}`);
+    throw new Error(`Errore nella rilettura dell'account Stripe collegato su Supabase: ${error.message}`);
   }
 
   return mapRow(data);
@@ -118,15 +124,6 @@ export async function getStripeAccountIdForUser(userId: string): Promise<string 
   }
 
   return data?.stripe_account_id ?? null;
-}
-
-/** Collega `stripeAccountId` all'utente dopo lo scambio OAuth (callback route). */
-export async function setStripeAccountIdForUser(userId: string, stripeAccountId: string): Promise<void> {
-  const { error } = await supabaseAdmin.from("users").update({ stripe_account_id: stripeAccountId }).eq("id", userId);
-
-  if (error) {
-    throw new Error(`Errore nel collegamento dell'account Stripe all'utente su Supabase: ${error.message}`);
-  }
 }
 
 /**

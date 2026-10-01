@@ -4,7 +4,7 @@
 // sia dal componente client che gestisce il filtro temporale interattivo
 // (src/components/dashboard/dashboard-overview.tsx).
 
-import type { FailedTransaction } from "@/lib/transactions";
+import type { FailedTransaction, PaymentMethodType } from "@/lib/transactions";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -167,6 +167,99 @@ export function computeMrrRecovered(all: FailedTransaction[], now: Date = new Da
     .reduce((sum, t) => sum + t.amount, 0);
 
   return { totalAmount, monthAmount, currency: all[0]?.currency ?? "usd" };
+}
+
+export type MrrLostStats = {
+  /** Somma di tutte le fatture segnate "perso", indipendentemente da quando. */
+  totalAmount: number;
+  /** Solo le fatture segnate "perso" nel mese solare corrente. Il timestamp di passaggio a "perso" non è tracciato separatamente: si usa `createdAt` come approssimazione (coerente con l'analisi per coorte di computeDashboardStats), non la data effettiva in cui il cron ha esaurito i tentativi. */
+  monthAmount: number;
+  currency: string;
+};
+
+/**
+ * MRR Perso: complemento di computeMrrRecovered per il confronto "recuperato
+ * vs perso" richiesto in dashboard — stessa base (tutto lo storico, non il
+ * periodo selezionato), stessa struttura.
+ */
+export function computeMrrLost(all: FailedTransaction[], now: Date = new Date()): MrrLostStats {
+  const lost = all.filter((t) => t.status === "perso");
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).getTime();
+
+  const totalAmount = lost.reduce((sum, t) => sum + t.amount, 0);
+  const monthAmount = lost
+    .filter((t) => new Date(t.createdAt).getTime() >= monthStart)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  return { totalAmount, monthAmount, currency: all[0]?.currency ?? "usd" };
+}
+
+export type GatewayBreakdownEntry = {
+  gateway: PaymentMethodType;
+  label: string;
+  totalCount: number;
+  recoveredCount: number;
+  recoveryRate: number;
+  recoveredAmount: number;
+  currency: string;
+};
+
+const GATEWAY_LABELS: Record<PaymentMethodType, string> = {
+  card: "Stripe",
+  paypal: "PayPal",
+  sepa_debit: "GoCardless / SDD",
+};
+
+/**
+ * Tasso di successo del recupero per gateway (Stripe/PayPal/GoCardless):
+ * `paymentMethodType` è già la distinzione salvata da ciascun webhook
+ * (src/lib/transactions.ts — 'card' per Stripe, 'paypal' per PayPal,
+ * 'sepa_debit' sia per GoCardless che per il webhook manuale SDD, che
+ * condividono lo stesso metodo di pagamento sottostante e non sono
+ * distinguibili a valle senza una colonna dedicata). Solo i gateway con
+ * almeno una fattura compaiono nel risultato.
+ */
+export function computeGatewayBreakdown(all: FailedTransaction[]): GatewayBreakdownEntry[] {
+  const byGateway = new Map<PaymentMethodType, FailedTransaction[]>();
+  for (const transaction of all) {
+    const bucket = byGateway.get(transaction.paymentMethodType) ?? [];
+    bucket.push(transaction);
+    byGateway.set(transaction.paymentMethodType, bucket);
+  }
+
+  return [...byGateway.entries()]
+    .map(([gateway, transactions]) => {
+      const recovered = transactions.filter((t) => t.status === "recuperato");
+      return {
+        gateway,
+        label: GATEWAY_LABELS[gateway] ?? gateway,
+        totalCount: transactions.length,
+        recoveredCount: recovered.length,
+        recoveryRate: transactions.length > 0 ? Math.round((recovered.length / transactions.length) * 100) : 0,
+        recoveredAmount: recovered.reduce((sum, t) => sum + t.amount, 0),
+        currency: transactions[0]?.currency ?? "usd",
+      };
+    })
+    .sort((a, b) => b.totalCount - a.totalCount);
+}
+
+export type AverageRecoveryTimeStats = {
+  /** Giorni medi tra `createdAt` (fallimento) e `recoveredAt` (saldo), arrotondati a un decimale. Null se nessuna fattura è ancora stata recuperata. */
+  averageDays: number | null;
+  sampleSize: number;
+};
+
+/** Tempo medio di recupero: giorni trascorsi dal fallimento al saldo, sulle sole fatture con stato "recuperato" (le uniche con un recoveredAt valorizzato). */
+export function computeAverageRecoveryTime(all: FailedTransaction[]): AverageRecoveryTimeStats {
+  const recovered = all.filter((t) => t.status === "recuperato" && t.recoveredAt);
+  if (recovered.length === 0) return { averageDays: null, sampleSize: 0 };
+
+  const totalDays = recovered.reduce((sum, t) => {
+    const days = (new Date(t.recoveredAt as string).getTime() - new Date(t.createdAt).getTime()) / DAY_MS;
+    return sum + Math.max(0, days);
+  }, 0);
+
+  return { averageDays: Math.round((totalDays / recovered.length) * 10) / 10, sampleSize: recovered.length };
 }
 
 export type VolumeAtRiskStats = {

@@ -92,6 +92,17 @@ export async function getUserIdForOrganisation(organisationId: string): Promise<
   return data?.user_id ?? null;
 }
 
+/** Tutti gli utenti con un'organisation GoCardless collegata, usata dal cron di dunning per includere anche i merchant senza Stripe (src/app/api/cron/dunning/route.ts). */
+export async function listConnectedGoCardlessUserIds(): Promise<string[]> {
+  const { data, error } = await supabaseAdmin.from("connected_gocardless_accounts").select("user_id");
+
+  if (error) {
+    throw new Error(`Errore nel recupero degli account GoCardless collegati su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => row.user_id);
+}
+
 /** Disconnette GoCardless per l'utente: elimina la riga collegata. */
 export async function clearGoCardlessAccountForUser(userId: string): Promise<void> {
   const { error } = await supabaseAdmin.from("connected_gocardless_accounts").delete().eq("user_id", userId);
