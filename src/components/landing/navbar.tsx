@@ -11,6 +11,7 @@ import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 const NAV_LINKS = [
   { label: "Caratteristiche", href: "#features" },
+  { label: "Demo", href: "#demo" },
   { label: "Calcola ROI", href: "#roi-calculator" },
   { label: "Prezzi", href: "#pricing" },
 ];

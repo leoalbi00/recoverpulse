@@ -1,20 +1,7 @@
-import { ArrowRight, AlertTriangle, Bell, CreditCard, Lock, ShieldCheck, TrendingUp } from "lucide-react";
+import { Bell, ShieldCheck, TrendingUp } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-const STATS = [
-  { value: "40%", label: "del fatturato perso recuperato" },
-  { value: "9%", label: "MRR medio a rischio churn involontario" },
-  { value: "5 min", label: "per collegare Stripe, no-code" },
-];
-
-const TRUST_BADGES = [
-  { icon: Lock, label: "Crittografia SSL a 256-bit" },
-  { icon: ShieldCheck, label: "GDPR Compliant" },
-  { icon: CreditCard, label: "Stripe Compatible" },
-];
-
+// Anteprima statica della dashboard usata dalla Hero in scrollytelling
+// (hero-scroll.tsx): solo markup e Tailwind, nessuna immagine.
 const MOCK_TRANSACTIONS = [
   { name: "Nova Studio SRL", amount: "€89,00", status: "recuperato" as const },
   { name: "Blue Ocean Agency", amount: "€199,00", status: "in_corso" as const },
@@ -37,9 +24,9 @@ const STATUS_LABEL = {
   in_corso: "In corso",
 };
 
-function DashboardMockup() {
+export function DashboardMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-md py-6 lg:mx-0 lg:max-w-none lg:py-8">
+    <div className="relative mx-auto w-full py-6">
       <div
         aria-hidden
         className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-emerald-500/10 blur-3xl"
@@ -154,99 +141,5 @@ function DashboardMockup() {
         </div>
       </div>
     </div>
-  );
-}
-
-export function Hero() {
-  return (
-    <section className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.1)_1px,transparent_0)] bg-[size:36px_36px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,black_20%,transparent_75%)]"
-      />
-      <div
-        aria-hidden
-        className="absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/20 blur-[120px]"
-      />
-      <div
-        aria-hidden
-        className="absolute top-10 right-0 -z-10 h-[380px] w-[380px] rounded-full bg-zinc-100/5 blur-[100px]"
-      />
-
-      <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
-        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-          <Badge
-            variant="outline"
-            className="h-auto gap-1.5 rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-zinc-300"
-          >
-            <AlertTriangle className="size-3.5 text-amber-400" />
-            Il churn involontario costa in media il 9% dell&apos;MRR
-          </Badge>
-
-          <h1 className="mt-8 text-4xl font-semibold tracking-tight text-zinc-100 sm:text-6xl">
-            Recupera fino al{" "}
-            <span className="text-emerald-500">40% del fatturato perso</span>{" "}
-            <br className="hidden sm:block" />
-            per carte di credito scadute.
-          </h1>
-
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
-            OmniRev intercetta ogni pagamento fallito su Stripe e avvia in
-            automatico una sequenza di solleciti via Email con link 1-click
-            per aggiornare la carta — senza che il tuo team debba inseguire un
-            solo cliente.
-          </p>
-
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              render={<a href="/start-trial" />}
-              className="h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-emerald-500/20"
-            >
-              Inizia Gratis
-              <ArrowRight className="size-4" data-icon="inline-end" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              render={<a href="#roi-calculator" />}
-              className="h-12 rounded-full px-8 text-base font-medium"
-            >
-              Calcola quanto puoi recuperare
-            </Button>
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 lg:justify-start">
-            {TRUST_BADGES.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
-                <Icon className="size-3.5 text-emerald-500/80" />
-                {label}
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-5 text-xs text-zinc-500">
-            OmniRev è in Beta Gratuita &mdash; nessuna carta di
-            credito richiesta per registrarsi &middot; connetti Stripe in pochi
-            minuti, no-code
-          </p>
-
-          <div className="mt-14 grid w-full max-w-lg grid-cols-3 gap-4 border-t border-zinc-800 pt-8">
-            {STATS.map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center lg:items-start">
-                <span className="text-2xl font-semibold text-zinc-100 sm:text-3xl">
-                  {stat.value}
-                </span>
-                <span className="mt-1 text-center text-xs text-zinc-500 sm:text-left sm:text-sm">
-                  {stat.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <DashboardMockup />
-      </div>
-    </section>
   );
 }

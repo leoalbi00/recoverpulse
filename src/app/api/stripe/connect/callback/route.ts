@@ -6,7 +6,6 @@ import { verifyConnectState } from "@/lib/stripe-connect-state";
 import {
   clearStripeAccountForUser,
   getUserIdForStripeAccount,
-  setStripeAccountIdForUser,
   upsertConnectedStripeAccount,
 } from "@/lib/connected-stripe-accounts";
 
@@ -58,6 +57,10 @@ export async function GET(request: Request) {
       await clearStripeAccountForUser(previousOwnerId);
     }
 
+    // Scrittura atomica (RPC connect_stripe_account, vedi
+    // src/lib/connected-stripe-accounts.ts): registra l'account collegato e
+    // aggiorna users.stripe_account_id nella stessa transazione Postgres,
+    // niente stato intermedio inconsistente se una delle due scritture fallisse.
     await upsertConnectedStripeAccount({
       stripeAccountId: token.stripe_user_id,
       userId: verified.userId,
@@ -67,8 +70,6 @@ export async function GET(request: Request) {
       scope: token.scope,
       livemode: token.livemode ?? false,
     });
-
-    await setStripeAccountIdForUser(verified.userId, token.stripe_user_id);
 
     return NextResponse.redirect(`${settingsUrl}?provider=stripe&connected=success#metodi-pagamento`);
   } catch (error) {

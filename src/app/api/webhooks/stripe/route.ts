@@ -8,6 +8,7 @@ import {
   markInvoiceRecovered,
   markSubscriptionLost,
   recordFailedPayment,
+  scheduleFirstChargeRetry,
 } from "@/lib/transactions";
 import { startDunningSequence, stopDunningSequence } from "@/lib/dunning";
 import { setStripeCustomerForUser, setSubscriptionForUser, getUserIdForStripeCustomer } from "@/lib/billing";
@@ -16,6 +17,9 @@ import { createPaymentToken } from "@/lib/tokens";
 import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications";
 import { sendCardExpiringEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
+import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
+import { requirePaymentSlots } from "@/lib/guardrails";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +27,10 @@ export const dynamic = "force-dynamic";
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
 // dunning parte comunque verso questo indirizzo di test.
 const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
+
+// Primo riaddebito automatico via stripe.invoices.pay, eseguito dal cron
+// src/app/api/cron/smart-retry/route.ts (backoff successivo: +24h, +48h).
+const FIRST_CHARGE_RETRY_DELAY_MS = 12 * 60 * 60 * 1000;
 
 async function resolveCustomer(
   stripe: Stripe,
@@ -59,6 +67,40 @@ function resolveSubscriptionId(invoice: Stripe.Invoice): string | null {
   return typeof subscription === "string" ? subscription : subscription.id;
 }
 
+/**
+ * `invoice.last_finalization_error` copre solo un fallimento della
+ * FINALIZZAZIONE della fattura (bozza -> aperta) — per il caso comune di
+ * `invoice.payment_failed` (fattura già finalizzata, tentativo di addebito
+ * automatico fallito) resta sempre null, quindi non è una fonte valida per il
+ * decline code reale. In questa versione dell'API l'oggetto Invoice non
+ * espone più `payment_intent` direttamente (vedi handlePaymentIntentSucceeded
+ * sopra): il decline code va recuperato risalendo a `invoice.payments`,
+ * l'elenco dei tentativi di pagamento della fattura, fino al PaymentIntent
+ * del tentativo più recente.
+ */
+async function resolveLastPaymentError(
+  stripe: Stripe,
+  invoiceId: string
+): Promise<Stripe.PaymentIntent.LastPaymentError | null> {
+  try {
+    const withPayments = await stripe.invoices.retrieve(invoiceId, {
+      expand: ["payments.data.payment.payment_intent"],
+    });
+
+    const payments = withPayments.payments?.data ?? [];
+    for (let i = payments.length - 1; i >= 0; i--) {
+      const paymentIntent = payments[i].payment?.payment_intent;
+      if (paymentIntent && typeof paymentIntent !== "string" && paymentIntent.last_payment_error) {
+        return paymentIntent.last_payment_error;
+      }
+    }
+  } catch (error) {
+    console.error(`[stripe-webhook] impossibile risolvere il PaymentIntent della fattura ${invoiceId}:`, error);
+  }
+
+  return null;
+}
+
 async function handleInvoicePaymentFailed(
   stripe: Stripe,
   invoice: Stripe.Invoice,
@@ -71,6 +113,17 @@ async function handleInvoicePaymentFailed(
 
   const customer = await resolveCustomer(stripe, invoice.customer);
 
+  // STOP-SLOT (src/lib/guardrails.ts): senza cliente, fattura, importo e
+  // valuta confermati non si registra l'insoluto, non si genera il Magic
+  // Link e non parte alcun sollecito.
+  const slots = requirePaymentSlots("stripe-webhook", {
+    customerId: customer.id,
+    invoiceId: invoice.id,
+    amount: invoice.amount_due,
+    currency: invoice.currency,
+  });
+  if (!slots) return;
+
   if (!customer.email) {
     console.warn(
       `[stripe-webhook] ATTENZIONE: nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (probabile evento di test da Stripe CLI). Uso l'email di fallback "${FALLBACK_TEST_EMAIL}" invece di saltare l'invio.`
@@ -78,11 +131,29 @@ async function handleInvoicePaymentFailed(
     customer.email = FALLBACK_TEST_EMAIL;
   }
 
+  const planName = invoice.lines.data[0]?.description ?? "Abbonamento";
+  const invoiceId = slots.invoiceId;
+
+  // Il decline code reale vive sul PaymentIntent del tentativo di addebito,
+  // non su last_finalization_error (vedi resolveLastPaymentError sopra).
+  const lastPaymentError = await resolveLastPaymentError(stripe, invoiceId);
+
   const reason =
+    lastPaymentError?.message ??
     invoice.last_finalization_error?.message ??
     "Pagamento rifiutato dall'istituto emittente della carta.";
-  const planName = invoice.lines.data[0]?.description ?? "Abbonamento";
-  const invoiceId = invoice.id ?? crypto.randomUUID();
+
+  // Smart Retry & Error Categorization: classifica il motivo di rifiuto per
+  // decidere se ha senso ritentare l'addebito automaticamente, e quando (vedi
+  // src/lib/dunning-error-categorization.ts, usato in modo identico dai
+  // webhook PayPal/GoCardless/SDD per restare coerenti tra gateway).
+  const errorCategory = categorizeGatewayError({
+    code: lastPaymentError?.code ?? invoice.last_finalization_error?.code,
+    declineCode: lastPaymentError?.decline_code ?? invoice.last_finalization_error?.decline_code,
+    message: lastPaymentError?.message ?? invoice.last_finalization_error?.message,
+  });
+  const nextRetryAt = computeNextRetryAt(errorCategory);
+  const retryBypassed = isRetryBypassCategory(errorCategory);
 
   // Log dettagliato di conferma ricezione evento, visibile sia nei log di
   // Vercel (Functions > Logs) sia in locale con `stripe listen` + `next dev`:
@@ -110,6 +181,10 @@ async function handleInvoicePaymentFailed(
     reason,
     paymentLinkToken,
     hostedInvoiceUrl: invoice.hosted_invoice_url,
+    failureCode: lastPaymentError?.code ?? invoice.last_finalization_error?.code ?? null,
+    errorCategory,
+    nextRetryAt,
+    retryBypassed,
   });
 
   console.log(
@@ -118,6 +193,25 @@ async function handleInvoicePaymentFailed(
   console.log(
     `[stripe-webhook] avvio dunning per fattura ${invoiceId}: customerEmail="${transaction.customerEmail}" paymentLinkToken=${paymentLinkToken ? "presente" : "assente"}`
   );
+
+  if (!retryBypassed) {
+    try {
+      await scheduleFirstChargeRetry(invoiceId, userId, new Date(Date.now() + FIRST_CHARGE_RETRY_DELAY_MS));
+    } catch (error) {
+      console.error(`[stripe-webhook] impossibile pianificare il riaddebito automatico per la fattura ${invoiceId}:`, error);
+    }
+  }
+
+  // Fallimento generato da un nostro riaddebito automatico (il cron ha già
+  // incrementato charge_retry_count prima di chiamare stripe.invoices.pay):
+  // notifica ed email di recupero le invia il cron stesso, qui ripartirebbe
+  // lo step "immediate" una seconda volta.
+  if (transaction.chargeRetryCount > 0) {
+    console.log(
+      `[stripe-webhook] fattura ${invoiceId}: fallimento del riaddebito automatico n.${transaction.chargeRetryCount}, email gestita da cron/smart-retry.`
+    );
+    return;
+  }
 
   await notifyPaymentFailed(transaction);
   await startDunningSequence(transaction);
@@ -377,6 +471,18 @@ export async function POST(request: Request) {
     // webhook non sia configurato quando in realtà lo è.
     console.error("[stripe-webhook] richiesta priva dell'header stripe-signature.");
     return NextResponse.json({ error: "Firma webhook mancante." }, { status: 400 });
+  }
+
+  // Idempotenza: Stripe può ri-consegnare lo stesso evento (timeout, retry
+  // dopo un 5xx transitorio) — senza questo controllo una ridelivery
+  // rispedirebbe l'email di dunning e riavvierebbe la sequenza da capo.
+  // `claimWebhookEvent` registra l'event.id una sola volta grazie al vincolo
+  // unique su webhook_events(provider, event_id): la seconda consegna trova
+  // `false` e ritorna 200 senza rieseguire alcun effetto collaterale.
+  const isNewEvent = await claimWebhookEvent("stripe", event.id, event.type);
+  if (!isNewEvent) {
+    console.log(`[stripe-webhook] evento ${event.id} (${event.type}) già elaborato: ridelivery ignorata.`);
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   // event.account presente = evento generato da un account collegato via

@@ -8,6 +8,7 @@ import { createPaymentToken } from "@/lib/tokens";
 import { startDunningSequence } from "@/lib/dunning";
 import { notifyPaymentFailed } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 
 export const dynamic = "force-dynamic";
 
@@ -104,6 +105,10 @@ export async function POST(request: Request) {
   try {
     const paymentLinkToken = await createPaymentToken({ customerId, userId });
 
+    const errorCategory = categorizeGatewayError({ code: data.failure_code, message: data.failure_reason });
+    const nextRetryAt = computeNextRetryAt(errorCategory);
+    const retryBypassed = isRetryBypassCategory(errorCategory);
+
     const transaction = await recordFailedPayment({
       userId,
       invoiceId,
@@ -121,6 +126,9 @@ export async function POST(request: Request) {
       ibanLast4: data.iban_last4 ?? null,
       mandateReference: data.mandate_ref,
       failureCode: data.failure_code ?? null,
+      errorCategory,
+      nextRetryAt,
+      retryBypassed,
     });
 
     console.log(

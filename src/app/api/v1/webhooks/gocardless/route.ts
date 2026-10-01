@@ -8,6 +8,8 @@ import { createPaymentToken } from "@/lib/tokens";
 import { startDunningSequence } from "@/lib/dunning";
 import { notifyPaymentFailed } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 
 export const dynamic = "force-dynamic";
 
@@ -21,14 +23,35 @@ type GoCardlessEvent = {
   details?: { cause?: string; description?: string };
 };
 
-function verifySignature(rawBody: string, signature: string | null): boolean {
+type SignatureResult = "valid" | "invalid" | "dev-bypass";
+
+/**
+ * Fallback morbido dev/preview: se GOCARDLESS_WEBHOOK_SECRET non è ancora
+ * configurato (tipico di un ambiente locale/preview appena creato) accettiamo
+ * il payload senza verificarne l'autenticità invece di bloccare i test,
+ * stesso principio già applicato al webhook Stripe
+ * (src/app/api/webhooks/stripe/route.ts). Mai in produzione: NODE_ENV vale
+ * sempre "production" su Vercel, dove il secret resta obbligatorio.
+ */
+function verifySignature(rawBody: string, signature: string | null): SignatureResult {
   const secret = process.env.GOCARDLESS_WEBHOOK_SECRET;
-  if (!secret || !signature) return false;
+  if (!secret) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[webhooks/gocardless] GOCARDLESS_WEBHOOK_SECRET non configurato: payload accettato senza verifica (solo dev/preview)."
+      );
+      return "dev-bypass";
+    }
+    return "invalid";
+  }
+
+  if (!signature) return "invalid";
 
   const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
   const provided = Buffer.from(signature);
   const expectedBuf = Buffer.from(expected);
-  return provided.length === expectedBuf.length && crypto.timingSafeEqual(provided, expectedBuf);
+  const matches = provided.length === expectedBuf.length && crypto.timingSafeEqual(provided, expectedBuf);
+  return matches ? "valid" : "invalid";
 }
 
 /**
@@ -52,7 +75,7 @@ export async function POST(request: Request) {
 
   const rawBody = await request.text();
   const signature = request.headers.get("webhook-signature");
-  if (!verifySignature(rawBody, signature)) {
+  if (verifySignature(rawBody, signature) === "invalid") {
     return NextResponse.json({ error: "Firma webhook non valida." }, { status: 401 });
   }
 
@@ -71,6 +94,16 @@ export async function POST(request: Request) {
     const organisationId = event.links?.organisation;
     const paymentId = event.links?.payment;
     if (!organisationId || !paymentId) continue;
+
+    // Idempotenza: GoCardless raggruppa più eventi per richiesta e può
+    // ri-consegnare lo stesso evento in una notifica successiva. `event.id`
+    // è univoco lato GoCardless, coerente con lo stesso pattern usato dal
+    // webhook Stripe (src/app/api/webhooks/stripe/route.ts).
+    const isNewEvent = await claimWebhookEvent("gocardless", event.id, `${event.resource_type}.${event.action}`);
+    if (!isNewEvent) {
+      console.log(`[webhooks/gocardless] evento ${event.id} già elaborato: ridelivery ignorata.`);
+      continue;
+    }
 
     try {
       const userId = await getUserIdForOrganisation(organisationId);
@@ -98,6 +131,13 @@ export async function POST(request: Request) {
 
       const paymentLinkToken = await createPaymentToken({ customerId, userId });
 
+      const errorCategory = categorizeGatewayError({
+        code: event.details?.cause,
+        message: event.details?.description,
+      });
+      const nextRetryAt = computeNextRetryAt(errorCategory);
+      const retryBypassed = isRetryBypassCategory(errorCategory);
+
       const transaction = await recordFailedPayment({
         userId,
         invoiceId,
@@ -114,6 +154,9 @@ export async function POST(request: Request) {
         paymentMethodType: "sepa_debit",
         mandateReference: mandate?.reference ?? null,
         failureCode: event.details?.cause ?? null,
+        errorCategory,
+        nextRetryAt,
+        retryBypassed,
       });
 
       console.log(

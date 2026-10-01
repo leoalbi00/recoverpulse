@@ -1,5 +1,9 @@
 import "server-only";
+import { createElement } from "react";
 import { Resend } from "resend";
+import { render } from "@react-email/components";
+
+import { RecoveryEmail } from "@/components/emails/recovery-email";
 
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS } from "@/lib/merchant-settings";
 import { getIntegrationSettings } from "@/lib/integration-settings";
@@ -1706,4 +1710,73 @@ export async function sendTrialActivationCodeEmail({
     console.error(`[email] eccezione imprevista nell'invio del codice di attivazione a "${to}":`, error);
     return false;
   }
+}
+
+/**
+ * Email di recupero dopo un riaddebito automatico fallito
+ * (src/app/api/cron/smart-retry/route.ts), renderizzata con React Email
+ * (src/components/emails/recovery-email.tsx) invece dei template HTML a
+ * stringa usati dagli step della sequenza dunning. Come sendDunningEmail,
+ * propaga l'errore al chiamante.
+ */
+export async function sendChargeRetryFailedEmail({
+  userId,
+  to,
+  customerName,
+  planName,
+  amountFormatted,
+  recoveryLink,
+  failureReason,
+  nextAttemptLabel,
+}: {
+  userId: string;
+  to: string;
+  customerName: string;
+  planName: string;
+  amountFormatted: string;
+  recoveryLink: string;
+  failureReason?: string | null;
+  /** Data leggibile del prossimo riaddebito, null = tentativi esauriti. */
+  nextAttemptLabel: string | null;
+}): Promise<void> {
+  if (!to) {
+    console.warn("[email] invio saltato: email cliente mancante.");
+    return;
+  }
+
+  const resend = await getResendClient();
+  if (!resend) {
+    console.warn("[email] Resend API Key non configurata: invio email di riaddebito fallito saltato.");
+    return;
+  }
+
+  const merchant = await getMerchantSettings(userId);
+  const companyName = merchant.companyName || DEFAULT_MERCHANT_SETTINGS.companyName;
+  const primaryColor = merchant.primaryColor || DEFAULT_MERCHANT_SETTINGS.primaryColor;
+
+  const html = await render(
+    createElement(RecoveryEmail, {
+      companyName,
+      logoUrl: merchant.logoUrl,
+      primaryColor,
+      primaryTextColor: getReadableTextColor(primaryColor),
+      customerName,
+      planName,
+      amountFormatted,
+      recoveryLink,
+      failureReason,
+      nextAttemptLabel,
+      supportEmail: merchant.supportEmail,
+    })
+  );
+
+  const from = buildFromHeader(merchant.senderName, companyName);
+  const subject = `Pagamento di ${amountFormatted} non riuscito — aggiorna la tua carta`;
+
+  const { data, error } = await resend.emails.send({ from, to, subject, html });
+  if (error) {
+    throw new Error(`Errore nell'invio dell'email di riaddebito fallito tramite Resend: ${error.message}`);
+  }
+
+  console.log(`[email] email di riaddebito fallito inviata a "${to}" (Resend id: ${data?.id ?? "n/d"}).`);
 }

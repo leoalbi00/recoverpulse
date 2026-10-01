@@ -13,9 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OmniRev — Recupera più forte. Performa più a lungo.",
+  title: "OmniRev — Recupera i pagamenti falliti in automatico",
   description:
-    "OmniRev trasforma i dati del tuo corpo in un punteggio di recupero chiaro e in un piano d'azione quotidiano per atleti e appassionati di performance.",
+    "Smart dunning per SaaS e abbonamenti: OmniRev intercetta ogni pagamento fallito, ritenta l'addebito al momento giusto e invia al cliente un link 1-click per aggiornare la carta.",
+  openGraph: {
+    title: "OmniRev — Recupera i pagamenti falliti in automatico",
+    description:
+      "Recupera fino al 40% del fatturato perso per carte scadute e fondi insufficienti, senza inseguire i clienti.",
+    type: "website",
+    locale: "it_IT",
+    siteName: "OmniRev",
+  },
 };
 
 export const viewport: Viewport = {

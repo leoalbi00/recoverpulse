@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertTriangle, DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { AlertTriangle, Clock, DollarSign, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecoveryChart } from "@/components/dashboard/recovery-chart";
@@ -13,6 +13,9 @@ import {
   computeDashboardStats,
   computeMonthlyRecoveryChartData,
   computeMrrRecovered,
+  computeMrrLost,
+  computeGatewayBreakdown,
+  computeAverageRecoveryTime,
   computeTotalRevenue,
   computeVolumeAtRisk,
   computeSequencePerformance,
@@ -49,6 +52,9 @@ export function DashboardOverview({
   const stats = useMemo(() => computeDashboardStats(allTransactions), [allTransactions]);
   const totalRevenue = useMemo(() => computeTotalRevenue(allTransactions), [allTransactions]);
   const mrr = useMemo(() => computeMrrRecovered(allTransactions), [allTransactions]);
+  const mrrLost = useMemo(() => computeMrrLost(allTransactions), [allTransactions]);
+  const gatewayBreakdown = useMemo(() => computeGatewayBreakdown(allTransactions), [allTransactions]);
+  const avgRecoveryTime = useMemo(() => computeAverageRecoveryTime(allTransactions), [allTransactions]);
   const volumeAtRisk = useMemo(() => computeVolumeAtRisk(allTransactions), [allTransactions]);
   const chartData = useMemo(() => computeMonthlyRecoveryChartData(allTransactions, 6), [allTransactions]);
   const sequencePerformance = useMemo(
@@ -89,6 +95,27 @@ export function DashboardOverview({
           value={formatCurrency(volumeAtRisk.amount, volumeAtRisk.currency)}
           delta={`${volumeAtRisk.count} fatture in corso di recupero`}
           trend={volumeAtRisk.amount > 0 ? "down" : "neutral"}
+        />
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <StatCard
+          icon={TrendingDown}
+          label="MRR Perso"
+          value={formatCurrency(mrrLost.totalAmount, mrrLost.currency)}
+          delta={`${formatCurrency(mrrLost.monthAmount, mrrLost.currency)} questo mese`}
+          trend={mrrLost.totalAmount > 0 ? "down" : "neutral"}
+        />
+        <StatCard
+          icon={Clock}
+          label="Tempo Medio di Recupero"
+          value={avgRecoveryTime.averageDays !== null ? `${avgRecoveryTime.averageDays} giorni` : "—"}
+          delta={
+            avgRecoveryTime.sampleSize > 0
+              ? `su ${avgRecoveryTime.sampleSize} fatture recuperate`
+              : "Nessun recupero ancora registrato"
+          }
+          trend="neutral"
         />
       </div>
 
@@ -163,6 +190,57 @@ export function DashboardOverview({
                             )}
                           >
                             {step.reached > 0 ? `${step.conversionRate}%` : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="mt-10 scroll-mt-20">
+            <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-6 shadow-md sm:p-8">
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-900">Recupero per Gateway</h2>
+                <p className="mt-1 text-sm text-zinc-600">
+                  Tasso di successo del recupero suddiviso per metodo di pagamento collegato.
+                </p>
+              </div>
+
+              {gatewayBreakdown.length === 0 ? (
+                <p className="mt-6 py-4 text-center text-sm text-zinc-600">
+                  Nessun insoluto registrato ancora su nessun gateway.
+                </p>
+              ) : (
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
+                        <th className="px-3 pb-3 font-medium first:pl-0">Gateway</th>
+                        <th className="px-3 pb-3 font-medium">Fatture Fallite</th>
+                        <th className="px-3 pb-3 font-medium">Recuperate</th>
+                        <th className="px-3 pb-3 font-medium">Importo Recuperato</th>
+                        <th className="px-3 pb-3 text-right font-medium last:pr-0">Tasso di Successo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-200">
+                      {gatewayBreakdown.map((entry) => (
+                        <tr key={entry.gateway} className="transition-colors hover:bg-zinc-100">
+                          <td className="px-3 py-3 font-medium text-zinc-900 first:pl-0">{entry.label}</td>
+                          <td className="px-3 py-3 text-zinc-600">{entry.totalCount}</td>
+                          <td className="px-3 py-3 text-zinc-600">{entry.recoveredCount}</td>
+                          <td className="px-3 py-3 text-zinc-600">
+                            {formatCurrency(entry.recoveredAmount, entry.currency)}
+                          </td>
+                          <td
+                            className={cn(
+                              "px-3 py-3 text-right font-semibold last:pr-0",
+                              conversionColorClass(entry.totalCount, entry.recoveryRate)
+                            )}
+                          >
+                            {entry.recoveryRate}%
                           </td>
                         </tr>
                       ))}

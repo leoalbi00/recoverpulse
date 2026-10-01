@@ -140,6 +140,17 @@ export async function updatePaypalTokens(
   }
 }
 
+/** Tutti gli utenti con una connessione PayPal attiva (merchant_id valorizzato), usata dal cron di dunning per includere anche i merchant senza Stripe (src/app/api/cron/dunning/route.ts). */
+export async function listConnectedPaypalUserIds(): Promise<string[]> {
+  const { data, error } = await supabaseAdmin.from("paypal_settings").select("user_id").not("merchant_id", "is", null).neq("merchant_id", "");
+
+  if (error) {
+    throw new Error(`Errore nel recupero degli account PayPal collegati su Supabase: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => row.user_id);
+}
+
 /** Disconnette PayPal per l'utente: elimina la riga di connessione. */
 export async function clearPaypalSettings(userId: string): Promise<void> {
   const { error } = await supabaseAdmin.from("paypal_settings").delete().eq("user_id", userId);

@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import BigNumber from "bignumber.js";
+import NumberFlow from "@number-flow/react";
 import { ArrowRight, Calculator } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,29 +12,47 @@ import { Button } from "@/components/ui/button";
 // il tasso di pagamenti falliti è una media di settore per business in
 // abbonamento, il tasso di recupero è quello dichiarato in Hero per
 // OmniRev. Numeri indicativi, non una previsione garantita.
-const AVERAGE_FAILED_PAYMENT_RATE = 0.09;
-const RECOVERY_RATE = 0.4;
+// Tassi come stringhe per BigNumber: 0.09 e 0.4 non sono rappresentabili
+// esattamente in virgola mobile, il calcolo resta in decimale esatto e si
+// arrotonda al centesimo solo alla fine.
+const AVERAGE_FAILED_PAYMENT_RATE = "0.09";
+const RECOVERY_RATE = "0.4";
 
 const MIN_MRR = 1000;
 const MAX_MRR = 200000;
 const DEFAULT_MRR = 20000;
 const STEP = 500;
 
+const CURRENCY_FORMAT = {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+} as const satisfies Intl.NumberFormatOptions;
+
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("it-IT", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return new Intl.NumberFormat("it-IT", CURRENCY_FORMAT).format(value);
+}
+
+/** Importo in euro arrotondato al centesimo (half-even, come in contabilità). */
+function toEuros(value: BigNumber): number {
+  return value.decimalPlaces(2, BigNumber.ROUND_HALF_EVEN).toNumber();
+}
+
+function AnimatedAmount({ value, className }: { value: number; className?: string }) {
+  return <NumberFlow value={value} locales="it-IT" format={CURRENCY_FORMAT} className={className} willChange />;
 }
 
 export function RoiCalculator() {
   const [mrr, setMrr] = useState(DEFAULT_MRR);
 
   const { atRisk, recoverableMonthly, recoverableYearly } = useMemo(() => {
-    const risk = mrr * AVERAGE_FAILED_PAYMENT_RATE;
-    const monthly = risk * RECOVERY_RATE;
-    return { atRisk: risk, recoverableMonthly: monthly, recoverableYearly: monthly * 12 };
+    const risk = new BigNumber(mrr).times(AVERAGE_FAILED_PAYMENT_RATE);
+    const monthly = risk.times(RECOVERY_RATE);
+    return {
+      atRisk: toEuros(risk),
+      recoverableMonthly: toEuros(monthly),
+      recoverableYearly: toEuros(monthly.times(12)),
+    };
   }, [mrr]);
 
   const progress = ((mrr - MIN_MRR) / (MAX_MRR - MIN_MRR)) * 100;
@@ -62,9 +82,7 @@ export function RoiCalculator() {
             <label htmlFor="mrr-input" className="text-sm font-medium text-zinc-300">
               Il tuo fatturato mensile ricorrente (MRR)
             </label>
-            <span className="text-4xl font-semibold tracking-tight text-zinc-100 sm:text-5xl">
-              {formatCurrency(mrr)}
-            </span>
+            <AnimatedAmount value={mrr} className="text-4xl font-semibold tracking-tight text-zinc-100 sm:text-5xl" />
           </div>
 
           <input
@@ -86,17 +104,17 @@ export function RoiCalculator() {
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 text-center">
               <p className="text-xs text-zinc-500">Fatturato a rischio / mese</p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-100">{formatCurrency(atRisk)}</p>
+              <AnimatedAmount value={atRisk} className="mt-2 text-2xl font-semibold text-zinc-100" />
               <p className="mt-1 text-[11px] text-zinc-600">~9% del MRR in media</p>
             </div>
             <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center ring-1 ring-emerald-500/20">
               <p className="text-xs text-emerald-300/80">Recuperabile / mese con OmniRev</p>
-              <p className="mt-2 text-3xl font-semibold text-emerald-400">{formatCurrency(recoverableMonthly)}</p>
+              <AnimatedAmount value={recoverableMonthly} className="mt-2 text-3xl font-semibold text-emerald-400" />
               <p className="mt-1 text-[11px] text-emerald-300/60">fino al 40% recuperato</p>
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 text-center">
               <p className="text-xs text-zinc-500">Recuperabile / anno</p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-100">{formatCurrency(recoverableYearly)}</p>
+              <AnimatedAmount value={recoverableYearly} className="mt-2 text-2xl font-semibold text-zinc-100" />
               <p className="mt-1 text-[11px] text-zinc-600">proiezione a 12 mesi</p>
             </div>
           </div>

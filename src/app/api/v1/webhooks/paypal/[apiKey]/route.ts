@@ -10,6 +10,8 @@ import { createPaymentToken } from "@/lib/tokens";
 import { startDunningSequence } from "@/lib/dunning";
 import { notifyPaymentFailed } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +32,7 @@ type PaypalSubscriptionResource = {
 };
 
 type PaypalWebhookEvent = {
+  id?: string;
   event_type?: string;
   summary?: string;
   resource?: PaypalSubscriptionResource;
@@ -135,6 +138,17 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
     return NextResponse.json({ received: true });
   }
 
+  // Idempotenza: solo dopo la verifica della firma, così un id contraffatto
+  // non può "bruciare" l'idempotenza di un evento legittimo futuro. `event.id`
+  // (formato "WH-...") è univoco lato PayPal per singola consegna webhook.
+  if (event.id) {
+    const isNewEvent = await claimWebhookEvent("paypal", event.id, event.event_type);
+    if (!isNewEvent) {
+      console.log(`[webhooks/paypal] evento ${event.id} già elaborato: ridelivery ignorata.`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+  }
+
   const resource = event.resource ?? {};
   const subscriptionId = resource.id;
   if (!subscriptionId) {
@@ -166,6 +180,14 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
   try {
     const paymentLinkToken = await createPaymentToken({ customerId, userId });
 
+    // PayPal non espone un decline code strutturato in questi eventi (a
+    // differenza di Stripe/GoCardless): la categorizzazione qui è "best
+    // effort" sul solo testo di `summary`, il più delle volte ricade su
+    // "other" e segue il calendario a step normale del template.
+    const errorCategory = categorizeGatewayError({ message: reason });
+    const nextRetryAt = computeNextRetryAt(errorCategory);
+    const retryBypassed = isRetryBypassCategory(errorCategory);
+
     const transaction = await recordFailedPayment({
       userId,
       invoiceId,
@@ -182,6 +204,9 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
       paymentMethodType: "paypal",
       paypalSubscriptionId: subscriptionId,
       gatewayCustomerId: resource.subscriber?.payer_id ?? null,
+      errorCategory,
+      nextRetryAt,
+      retryBypassed,
     });
 
     console.log(

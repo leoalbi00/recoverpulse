@@ -48,19 +48,34 @@ export async function GET(request: Request) {
     const webhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/paypal/${merchantApiKey}`;
     const webhookId = await registerMerchantWebhook(tokens.accessToken, webhookUrl, environment);
 
-    await savePaypalConnection(verified.userId, {
-      merchantId:
-        identity.merchantId ??
-        url.searchParams.get("merchantIdInPayPal") ??
-        url.searchParams.get("merchantId") ??
-        "",
-      email: identity.email,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresInSeconds: tokens.expiresIn,
-      webhookId,
-      environment,
-    });
+    try {
+      await savePaypalConnection(verified.userId, {
+        merchantId:
+          identity.merchantId ??
+          url.searchParams.get("merchantIdInPayPal") ??
+          url.searchParams.get("merchantId") ??
+          "",
+        email: identity.email,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresInSeconds: tokens.expiresIn,
+        webhookId,
+        environment,
+      });
+    } catch (saveError) {
+      // Il webhook è già stato registrato lato PayPal (chiamata REST
+      // irreversibile senza un secondo giro API dedicato) ma il salvataggio
+      // locale è fallito: la connessione resta incompleta e un retry
+      // dell'utente registrerà un secondo webhook duplicato in PayPal Developer
+      // Dashboard. Log distinto per permettere una pulizia manuale mirata
+      // (webhookId qui sotto), invece di confonderlo con un errore generico
+      // di scambio token.
+      console.error(
+        `[paypal-connect] webhook PayPal ${webhookId} registrato ma salvataggio locale fallito per l'utente ${verified.userId}: verificare/ripulire manualmente in PayPal Developer Dashboard.`,
+        saveError
+      );
+      throw saveError;
+    }
 
     return NextResponse.redirect(`${settingsUrl}?provider=paypal&connected=success#metodi-pagamento`);
   } catch (error) {
