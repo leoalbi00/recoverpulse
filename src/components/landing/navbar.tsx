@@ -30,7 +30,7 @@ export function Navbar({ user }: NavbarProps) {
         <span className="hidden sm:inline">{BETA_SUBHEADLINE}</span>
       </div>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="transition-opacity hover:opacity-80">
+        <Link href="/" aria-label="OmniRev — home">
           <Logo />
         </Link>
 

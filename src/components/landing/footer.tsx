@@ -89,7 +89,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 flex flex-col gap-4 lg:col-span-2">
-            <Link href="/" className="transition-opacity hover:opacity-80">
+            <Link href="/">
               <Logo />
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-zinc-400">

@@ -65,7 +65,7 @@ export default function RegisterPage() {
         className="pointer-events-none fixed -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/15 blur-[120px]"
       />
 
-      <Link href="/" className="mb-8 transition-opacity hover:opacity-80">
+      <Link href="/" className="mb-8">
         <Logo />
       </Link>
 

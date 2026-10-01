@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, ShieldCheck, XCircle } from "lucide-react";
+import { AlertTriangle, ShieldCheck, XCircle } from "lucide-react";
 
 import { getStripePublishableKeyForAccount } from "@/lib/stripe";
 import { getStripeAccountIdForUser } from "@/lib/connected-stripe-accounts";
@@ -13,6 +13,7 @@ import { DemoCardForm } from "@/components/update-payment/demo-card-form";
 import { SimulatedPaymentForm } from "@/components/update-payment/simulated-payment-form";
 import { PaypalUpdateForm } from "@/components/update-payment/paypal-update-form";
 import { SecurityBadges } from "@/components/update-payment/security-badges";
+import { LogoGlyph } from "@/components/ui/logo";
 
 const DEMO_TOKENS = ["test-token-123", "demo"];
 
@@ -65,7 +66,7 @@ function Shell({ children, merchant }: { children: React.ReactNode; merchant: Me
               className="flex size-8 shrink-0 items-center justify-center rounded-lg"
               style={{ backgroundColor: merchant.primaryColor }}
             >
-              <Activity className="size-4" style={{ color: accentTextColor }} strokeWidth={2.5} />
+              <LogoGlyph size={18} color={accentTextColor} />
             </span>
           )}
           <span className="text-base font-semibold tracking-tight text-white">{merchant.companyName}</span>

@@ -281,3 +281,32 @@
 .bg-white .text-white {
   color: #ffffff !important;
 }
+
+/*
+ * Micro-interazioni del logo OmniRev (src/components/ui/logo.tsx): il
+ * nucleo "respira" e il nodo AI emette un alone sincronizzato, a ritmo
+ * lento per non distrarre. Applicate solo con motion-safe.
+ */
+@keyframes omnirev-core-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.86);
+    opacity: 0.82;
+  }
+}
+
+@keyframes omnirev-node-halo {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  60%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
