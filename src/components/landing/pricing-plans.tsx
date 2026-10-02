@@ -46,7 +46,7 @@ export function PricingPlans() {
         <div
           role="radiogroup"
           aria-label="Periodo di fatturazione"
-          className="inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/80 p-1"
+          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-zinc-900/80 p-1"
         >
           {(
             [
@@ -93,10 +93,10 @@ export function PricingPlans() {
 
             <div
               className={cn(
-                "flex h-full flex-col rounded-2xl border p-8 shadow-xl shadow-black/20 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1",
+                "flex h-full flex-col rounded-2xl border p-8 backdrop-blur-md transition-transform duration-300 hover:-translate-y-1",
                 plan.popular
                   ? "border-emerald-500/40 bg-gradient-to-b from-emerald-500/[0.08] to-zinc-900/60 ring-1 ring-emerald-500/40"
-                  : "border-zinc-800/80 bg-zinc-900/60"
+                  : "border-white/10 bg-zinc-900/60"
               )}
             >
               <h3 className="text-lg font-semibold text-zinc-100">{plan.name}</h3>
@@ -117,7 +117,7 @@ export function PricingPlans() {
                   : "Fatturazione mensile, disdici quando vuoi"}
               </p>
 
-              <p className="mt-5 flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-300">
+              <p className="mt-5 flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-300">
                 <Percent className="size-3.5 shrink-0 text-emerald-400" />
                 0% di commissione sul fatturato recuperato
               </p>

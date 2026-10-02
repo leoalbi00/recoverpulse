@@ -48,7 +48,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: "Prodotto",
     links: [
-      { label: "Caratteristiche", href: "#features" },
+      { label: "Funzionalità", href: "#features" },
       { label: "Prezzi", href: "#pricing" },
       { label: "Integrazioni", href: "#" },
       { label: "Novità", href: "#" },
@@ -85,7 +85,7 @@ const FOOTER_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-800">
+    <footer className="border-t border-white/10">
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 flex flex-col gap-4 lg:col-span-2">
@@ -133,7 +133,7 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col items-center gap-4 border-t border-zinc-800 pt-8 text-sm text-zinc-500 sm:flex-row sm:justify-between">
+        <div className="mt-14 flex flex-col items-center gap-4 border-t border-white/10 pt-8 text-sm text-zinc-500 sm:flex-row sm:justify-between">
           <span>
             &copy; {new Date().getFullYear()} OmniRev. Tutti i diritti
             riservati.

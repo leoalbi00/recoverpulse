@@ -4,57 +4,56 @@ import { Player } from "@remotion/player";
 import { useReducedMotion } from "framer-motion";
 import { PlayCircle } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { DEMO_VIDEO, VideoComposition } from "@/remotion/video-composition";
 
 /**
  * Video-demo generata in codice (src/remotion/video-composition.tsx) e
- * riprodotta dal vivo con @remotion/player: nessun MP4 da ospitare, il
- * contenuto resta sempre allineato al prodotto. Lo stesso componente si
- * esporta in MP4 con `npm run video:render`.
+ * riprodotta dal vivo con @remotion/player dentro un dialog aperto dalla
+ * Hero: nessun MP4 da ospitare, e la pagina non porta un player pesante in
+ * vista finché nessuno lo chiede. Lo stesso componente si esporta in MP4 con
+ * `npm run video:render`.
  */
-export function DemoVideo() {
+export function DemoVideoDialog({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section id="demo" aria-labelledby="demo-title" className="relative scroll-mt-16 py-28 sm:py-32">
-      <div className="mx-auto max-w-5xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="h-auto gap-1.5 rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
-          >
-            <PlayCircle className="size-3.5 text-emerald-500" />
-            Demo in 12 secondi
-          </Badge>
-          <h2 id="demo-title" className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl">
-            Il motore di recupero, in azione
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-zinc-400">
-            Dal codice di rifiuto della banca al pagamento recuperato: ecco cosa fa OmniRev per ogni
-            singola fattura fallita, in automatico.
-          </p>
+    <Dialog>
+      <DialogTrigger
+        className={cn(
+          buttonVariants({ variant: "outline", size: "lg" }),
+          "h-12 gap-2 rounded-full border-white/10 bg-zinc-50/[0.03] px-7 text-base font-medium text-zinc-200 backdrop-blur-md hover:bg-zinc-50/[0.08]",
+          className
+        )}
+      >
+        <PlayCircle className="size-4 text-emerald-400" />
+        Guarda la demo
+      </DialogTrigger>
+      <DialogContent>
+        <div className="flex flex-col gap-1 pr-10">
+          <DialogTitle className="text-base font-semibold text-zinc-100">Il motore di recupero, in azione</DialogTitle>
+          <DialogDescription className="text-sm text-zinc-400">
+            Dal codice di rifiuto della banca al pagamento recuperato, in 12 secondi.
+          </DialogDescription>
         </div>
-
-        <div className="relative mt-14">
-          <div aria-hidden className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-emerald-500/10 blur-3xl" />
-          <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/50">
-            <Player
-              component={VideoComposition}
-              durationInFrames={DEMO_VIDEO.durationInFrames}
-              fps={DEMO_VIDEO.fps}
-              compositionWidth={DEMO_VIDEO.width}
-              compositionHeight={DEMO_VIDEO.height}
-              style={{ width: "100%", aspectRatio: `${DEMO_VIDEO.width} / ${DEMO_VIDEO.height}` }}
-              controls
-              loop
-              autoPlay={!reduceMotion}
-              initiallyMuted
-              clickToPlay
-            />
-          </div>
+        <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-black">
+          <Player
+            component={VideoComposition}
+            durationInFrames={DEMO_VIDEO.durationInFrames}
+            fps={DEMO_VIDEO.fps}
+            compositionWidth={DEMO_VIDEO.width}
+            compositionHeight={DEMO_VIDEO.height}
+            style={{ width: "100%", aspectRatio: `${DEMO_VIDEO.width} / ${DEMO_VIDEO.height}` }}
+            controls
+            loop
+            autoPlay={!reduceMotion}
+            initiallyMuted
+            clickToPlay
+          />
         </div>
-      </div>
-    </section>
+      </DialogContent>
+    </Dialog>
   );
 }

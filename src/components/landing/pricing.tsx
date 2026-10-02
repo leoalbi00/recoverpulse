@@ -8,7 +8,7 @@ import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="relative scroll-mt-16 py-28 sm:py-32">
+    <section id="pricing" className="relative scroll-mt-24 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Badge className="h-auto rounded-full bg-emerald-500 px-3 py-1 text-zinc-950">
@@ -35,7 +35,7 @@ export function Pricing() {
         <div className="mx-auto mt-16 max-w-2xl text-center">
           <Badge
             variant="outline"
-            className="h-auto gap-1.5 rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-400"
+            className="h-auto gap-1.5 rounded-full border-white/10 bg-zinc-900/60 px-3 py-1 text-zinc-400"
           >
             <Lock className="size-3.5" />
             In arrivo con la versione Pro
@@ -97,7 +97,7 @@ export function Pricing() {
           <div className="mx-auto max-w-2xl text-center">
             <Badge
               variant="outline"
-              className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
+              className="h-auto rounded-full border-white/10 bg-zinc-900/60 px-3 py-1 text-zinc-300"
             >
               Integrazione Pilota
             </Badge>
@@ -111,7 +111,7 @@ export function Pricing() {
             </p>
           </div>
 
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-10">
+          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur-md sm:p-10">
             <PilotRequestForm />
           </div>
         </div>

@@ -2,11 +2,10 @@ import type { Organization, SoftwareApplication, WithContext } from "schema-dts"
 
 import { auth } from "@/auth";
 import { Navbar } from "@/components/landing/navbar";
-import { HeroScroll } from "@/components/landing/hero-scroll";
-import { SimulationSection } from "@/components/landing/simulation-section";
-import { MagicLinkPhoneMockup } from "@/components/landing/magic-link-phone-mockup";
+import { Hero } from "@/components/landing/hero";
+import { RecoveryFlow } from "@/components/landing/recovery-flow";
 import { Features } from "@/components/landing/features";
-import { DemoVideo } from "@/components/landing/demo-video";
+import { SecurityTrust } from "@/components/landing/security-trust";
 import { RoiCalculator } from "@/components/landing/roi-calculator";
 import { Pricing } from "@/components/landing/pricing";
 import { RoadmapBadge } from "@/components/landing/roadmap-badge";
@@ -56,11 +55,10 @@ export default async function Home() {
       />
       <Navbar user={session?.user} />
       <main className="flex-1">
-        <HeroScroll />
-        <SimulationSection />
-        <MagicLinkPhoneMockup />
+        <Hero />
+        <RecoveryFlow />
         <Features />
-        <DemoVideo />
+        <SecurityTrust />
         <RoiCalculator />
         <Pricing />
         <RoadmapBadge />

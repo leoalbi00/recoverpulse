@@ -10,8 +10,9 @@ import { Logo } from "@/components/ui/logo";
 import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
 const NAV_LINKS = [
-  { label: "Caratteristiche", href: "#features" },
-  { label: "Demo", href: "#demo" },
+  { label: "Come funziona", href: "#come-funziona" },
+  { label: "Funzionalità", href: "#features" },
+  { label: "Sicurezza", href: "#sicurezza" },
   { label: "Calcola ROI", href: "#roi-calculator" },
   { label: "Prezzi", href: "#pricing" },
 ];
@@ -24,7 +25,7 @@ export function Navbar({ user }: NavbarProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/70 backdrop-blur-md">
       <div className="flex items-center justify-center gap-1.5 border-b border-emerald-400/20 bg-emerald-400/10 px-4 py-1.5 text-center text-xs text-emerald-200">
         <span className="font-semibold">{BETA_HEADLINE}</span>
         <span className="hidden sm:inline">{BETA_SUBHEADLINE}</span>
@@ -34,7 +35,7 @@ export function Navbar({ user }: NavbarProps) {
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
@@ -46,7 +47,7 @@ export function Navbar({ user }: NavbarProps) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
               <Button render={<a href="/dashboard" />}>Dashboard</Button>
@@ -75,7 +76,7 @@ export function Navbar({ user }: NavbarProps) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60 md:hidden"
+          className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60 lg:hidden"
           aria-label={open ? "Chiudi menu" : "Apri menu"}
           aria-expanded={open}
         >
@@ -84,7 +85,7 @@ export function Navbar({ user }: NavbarProps) {
       </div>
 
       {open && (
-        <div className="border-t border-zinc-800 bg-zinc-950/95 px-6 pt-2 pb-6 md:hidden">
+        <div className="border-t border-white/10 bg-zinc-950/95 px-6 pt-2 pb-6 lg:hidden">
           <nav className="flex flex-col gap-1">
             {NAV_LINKS.map((link) => (
               <a

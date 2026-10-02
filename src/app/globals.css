@@ -227,7 +227,9 @@
  * essere scuro, punto — a prescindere da eventuali classi di colore chiaro
  * ereditate o dimenticate su un elemento figlio. Regola volutamente ad alta
  * specificità (!important) perché deve vincere su tutto il resto del foglio,
- * incluse le utility Tailwind generate dopo.
+ * incluse le utility Tailwind generate dopo. Attenzione: il selettore
+ * `[class*="bg-white"]` colpisce anche `bg-white/10` e simili, quindi per i
+ * velati traslucidi su sfondo scuro si usa `bg-zinc-50/…`.
  */
 .bg-white,
 [class*="bg-white"] {
@@ -313,4 +315,23 @@
     transform: scale(2.4);
     opacity: 0;
   }
+}
+
+/*
+ * Raggio luminoso dell'AnimatedBeam (src/components/ui/animated-beam.tsx):
+ * con pathLength=100 e dasharray "20 200" il trattino entra da prima
+ * dell'inizio del tracciato (offset 20) ed esce dopo la fine (offset -100).
+ */
+@keyframes omnirev-beam-flow {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.omnirev-beam {
+  stroke-dashoffset: 20;
+  animation: omnirev-beam-flow 3s linear infinite;
 }

@@ -1,121 +1,108 @@
-import { BarChart3, Palette, Workflow, Zap, type LucideIcon } from "lucide-react";
+import { BarChart3, Check, EyeOff, LayoutGrid, RotateCw, ShieldCheck } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { SectionHeading } from "@/components/landing/section-heading";
 
-type Feature = {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  points: string[];
+// Tempi reali del cron di riaddebito (src/app/api/cron/smart-retry/route.ts):
+// primo tentativo a +12h, poi backoff a +24h e +48h, massimo 3 tentativi.
+const RETRY_TIMELINE = [
+  { label: "Rifiuto", tone: "failed" },
+  { label: "+12h", tone: "pending" },
+  { label: "+24h", tone: "pending" },
+  { label: "Recuperato", tone: "done" },
+] as const;
+
+const TIMELINE_TONES = {
+  failed: "border-rose-400/20 text-rose-300",
+  pending: "border-white/10 text-zinc-400",
+  done: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
 };
 
-const FEATURES: Feature[] = [
-  {
-    icon: Workflow,
-    title: "Sequenze Automatizzate",
-    description:
-      "Ogni pagamento fallito attiva in automatico una sequenza dunning via Email, con i tempi di invio che decidi tu. SMS e WhatsApp arrivano nella versione Pro.",
-    points: [
-      "Invio automatico su fattura fallita",
-      "Template pronti, personalizzabili in dashboard",
-      "Nessun intervento manuale richiesto",
-    ],
-  },
-  {
-    icon: Palette,
-    title: "Portale White-Label",
-    description:
-      "Il portale 1-click di aggiornamento carta e le email di sollecito mostrano il tuo logo, il nome della tua azienda e il tuo colore di brand, non il nostro.",
-    points: [
-      "Logo e colori personalizzabili in dashboard",
-      "Upload diretto del logo via drag & drop",
-      "Anteprima live prima di pubblicare",
-    ],
-  },
-  {
-    icon: Zap,
-    title: "Integrazione Stripe No-Code",
-    description:
-      "Incolla le tue chiavi API da Impostazioni e sei operativo: nessun deploy, nessuna riga di codice, nessun file .env da modificare.",
-    points: [
-      "Chiavi salvate in modo sicuro su Supabase",
-      "Test di connessione in tempo reale",
-      "Attivo su tutte le chiamate in pochi secondi",
-    ],
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics in Tempo Reale",
-    description:
-      "Fatturato recuperato, tasso di recupero e pagamenti in corso in un'unica dashboard aggiornata via webhook Stripe, senza fogli di calcolo.",
-    points: [
-      "Fatturato recuperato in tempo reale",
-      "Tasso di recupero e pagamenti attivi",
-      "Aggiornata automaticamente via webhook",
-    ],
-  },
-];
+// Gli slot obbligatori validati da src/lib/guardrails.ts.
+const PAYMENT_SLOTS = ["customerId", "invoiceId", "amount", "currency"];
+
+const ANALYTICS_BARS = [38, 52, 45, 61, 58, 72, 66, 80, 74, 88, 83, 96];
 
 export function Features() {
   return (
-    <section id="features" className="relative scroll-mt-16 py-28 sm:py-32">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <Badge
-            variant="outline"
-            className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
-          >
-            Caratteristiche
-          </Badge>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
-            Tutto ciò che serve per fermare il churn involontario
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-zinc-400">
-            Strumenti pensati per i team che vendono in abbonamento su Stripe
-            e vogliono recuperare fatturato senza alzare un dito.
-          </p>
-        </div>
+    <section id="features" aria-labelledby="features-title" className="scroll-mt-24 py-16 md:py-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 md:gap-16">
+        <SectionHeading
+          id="features-title"
+          eyebrow="Funzionalità"
+          icon={LayoutGrid}
+          title="Un motore di recupero progettato come un sistema finanziario"
+          description="Ogni azione sul denaro dei tuoi clienti passa da controlli espliciti, tracciati e ripetibili."
+        />
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
-            <Card
-              key={feature.title}
-              className="group h-full border border-zinc-800/80 bg-zinc-900/60 py-8 shadow-xl shadow-black/20 ring-0 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-500/40 hover:bg-zinc-900"
-            >
-              <CardHeader className="px-8">
-                <span className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 transition-colors group-hover:bg-emerald-500/15">
-                  <feature.icon className="size-6 text-emerald-500" />
-                </span>
-                <CardTitle className="mt-5 text-lg font-semibold text-zinc-100">
-                  {feature.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-8">
-                <CardDescription className="leading-relaxed text-zinc-400">
-                  {feature.description}
-                </CardDescription>
-                <ul className="mt-6 flex flex-col gap-2.5 border-t border-zinc-800 pt-6">
-                  {feature.points.map((point) => (
-                    <li
-                      key={point}
-                      className="flex items-center gap-2.5 text-sm text-zinc-300"
-                    >
-                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <BentoGrid>
+          <BentoCard
+            icon={<RotateCw />}
+            title="Smart Retry"
+            description="Il riaddebito riparte da solo con backoff progressivo, mentre il cliente riceve il link per aggiornare la carta. Dopo il terzo tentativo subentra la sequenza di solleciti."
+            className="md:col-span-2"
+          >
+            <ol className="flex flex-wrap items-center gap-2">
+              {RETRY_TIMELINE.map((step, index) => (
+                <li key={step.label} className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full border px-3 py-1 font-mono text-xs tabular-nums ${TIMELINE_TONES[step.tone]}`}
+                  >
+                    {step.label}
+                  </span>
+                  {index < RETRY_TIMELINE.length - 1 && <span aria-hidden className="h-px w-4 bg-zinc-50/15" />}
+                </li>
+              ))}
+            </ol>
+          </BentoCard>
+
+          <BentoCard
+            icon={<ShieldCheck />}
+            title="Stop-Slot Guardrails"
+            description="Nessun addebito né sollecito parte se manca anche uno solo dei dati obbligatori."
+          >
+            <ul className="grid grid-cols-2 gap-2">
+              {PAYMENT_SLOTS.map((slot) => (
+                <li
+                  key={slot}
+                  className="flex items-center gap-1.5 rounded-md border border-white/10 px-2 py-1.5 font-mono text-[11px] text-zinc-300"
+                >
+                  <Check className="size-3 shrink-0 text-emerald-400" />
+                  {slot}
+                </li>
+              ))}
+            </ul>
+          </BentoCard>
+
+          <BentoCard
+            icon={<EyeOff />}
+            title="Anonymization Engine"
+            tag="In arrivo"
+            description="I dati personali dei tuoi clienti vengono pseudonimizzati prima di qualsiasi elaborazione da parte dei modelli AI."
+          >
+            <div className="flex flex-col gap-1.5 rounded-md border border-white/10 px-3 py-2 font-mono text-[11px]">
+              <span className="truncate text-zinc-500 line-through decoration-zinc-600">mario.rossi@acme.it</span>
+              <span className="truncate text-emerald-300">customer_7f3a…@redacted</span>
+            </div>
+          </BentoCard>
+
+          <BentoCard
+            icon={<BarChart3 />}
+            title="Analytics in tempo reale"
+            description="Fatturato recuperato, tasso di recupero e pagamenti in corso, aggiornati via webhook dai tuoi gateway."
+            className="md:col-span-2"
+          >
+            <div aria-hidden className="flex h-16 items-end gap-1.5">
+              {ANALYTICS_BARS.map((height, index) => (
+                <span
+                  key={index}
+                  className={`flex-1 rounded-t-sm ${index < 4 ? "bg-zinc-50/15" : "bg-emerald-400/70"}`}
+                  style={{ height: `${height}%` }}
+                />
+              ))}
+            </div>
+          </BentoCard>
+        </BentoGrid>
       </div>
     </section>
   );
