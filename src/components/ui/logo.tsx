@@ -23,7 +23,7 @@ type LogoProps = {
   variant?: LogoVariant;
   /** Taglia predefinita o lato del marchio in px. */
   size?: LogoSize | number;
-  /** Bagliore e pulsazione del nucleo AI; false per contesti statici (stampa, tabelle dense). */
+  /** Giro del nodo AI al passaggio del mouse; false per contesti statici (stampa, tabelle dense). */
   animated?: boolean;
   className?: string;
 };
@@ -31,10 +31,9 @@ type LogoProps = {
 /**
  * Logo ufficiale OmniRev (concept "Orbit", vedi src/lib/brand.ts).
  * Vettoriale, eredita il tema: wordmark e nodo AI cambiano colore in base
- * alla classe `dark`. Micro-interazioni: il nucleo pulsa e il nodo emette un
- * alone a intervalli; al passaggio del mouse il nodo compie un giro
- * dell'orbita e il bagliore si intensifica. Tutto disattivato con
- * prefers-reduced-motion.
+ * alla classe `dark`. Unica micro-interazione: al passaggio del mouse il nodo
+ * compie un giro dell'orbita (disattivata con prefers-reduced-motion).
+ * Nessuna animazione continua né bagliore.
  */
 export function Logo({ variant = "full", size = "md", animated = true, className }: LogoProps) {
   const markPx = typeof size === "number" ? size : MARK_PX[size];
@@ -63,7 +62,6 @@ export function Logo({ variant = "full", size = "md", animated = true, className
 
 // Origine delle trasformazioni nel centro dell'orbita, in unità del viewBox.
 const ORBIT_ORIGIN: CSSProperties = { transformBox: "view-box", transformOrigin: "16px 16px" };
-const SELF_ORIGIN: CSSProperties = { transformBox: "fill-box", transformOrigin: "center" };
 
 function LogoMark({ size, animated }: { size: number; animated: boolean }) {
   const gradientId = `omnirev-gradient-${useId().replace(/:/g, "")}`;
@@ -76,11 +74,7 @@ function LogoMark({ size, animated }: { size: number; animated: boolean }) {
       viewBox={BRAND_VIEWBOX}
       fill="none"
       aria-hidden
-      className={cn(
-        "shrink-0 overflow-visible transition-[filter] duration-500",
-        animated &&
-          "drop-shadow-[0_0_6px_rgb(34_211_238/0.2)] group-hover/logo:drop-shadow-[0_0_10px_rgb(34_211_238/0.55)] dark:drop-shadow-[0_0_8px_rgb(34_211_238/0.35)]"
-      )}
+      className="shrink-0 overflow-visible"
     >
       <defs>
         <linearGradient
@@ -108,11 +102,9 @@ function LogoMark({ size, animated }: { size: number; animated: boolean }) {
         cy={BRAND_CORE.cy}
         r={BRAND_CORE.r}
         fill={paint}
-        style={SELF_ORIGIN}
-        className={cn(animated && "motion-safe:animate-[omnirev-core-pulse_3.2s_ease-in-out_infinite]")}
       />
 
-      {/* Nodo AI + alone: ruotano insieme attorno al centro all'hover. */}
+      {/* Nodo AI: ruota attorno al centro all'hover. */}
       <g
         style={ORBIT_ORIGIN}
         className={cn(
@@ -120,15 +112,6 @@ function LogoMark({ size, animated }: { size: number; animated: boolean }) {
             "motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-[cubic-bezier(0.65,0,0.35,1)] motion-safe:group-hover/logo:rotate-[360deg]"
         )}
       >
-        {animated && (
-          <circle
-            cx={BRAND_NODE.cx}
-            cy={BRAND_NODE.cy}
-            r={BRAND_NODE.r}
-            style={SELF_ORIGIN}
-            className="fill-[#0891B2] opacity-0 motion-safe:animate-[omnirev-node-halo_3.2s_ease-out_infinite] dark:fill-[#A5F3FC]"
-          />
-        )}
         <circle
           cx={BRAND_NODE.cx}
           cy={BRAND_NODE.cy}

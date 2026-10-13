@@ -47,7 +47,7 @@ export default async function Home() {
   const structuredData = buildStructuredData(getAppBaseUrl());
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-950 text-zinc-100 font-sans">
+    <div className="flex flex-1 flex-col bg-background font-sans text-foreground">
       <script
         type="application/ld+json"
         // JSON statico generato dal server: "<" escapato per non chiudere il tag script.

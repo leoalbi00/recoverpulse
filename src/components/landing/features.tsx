@@ -13,9 +13,9 @@ const RETRY_TIMELINE = [
 ] as const;
 
 const TIMELINE_TONES = {
-  failed: "border-rose-400/20 text-rose-300",
-  pending: "border-white/10 text-zinc-400",
-  done: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+  failed: "border-red-200 bg-red-50 text-red-700",
+  pending: "border-border text-muted-foreground",
+  done: "border-emerald-200 bg-emerald-50 text-emerald-800",
 };
 
 // Gli slot obbligatori validati da src/lib/guardrails.ts.
@@ -50,7 +50,7 @@ export function Features() {
                   >
                     {step.label}
                   </span>
-                  {index < RETRY_TIMELINE.length - 1 && <span aria-hidden className="h-px w-4 bg-zinc-50/15" />}
+                  {index < RETRY_TIMELINE.length - 1 && <span aria-hidden className="h-px w-4 bg-stone-300" />}
                 </li>
               ))}
             </ol>
@@ -65,9 +65,9 @@ export function Features() {
               {PAYMENT_SLOTS.map((slot) => (
                 <li
                   key={slot}
-                  className="flex items-center gap-1.5 rounded-md border border-white/10 px-2 py-1.5 font-mono text-[11px] text-zinc-300"
+                  className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1.5 font-mono text-[11px] text-foreground"
                 >
-                  <Check className="size-3 shrink-0 text-emerald-400" />
+                  <Check className="size-3 shrink-0 text-emerald-700" />
                   {slot}
                 </li>
               ))}
@@ -80,9 +80,9 @@ export function Features() {
             tag="In arrivo"
             description="I dati personali dei tuoi clienti vengono pseudonimizzati prima di qualsiasi elaborazione da parte dei modelli AI."
           >
-            <div className="flex flex-col gap-1.5 rounded-md border border-white/10 px-3 py-2 font-mono text-[11px]">
-              <span className="truncate text-zinc-500 line-through decoration-zinc-600">mario.rossi@acme.it</span>
-              <span className="truncate text-emerald-300">customer_7f3a…@redacted</span>
+            <div className="flex flex-col gap-1.5 rounded-md border border-border px-3 py-2 font-mono text-[11px]">
+              <span className="truncate text-stone-500 line-through decoration-stone-400">mario.rossi@acme.it</span>
+              <span className="truncate text-emerald-800">customer_7f3a…@redacted</span>
             </div>
           </BentoCard>
 
@@ -96,7 +96,7 @@ export function Features() {
               {ANALYTICS_BARS.map((height, index) => (
                 <span
                   key={index}
-                  className={`flex-1 rounded-t-sm ${index < 4 ? "bg-zinc-50/15" : "bg-emerald-400/70"}`}
+                  className={`flex-1 rounded-t-sm ${index < 4 ? "bg-stone-200" : "bg-emerald-600/80"}`}
                   style={{ height: `${height}%` }}
                 />
               ))}

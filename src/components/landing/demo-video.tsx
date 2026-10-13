@@ -24,21 +24,21 @@ export function DemoVideoDialog({ className }: { className?: string }) {
       <DialogTrigger
         className={cn(
           buttonVariants({ variant: "outline", size: "lg" }),
-          "h-12 gap-2 rounded-full border-white/10 bg-zinc-50/[0.03] px-7 text-base font-medium text-zinc-200 backdrop-blur-md hover:bg-zinc-50/[0.08]",
+          "h-12 gap-2 rounded-full bg-card px-7 text-base font-medium text-foreground",
           className
         )}
       >
-        <PlayCircle className="size-4 text-emerald-400" />
+        <PlayCircle className="size-4 text-emerald-700" />
         Guarda la demo
       </DialogTrigger>
       <DialogContent>
         <div className="flex flex-col gap-1 pr-10">
-          <DialogTitle className="text-base font-semibold text-zinc-100">Il motore di recupero, in azione</DialogTitle>
-          <DialogDescription className="text-sm text-zinc-400">
+          <DialogTitle className="text-base font-semibold text-foreground">Il motore di recupero, in azione</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             Dal codice di rifiuto della banca al pagamento recuperato, in 12 secondi.
           </DialogDescription>
         </div>
-        <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-black">
+        <div className="mt-4 overflow-hidden rounded-xl border border-border bg-black">
           <Player
             component={VideoComposition}
             durationInFrames={DEMO_VIDEO.durationInFrames}

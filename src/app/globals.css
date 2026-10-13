@@ -53,46 +53,49 @@
 }
 
 /*
- * Un solo tema, sempre scuro, su tutta l'app (dashboard inclusa): niente
- * più switcher né scope "chiaro" separati. `:root` porta già i valori
- * scuri come fallback, `.dark` li ripete identici perché <html> ha la
- * classe "dark" fissa (src/app/layout.tsx) — coerente con l'estetica
- * sempre scura della Landing Page.
+ * Tema chiaro "smeraldo sobrio" (predefinito): bianco caldo (stone), testo
+ * quasi nero, smeraldo 700 come unico accento (contrasto 5.5:1 su bianco).
+ * Regola 60-30-10: sfondo stone-50, superfici bianche con bordi stone-200,
+ * smeraldo solo per CTA, link e stati di successo.
+ *
+ * `.dark` conserva il vecchio tema scuro per le aree non ancora migrate
+ * (dashboard, pagine di accesso, portale di pagamento e pagine legali), che
+ * lo attivano con la classe `dark` sul proprio contenitore.
  */
 :root {
-  color-scheme: dark;
-  --background: oklch(14.1% 0.005 285.823); /* zinc-950 */
-  --foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
-  --card: oklch(21% 0.006 285.885); /* zinc-900 */
-  --card-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
-  --popover: oklch(21% 0.006 285.885); /* zinc-900 */
-  --popover-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
-  --primary: oklch(69.6% 0.17 162.48); /* emerald-500 */
-  --primary-foreground: oklch(14.1% 0.005 285.823); /* zinc-950 */
-  --secondary: oklch(27.4% 0.006 286.033); /* zinc-800 */
-  --secondary-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
-  --muted: oklch(27.4% 0.006 286.033); /* zinc-800 */
-  --muted-foreground: oklch(70.5% 0.015 286.067); /* zinc-400 */
-  --accent: oklch(27.4% 0.006 286.033); /* zinc-800 */
-  --accent-foreground: oklch(96.7% 0.001 286.375); /* zinc-100 */
-  --destructive: oklch(64.5% 0.246 16.439); /* rose-500 */
-  --border: oklch(27.4% 0.006 286.033 / 80%); /* zinc-800/80 */
-  --input: oklch(27.4% 0.006 286.033 / 50%); /* zinc-800/50 */
-  --ring: oklch(69.6% 0.17 162.48 / 50%); /* emerald-500/50 */
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  color-scheme: light;
+  --background: oklch(98.5% 0.001 106.423); /* stone-50 */
+  --foreground: oklch(21.6% 0.006 56.043); /* stone-900 */
+  --card: oklch(100% 0 0); /* bianco */
+  --card-foreground: oklch(21.6% 0.006 56.043); /* stone-900 */
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(21.6% 0.006 56.043);
+  --primary: oklch(50.8% 0.118 165.612); /* emerald-700 */
+  --primary-foreground: oklch(100% 0 0);
+  --secondary: oklch(97% 0.001 106.424); /* stone-100 */
+  --secondary-foreground: oklch(21.6% 0.006 56.043);
+  --muted: oklch(97% 0.001 106.424); /* stone-100 */
+  --muted-foreground: oklch(44.4% 0.011 73.639); /* stone-600 */
+  --accent: oklch(97% 0.001 106.424); /* stone-100 */
+  --accent-foreground: oklch(21.6% 0.006 56.043);
+  --destructive: oklch(57.7% 0.245 27.325); /* red-600 */
+  --border: oklch(92.3% 0.003 48.717); /* stone-200 */
+  --input: oklch(92.3% 0.003 48.717); /* stone-200 */
+  --ring: oklch(50.8% 0.118 165.612 / 40%); /* emerald-700/40 */
+  --chart-1: oklch(50.8% 0.118 165.612); /* emerald-700 */
+  --chart-2: oklch(59.6% 0.145 163.225); /* emerald-600 */
+  --chart-3: oklch(70.9% 0.01 56.259); /* stone-400 */
+  --chart-4: oklch(55.3% 0.013 58.071); /* stone-500 */
+  --chart-5: oklch(37.4% 0.01 67.558); /* stone-700 */
   --radius: 0.625rem;
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(27.4% 0.006 286.033 / 80%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(100% 0 0);
+  --sidebar-foreground: oklch(21.6% 0.006 56.043);
+  --sidebar-primary: oklch(50.8% 0.118 165.612);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --sidebar-accent: oklch(97% 0.001 106.424);
+  --sidebar-accent-foreground: oklch(21.6% 0.006 56.043);
+  --sidebar-border: oklch(92.3% 0.003 48.717);
+  --sidebar-ring: oklch(50.8% 0.118 165.612 / 40%);
 }
 
 .dark {
@@ -136,7 +139,6 @@
   }
   html {
     @apply font-sans;
-    color-scheme: dark;
   }
   button:not(:disabled),
   a[href],
@@ -173,8 +175,8 @@
     border-radius: 9999px;
     background: linear-gradient(
       to right,
-      #10b981 var(--range-progress, 50%),
-      #27272a var(--range-progress, 50%)
+      #047857 var(--range-progress, 50%),
+      #e7e5e4 var(--range-progress, 50%)
     );
   }
 
@@ -185,39 +187,39 @@
     height: 20px;
     width: 20px;
     border-radius: 9999px;
-    background: #10b981;
-    border: 3px solid #052e21;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    background: #ffffff;
+    border: 2px solid #047857;
+    box-shadow: 0 1px 3px rgba(28, 25, 23, 0.2);
   }
 
   .roi-slider::-moz-range-track {
     height: 8px;
     border-radius: 9999px;
-    background: #27272a;
+    background: #e7e5e4;
   }
 
   .roi-slider::-moz-range-progress {
     height: 8px;
     border-radius: 9999px;
-    background: #10b981;
+    background: #047857;
   }
 
   .roi-slider::-moz-range-thumb {
     height: 20px;
     width: 20px;
     border-radius: 9999px;
-    background: #10b981;
-    border: 3px solid #052e21;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    background: #ffffff;
+    border: 2px solid #047857;
+    box-shadow: 0 1px 3px rgba(28, 25, 23, 0.2);
   }
 
   .roi-slider:focus-visible::-webkit-slider-thumb {
-    outline: 2px solid #34d399;
+    outline: 2px solid #047857;
     outline-offset: 2px;
   }
 
   .roi-slider:focus-visible::-moz-range-thumb {
-    outline: 2px solid #34d399;
+    outline: 2px solid #047857;
     outline-offset: 2px;
   }
 }
@@ -286,52 +288,4 @@
 }
 .bg-white .text-white {
   color: #ffffff !important;
-}
-
-/*
- * Micro-interazioni del logo OmniRev (src/components/ui/logo.tsx): il
- * nucleo "respira" e il nodo AI emette un alone sincronizzato, a ritmo
- * lento per non distrarre. Applicate solo con motion-safe.
- */
-@keyframes omnirev-core-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(0.86);
-    opacity: 0.82;
-  }
-}
-
-@keyframes omnirev-node-halo {
-  0% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  60%,
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-}
-
-/*
- * Raggio luminoso dell'AnimatedBeam (src/components/ui/animated-beam.tsx):
- * con pathLength=100 e dasharray "20 200" il trattino entra da prima
- * dell'inizio del tracciato (offset 20) ed esce dopo la fine (offset -100).
- */
-@keyframes omnirev-beam-flow {
-  from {
-    stroke-dashoffset: 20;
-  }
-  to {
-    stroke-dashoffset: -100;
-  }
-}
-
-.omnirev-beam {
-  stroke-dashoffset: 20;
-  animation: omnirev-beam-flow 3s linear infinite;
 }

@@ -3,7 +3,6 @@
 import { CreditCard, Fingerprint, Info, Lock, RefreshCcwDot, ShieldCheck } from "lucide-react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { GridPattern } from "@/components/ui/grid-pattern";
 import { SectionHeading } from "@/components/landing/section-heading";
 
 const TRUST_ITEMS = [
@@ -41,10 +40,8 @@ export function SecurityTrust() {
     <section
       id="sicurezza"
       aria-labelledby="security-title"
-      className="relative isolate scroll-mt-24 overflow-x-clip border-y border-white/5 bg-black py-16 md:py-24"
+      className="scroll-mt-24 border-y border-border bg-muted py-16 md:py-24"
     >
-      <GridPattern mask="radial-gradient(ellipse 60% 70% at 50% 50%, black 20%, transparent 70%)" />
-
       <div className="mx-auto flex max-w-6xl flex-col gap-12 px-6 md:gap-16">
         <SectionHeading
           id="security-title"
@@ -59,15 +56,15 @@ export function SecurityTrust() {
             {TRUST_ITEMS.map(({ icon: Icon, title, description, detail }) => (
               <li
                 key={title}
-                className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-zinc-950/80 p-6 backdrop-blur-md"
+                className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-xs"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06]">
-                    <Icon className="size-5 text-emerald-400" />
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-200">
+                    <Icon className="size-5 text-emerald-700" />
                   </span>
                   <Tooltip>
                     <TooltipTrigger
-                      className="flex size-7 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-50/5 hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:outline-none"
+                      className="flex size-7 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       aria-label={`Dettagli: ${title}`}
                     >
                       <Info className="size-4" />
@@ -76,8 +73,8 @@ export function SecurityTrust() {
                   </Tooltip>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <h3 className="text-sm font-semibold text-zinc-100">{title}</h3>
-                  <p className="text-sm leading-relaxed text-zinc-400">{description}</p>
+                  <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
                 </div>
               </li>
             ))}
