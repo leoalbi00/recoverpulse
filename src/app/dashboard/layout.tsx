@@ -27,8 +27,9 @@ export default async function DashboardLayout({
   // src/components/dashboard/ e le pagine sotto src/app/dashboard/).
   // L'header desktop è "sticky" con effetto glassmorphism (sfondo
   // semi-trasparente bg-zinc-950/80 + backdrop-blur-md).
+  // Classe `dark`: tema scuro finché la dashboard non passa al tema chiaro (fase 2).
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="dark min-h-screen bg-zinc-950 text-zinc-100">
       <DashboardSidebar
         user={session.user}
         connectedStripeAccount={

@@ -17,7 +17,7 @@ export function LegalPage({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
+    <div className="dark flex min-h-screen flex-col bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
           <Link href="/">

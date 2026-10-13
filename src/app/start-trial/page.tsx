@@ -479,7 +479,7 @@ export default function StartTrialPage() {
   const [stepError, setStepError] = useState<string | null>(null);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-zinc-950 px-6 py-16">
+    <div className="dark flex min-h-screen flex-col items-center bg-zinc-950 px-6 py-16">
       <div
         aria-hidden
         className="pointer-events-none fixed -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/15 blur-[120px]"

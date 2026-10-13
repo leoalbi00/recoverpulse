@@ -27,15 +27,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  colorScheme: "dark",
-  themeColor: "#09090b",
+  colorScheme: "light",
+  themeColor: "#fafaf9",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="it"
-      className={`dark scroll-smooth ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`scroll-smooth ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background">{children}</body>
     </html>

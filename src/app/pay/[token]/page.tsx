@@ -45,7 +45,7 @@ function Shell({ children, merchant }: { children: React.ReactNode; merchant: Me
   const accentTextColor = getReadableTextColor(merchant.primaryColor);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
+    <main className="dark relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full opacity-10 blur-[120px]"
