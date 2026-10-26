@@ -10,6 +10,7 @@ import { DemoVideo } from "@/components/landing/demo-video";
 import { RoiCalculator } from "@/components/landing/roi-calculator";
 import { Pricing } from "@/components/landing/pricing";
 import { RoadmapBadge } from "@/components/landing/roadmap-badge";
+import { SecuritySection } from "@/components/landing/security-badges";
 import { Footer } from "@/components/landing/footer";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { PLANS } from "@/lib/plans";
@@ -24,7 +25,7 @@ function buildStructuredData(baseUrl: string): [WithContext<SoftwareApplication>
       operatingSystem: "Web",
       url: baseUrl,
       description:
-        "Smart dunning e recupero automatico dei pagamenti falliti per SaaS e abbonamenti: riaddebiti intelligenti, solleciti brandizzati e aggiornamento carta in 1 click.",
+        "Riduci il churn involontario da pagamenti rifiutati su Stripe: riaddebiti intelligenti, solleciti brandizzati e aggiornamento carta in 1 click per SaaS B2B.",
       offers: PLANS.map((plan) => ({
         "@type": "Offer",
         name: plan.name,
@@ -47,8 +48,9 @@ export default async function Home() {
   const session = await auth();
   const structuredData = buildStructuredData(getAppBaseUrl());
 
+  // `light`: scope Light Mode Enterprise (globals.css), solo per la Landing; la dashboard resta scura.
   return (
-    <div className="flex flex-1 flex-col bg-zinc-950 text-zinc-100 font-sans">
+    <div className="light flex flex-1 flex-col bg-background font-sans text-foreground">
       <script
         type="application/ld+json"
         // JSON statico generato dal server: "<" escapato per non chiudere il tag script.
@@ -62,6 +64,7 @@ export default async function Home() {
         <Features />
         <DemoVideo />
         <RoiCalculator />
+        <SecuritySection />
         <Pricing />
         <RoadmapBadge />
       </main>

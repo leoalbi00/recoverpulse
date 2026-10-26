@@ -8,12 +8,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 type Feature = {
   icon: LucideIcon;
   title: string;
   description: string;
   points: string[];
+  /** Classi di griglia della Bento: le card larghe occupano 2 colonne su desktop. */
+  span: string;
 };
 
 const FEATURES: Feature[] = [
@@ -27,6 +30,7 @@ const FEATURES: Feature[] = [
       "Template pronti, personalizzabili in dashboard",
       "Nessun intervento manuale richiesto",
     ],
+    span: "lg:col-span-2",
   },
   {
     icon: Palette,
@@ -38,17 +42,19 @@ const FEATURES: Feature[] = [
       "Upload diretto del logo via drag & drop",
       "Anteprima live prima di pubblicare",
     ],
+    span: "",
   },
   {
     icon: Zap,
-    title: "Integrazione Stripe No-Code",
+    title: "Stripe collegato in 1 click",
     description:
-      "Incolla le tue chiavi API da Impostazioni e sei operativo: nessun deploy, nessuna riga di codice, nessun file .env da modificare.",
+      "Autorizzi OmniRev con OAuth di Stripe Connect e sei operativo: nessuna chiave API da copiare, nessuna riga di codice, nessun deploy.",
     points: [
-      "Chiavi salvate in modo sicuro su Supabase",
-      "Test di connessione in tempo reale",
-      "Attivo su tutte le chiamate in pochi secondi",
+      "Token di accesso cifrati a riposo",
+      "Revocabile in ogni momento da Stripe",
+      "Attivo sulle nuove fatture in pochi secondi",
     ],
+    span: "",
   },
   {
     icon: BarChart3,
@@ -60,54 +66,58 @@ const FEATURES: Feature[] = [
       "Tasso di recupero e pagamenti attivi",
       "Aggiornata automaticamente via webhook",
     ],
+    span: "lg:col-span-2",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="relative scroll-mt-16 py-28 sm:py-32">
+    <section id="features" className="relative scroll-mt-16 border-y border-border bg-muted py-24 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Badge
             variant="outline"
-            className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
+            className="h-auto rounded-full bg-card px-3 py-1 text-slate-700"
           >
             Caratteristiche
           </Badge>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Tutto ciò che serve per fermare il churn involontario
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-zinc-400">
-            Strumenti pensati per i team che vendono in abbonamento su Stripe
-            e vogliono recuperare fatturato senza alzare un dito.
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Per i team B2B che fatturano in abbonamento su Stripe: ogni pagamento
+            rifiutato diventa un recupero automatico, misurabile in dashboard.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <Card
               key={feature.title}
-              className="group h-full border border-zinc-800/80 bg-zinc-900/60 py-8 shadow-xl shadow-black/20 ring-0 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-emerald-500/40 hover:bg-zinc-900"
+              className={cn(
+                "group h-full border border-border py-7 shadow-sm ring-0 transition-[box-shadow,border-color] hover:border-emerald-600/30 hover:shadow-md",
+                feature.span
+              )}
             >
-              <CardHeader className="px-8">
-                <span className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 ring-1 ring-emerald-500/20 transition-colors group-hover:bg-emerald-500/15">
-                  <feature.icon className="size-6 text-emerald-500" />
+              <CardHeader className="px-7">
+                <span className="flex size-12 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-600/15">
+                  <feature.icon className="size-6 text-emerald-700" />
                 </span>
-                <CardTitle className="mt-5 text-lg font-semibold text-zinc-100">
+                <CardTitle className="mt-5 text-lg font-semibold">
                   {feature.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="px-8">
-                <CardDescription className="leading-relaxed text-zinc-400">
+              <CardContent className="px-7">
+                <CardDescription className="max-w-prose leading-relaxed">
                   {feature.description}
                 </CardDescription>
-                <ul className="mt-6 flex flex-col gap-2.5 border-t border-zinc-800 pt-6">
+                <ul className="mt-6 flex flex-col gap-2.5 border-t border-border pt-6">
                   {feature.points.map((point) => (
                     <li
                       key={point}
-                      className="flex items-center gap-2.5 text-sm text-zinc-300"
+                      className="flex items-center gap-2.5 text-sm text-slate-700"
                     >
-                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-600" />
                       {point}
                     </li>
                   ))}

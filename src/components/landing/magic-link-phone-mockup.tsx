@@ -59,25 +59,25 @@ export function MagicLinkPhoneMockup() {
           <div className="order-2 lg:order-1">
             <Badge
               variant="outline"
-              className="h-auto rounded-full border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-emerald-300"
+              className="h-auto rounded-full border-emerald-600/20 bg-emerald-50 px-3 py-1 text-emerald-800"
             >
               Magic Link 1-Click
             </Badge>
             <h2
               id="magic-link-title"
-              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl"
+              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-4xl"
             >
               Dal rifiuto al recupero, senza che il tuo team muova un dito
             </h2>
             <ul className="mt-8 hidden flex-col gap-5 sm:flex">
               {STEPS.map(({ icon: Icon, title, detail }) => (
                 <li key={title} className="flex gap-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 ring-1 ring-zinc-800">
-                    <Icon className="size-4.5 text-emerald-400" />
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm ring-1 ring-border">
+                    <Icon className="size-4.5 text-emerald-700" />
                   </span>
                   <div>
-                    <p className="font-medium text-zinc-100">{title}</p>
-                    <p className="mt-0.5 text-sm text-zinc-400">{detail}</p>
+                    <p className="font-medium text-foreground">{title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{detail}</p>
                   </div>
                 </li>
               ))}
@@ -97,13 +97,13 @@ function Phone({ recovered, ref }: { recovered: boolean; ref: React.Ref<HTMLDivE
   return (
     <div
       ref={ref}
-      className="relative h-[460px] w-[230px] rounded-[2.75rem] border border-zinc-700 bg-zinc-900 p-2.5 shadow-2xl shadow-black/60 sm:h-[560px] sm:w-[280px]"
+      className="relative h-[460px] w-[230px] rounded-[2.75rem] border border-zinc-700 bg-zinc-900 p-2.5 shadow-2xl shadow-slate-900/25 sm:h-[560px] sm:w-[280px]"
     >
       <div
         aria-hidden
         className={cn(
           "absolute -inset-10 -z-10 rounded-full blur-3xl transition-colors duration-700",
-          recovered ? "bg-emerald-500/25" : "bg-rose-500/20"
+          recovered ? "bg-emerald-500/15" : "bg-rose-500/10"
         )}
       />
       <div className="relative flex h-full flex-col overflow-hidden rounded-[2.25rem] bg-gradient-to-b from-zinc-800 via-zinc-900 to-zinc-950">

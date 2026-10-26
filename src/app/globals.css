@@ -2,7 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* `.light` ritaglia uno scope chiaro (Landing) dentro <html class="dark">:
+   lì le varianti dark: non devono più scattare. */
+@custom-variant dark (&:is(.dark *):not(:is(.light, .light *)));
 
 @theme inline {
   --color-background: var(--background);
@@ -126,6 +128,39 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/*
+ * Scope "Light Mode Enterprise" della Landing (src/app/page.tsx): stessa
+ * palette shadcn, ma su base slate chiara — #FFFFFF sfondo, #F8FAFC superfici
+ * secondarie, #0F172A testo, #64748B testo secondario (4.76:1 su bianco, AA).
+ * Il primario passa a slate-900 per CTA ad alto contrasto; lo smeraldo resta
+ * colore d'accento del brand.
+ */
+.light {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #0f172a; /* slate-900 */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9; /* slate-100 */
+  --secondary-foreground: #0f172a;
+  --muted: #f8fafc; /* slate-50 */
+  --muted-foreground: #64748b; /* slate-500 */
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #e11d48; /* rose-600 */
+  --border: #e2e8f0; /* slate-200 */
+  --input: #cbd5e1; /* slate-300 */
+  --ring: rgb(5 150 105 / 50%); /* emerald-600/50 */
+  --range-fill: #059669; /* emerald-600: 3.8:1 su bianco, ok per elementi grafici */
+  --range-track: #e2e8f0;
+  --range-thumb-border: #ffffff;
+  --range-thumb-shadow: 0 1px 4px rgba(15, 23, 42, 0.25);
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground;
@@ -169,8 +204,8 @@
     border-radius: 9999px;
     background: linear-gradient(
       to right,
-      #10b981 var(--range-progress, 50%),
-      #27272a var(--range-progress, 50%)
+      var(--range-fill, #10b981) var(--range-progress, 50%),
+      var(--range-track, #27272a) var(--range-progress, 50%)
     );
   }
 
@@ -181,30 +216,30 @@
     height: 20px;
     width: 20px;
     border-radius: 9999px;
-    background: #10b981;
-    border: 3px solid #052e21;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    background: var(--range-fill, #10b981);
+    border: 3px solid var(--range-thumb-border, #052e21);
+    box-shadow: var(--range-thumb-shadow, 0 1px 4px rgba(0, 0, 0, 0.5));
   }
 
   .roi-slider::-moz-range-track {
     height: 8px;
     border-radius: 9999px;
-    background: #27272a;
+    background: var(--range-track, #27272a);
   }
 
   .roi-slider::-moz-range-progress {
     height: 8px;
     border-radius: 9999px;
-    background: #10b981;
+    background: var(--range-fill, #10b981);
   }
 
   .roi-slider::-moz-range-thumb {
     height: 20px;
     width: 20px;
     border-radius: 9999px;
-    background: #10b981;
-    border: 3px solid #052e21;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    background: var(--range-fill, #10b981);
+    border: 3px solid var(--range-thumb-border, #052e21);
+    box-shadow: var(--range-thumb-shadow, 0 1px 4px rgba(0, 0, 0, 0.5));
   }
 
   .roi-slider:focus-visible::-webkit-slider-thumb {

@@ -46,7 +46,7 @@ export function PricingPlans() {
         <div
           role="radiogroup"
           aria-label="Periodo di fatturazione"
-          className="inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/80 p-1"
+          className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-1"
         >
           {(
             [
@@ -62,7 +62,7 @@ export function PricingPlans() {
               onClick={() => setPeriod(option.id)}
               className={cn(
                 "flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500/60 focus-visible:outline-none",
-                period === option.id ? "bg-zinc-100 text-zinc-950" : "text-zinc-400 hover:text-zinc-200"
+                period === option.id ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {option.label}
@@ -70,7 +70,7 @@ export function PricingPlans() {
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
-                    period === "yearly" ? "bg-emerald-500 text-zinc-950" : "bg-emerald-500/15 text-emerald-400"
+                    period === "yearly" ? "bg-emerald-500 text-emerald-950" : "bg-emerald-500/15 text-emerald-700"
                   )}
                 >
                   −20%
@@ -85,7 +85,7 @@ export function PricingPlans() {
         {PLANS.map((plan) => (
           <div key={plan.id} className="relative h-full">
             {plan.popular && (
-              <Badge className="absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-zinc-950 shadow-lg shadow-emerald-500/30">
+              <Badge className="absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-white shadow-md shadow-emerald-600/20">
                 <Sparkles className="size-3.5" />
                 Consigliato
               </Badge>
@@ -93,32 +93,32 @@ export function PricingPlans() {
 
             <div
               className={cn(
-                "flex h-full flex-col rounded-2xl border p-8 shadow-xl shadow-black/20 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1",
+                "flex h-full flex-col rounded-2xl border p-8 shadow-xl shadow-slate-900/5 transition-transform duration-300 hover:-translate-y-1",
                 plan.popular
-                  ? "border-emerald-500/40 bg-gradient-to-b from-emerald-500/[0.08] to-zinc-900/60 ring-1 ring-emerald-500/40"
-                  : "border-zinc-800/80 bg-zinc-900/60"
+                  ? "border-emerald-600/40 bg-gradient-to-b from-emerald-50 to-card ring-1 ring-emerald-600/30"
+                  : "border-border bg-card"
               )}
             >
-              <h3 className="text-lg font-semibold text-zinc-100">{plan.name}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">{plan.description}</p>
+              <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{plan.description}</p>
 
               <div className="mt-8 flex items-baseline gap-1">
                 <NumberFlow
                   value={monthlyPrice(plan.priceInCents, period)}
                   locales="en-US"
                   format={PRICE_FORMAT}
-                  className="text-5xl font-semibold tracking-tight text-zinc-100"
+                  className="text-5xl font-semibold tracking-tight text-foreground"
                 />
-                <span className="text-sm text-zinc-500">/mese</span>
+                <span className="text-sm text-muted-foreground">/mese</span>
               </div>
-              <p className="mt-1 h-5 text-xs text-zinc-500">
+              <p className="mt-1 h-5 text-xs text-muted-foreground">
                 {period === "yearly"
                   ? `${new Intl.NumberFormat("en-US", PRICE_FORMAT).format(yearlyTotal(plan.priceInCents))} fatturati annualmente`
                   : "Fatturazione mensile, disdici quando vuoi"}
               </p>
 
-              <p className="mt-5 flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-xs text-zinc-300">
-                <Percent className="size-3.5 shrink-0 text-emerald-400" />
+              <p className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-2 text-xs text-slate-700">
+                <Percent className="size-3.5 shrink-0 text-emerald-700" />
                 0% di commissione sul fatturato recuperato
               </p>
 
@@ -134,8 +134,8 @@ export function PricingPlans() {
 
               <ul className="mt-8 flex flex-col gap-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-zinc-300">
-                    <Check className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+                  <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
+                    <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
                     {feature}
                   </li>
                 ))}

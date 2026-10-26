@@ -85,14 +85,14 @@ const FOOTER_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-800">
+    <footer className="border-t border-border bg-muted">
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-6">
           <div className="col-span-2 flex flex-col gap-4 lg:col-span-2">
             <Link href="/">
               <Logo />
             </Link>
-            <p className="max-w-xs text-sm leading-relaxed text-zinc-400">
+            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               Recupera i pagamenti falliti su Stripe con dunning automatico
               multi-canale e un portale di aggiornamento carta senza attriti.
             </p>
@@ -104,7 +104,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.label}
-                  className="flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
+                  className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <social.icon className="size-4" />
                 </a>
@@ -114,7 +114,7 @@ export function Footer() {
 
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.title} className="flex flex-col gap-3">
-              <span className="text-sm font-medium text-zinc-100">
+              <span className="text-sm font-medium text-foreground">
                 {column.title}
               </span>
               <ul className="flex flex-col gap-2.5">
@@ -122,7 +122,7 @@ export function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
                     </a>
@@ -133,22 +133,22 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col items-center gap-4 border-t border-zinc-800 pt-8 text-sm text-zinc-500 sm:flex-row sm:justify-between">
+        <div className="mt-14 flex flex-col items-center gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <span>
             &copy; {new Date().getFullYear()} OmniRev. Tutti i diritti
             riservati.
           </span>
           <div className="flex gap-6">
-            <a href="/privacy" className="hover:text-zinc-300">
+            <a href="/privacy" className="hover:text-foreground">
               Privacy
             </a>
-            <a href="/termini" className="hover:text-zinc-300">
+            <a href="/termini" className="hover:text-foreground">
               Termini
             </a>
-            <a href="/dpa" className="hover:text-zinc-300">
+            <a href="/dpa" className="hover:text-foreground">
               DPA
             </a>
-            <a href="/cookie" className="hover:text-zinc-300">
+            <a href="/cookie" className="hover:text-foreground">
               Cookie
             </a>
           </div>

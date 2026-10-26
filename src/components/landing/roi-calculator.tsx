@@ -63,26 +63,26 @@ export function RoiCalculator() {
         <div className="mx-auto max-w-2xl text-center">
           <Badge
             variant="outline"
-            className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300"
+            className="h-auto rounded-full bg-card px-3 py-1 text-slate-700"
           >
-            <Calculator className="size-3.5 text-emerald-500" />
+            <Calculator className="size-3.5 text-emerald-600" />
             Calcolatore ROI
           </Badge>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Quanto fatturato stai già perdendo?
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-zinc-400">
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
             Inserisci il tuo fatturato mensile ricorrente e scopri all&apos;istante
             quanto potresti recuperare ogni mese con OmniRev.
           </p>
         </div>
 
-        <div className="mt-14 rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-10">
+        <div className="mt-14 rounded-2xl border border-border bg-card p-6 shadow-lg shadow-slate-900/5 sm:p-10">
           <div className="flex flex-col items-center gap-2 text-center">
-            <label htmlFor="mrr-input" className="text-sm font-medium text-zinc-300">
+            <label htmlFor="mrr-input" className="text-sm font-medium text-slate-700">
               Il tuo fatturato mensile ricorrente (MRR)
             </label>
-            <AnimatedAmount value={mrr} className="text-4xl font-semibold tracking-tight text-zinc-100 sm:text-5xl" />
+            <AnimatedAmount value={mrr} className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl" />
           </div>
 
           <input
@@ -96,31 +96,31 @@ export function RoiCalculator() {
             style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
             className="roi-slider mt-6 w-full"
           />
-          <div className="mt-1.5 flex justify-between text-xs text-zinc-600">
+          <div className="mt-1.5 flex justify-between text-xs text-muted-foreground tabular-nums">
             <span>{formatCurrency(MIN_MRR)}</span>
             <span>{formatCurrency(MAX_MRR)}</span>
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 text-center">
-              <p className="text-xs text-zinc-500">Fatturato a rischio / mese</p>
-              <AnimatedAmount value={atRisk} className="mt-2 text-2xl font-semibold text-zinc-100" />
-              <p className="mt-1 text-[11px] text-zinc-600">~9% del MRR in media</p>
+            <div className="rounded-xl border border-border bg-muted p-5 text-center">
+              <p className="text-xs text-muted-foreground">Fatturato a rischio / mese</p>
+              <AnimatedAmount value={atRisk} className="mt-2 text-2xl font-semibold text-foreground" />
+              <p className="mt-1 text-[11px] text-muted-foreground">~9% del MRR in media</p>
             </div>
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center ring-1 ring-emerald-500/20">
-              <p className="text-xs text-emerald-300/80">Recuperabile / mese con OmniRev</p>
-              <AnimatedAmount value={recoverableMonthly} className="mt-2 text-3xl font-semibold text-emerald-400" />
-              <p className="mt-1 text-[11px] text-emerald-300/60">fino al 40% recuperato</p>
+            <div className="rounded-xl border border-emerald-600/25 bg-emerald-50 p-5 text-center">
+              <p className="text-xs font-medium text-emerald-800">Recuperabile / mese con OmniRev</p>
+              <AnimatedAmount value={recoverableMonthly} className="mt-2 text-3xl font-semibold text-emerald-700" />
+              <p className="mt-1 text-[11px] text-emerald-800">fino al 40% recuperato</p>
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-5 text-center">
-              <p className="text-xs text-zinc-500">Recuperabile / anno</p>
-              <AnimatedAmount value={recoverableYearly} className="mt-2 text-2xl font-semibold text-zinc-100" />
-              <p className="mt-1 text-[11px] text-zinc-600">proiezione a 12 mesi</p>
+            <div className="rounded-xl border border-border bg-muted p-5 text-center">
+              <p className="text-xs text-muted-foreground">Recuperabile / anno</p>
+              <AnimatedAmount value={recoverableYearly} className="mt-2 text-2xl font-semibold text-foreground" />
+              <p className="mt-1 text-[11px] text-muted-foreground">proiezione a 12 mesi</p>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col items-center gap-4 border-t border-zinc-800 pt-8 sm:flex-row sm:justify-between">
-            <p className="max-w-sm text-center text-xs text-zinc-500 sm:text-left">
+          <div className="mt-8 flex flex-col items-center gap-4 border-t border-border pt-8 sm:flex-row sm:justify-between">
+            <p className="max-w-sm text-center text-xs text-muted-foreground sm:text-left">
               Stima basata su un tasso medio di pagamenti falliti del 9% dell&apos;MRR
               e un tasso di recupero del 40%. I risultati reali variano in base
               al settore e ai canali dunning attivati.
@@ -128,9 +128,9 @@ export function RoiCalculator() {
             <Button
               size="lg"
               render={<a href="/start-trial" />}
-              className="h-11 shrink-0 gap-2 rounded-full px-6 text-sm font-semibold shadow-lg shadow-emerald-500/20"
+              className="h-11 shrink-0 gap-2 rounded-full px-6 text-sm font-semibold shadow-lg shadow-slate-900/10"
             >
-              Inizia a Recuperare Fatturato
+              Recupera {formatCurrency(recoverableMonthly)}/mese
               <ArrowRight className="size-4" data-icon="inline-end" />
             </Button>
           </div>

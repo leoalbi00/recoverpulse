@@ -57,13 +57,13 @@ export function SimulationSection() {
           <div>
             <Badge
               variant="outline"
-              className="h-auto rounded-full border-zinc-800 bg-zinc-900/60 px-3 py-1 text-zinc-300 max-lg:hidden"
+              className="h-auto rounded-full bg-card px-3 py-1 text-slate-700 max-lg:hidden"
             >
               Simulazione live
             </Badge>
             <h2
               id="simulation-title"
-              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-zinc-100 sm:text-4xl"
+              className="mt-4 text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-4xl"
             >
               Cosa succede quando un pagamento fallisce
             </h2>
@@ -76,15 +76,15 @@ export function SimulationSection() {
                   className={cn(
                     "rounded-xl border px-4 py-3 transition-all duration-500 sm:px-5 sm:py-4",
                     stage === index
-                      ? "border-zinc-700 bg-zinc-900/80 opacity-100"
-                      : "hidden border-transparent opacity-40 lg:block"
+                      ? "border-border bg-card opacity-100 shadow-sm"
+                      : "hidden border-transparent opacity-50 lg:block"
                   )}
                 >
-                  <p className="font-mono text-[11px] tracking-wider text-zinc-500 uppercase">{item.label}</p>
-                  <p className="mt-1 text-base font-semibold text-zinc-100">{item.title}</p>
+                  <p className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">{item.label}</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{item.title}</p>
                   <p
                     className={cn(
-                      "text-sm leading-relaxed text-zinc-400 transition-all duration-500",
+                      "text-sm leading-relaxed text-muted-foreground transition-all duration-500",
                       stage === index ? "mt-1 max-h-24" : "max-h-0 overflow-hidden lg:mt-1 lg:max-h-24"
                     )}
                   >
@@ -112,16 +112,15 @@ function InvoiceCard({ stage }: { stage: Stage }) {
         aria-hidden
         className={cn(
           "absolute -inset-8 -z-10 rounded-[2.5rem] blur-3xl transition-colors duration-700",
-          failed ? "bg-rose-500/15" : "bg-sky-500/10"
+          failed ? "bg-rose-500/10" : "bg-sky-500/10"
         )}
       />
 
-      {/* Carta "Enterprise Light": contrasto netto con lo sfondo scuro per
-          richiamare un documento contabile reale. */}
+      {/* Carta "documento contabile": bordo e ombra la staccano dallo sfondo chiaro. */}
       <motion.div
         animate={stage === 1 && !reduceMotion ? { x: [0, -10, 10, -6, 6, 0] } : { x: 0 }}
         transition={{ duration: 0.5 }}
-        className="overflow-hidden rounded-2xl bg-white text-zinc-900 shadow-2xl shadow-black/50"
+        className="overflow-hidden rounded-2xl border border-zinc-200 bg-white text-zinc-900 shadow-xl shadow-slate-900/10"
       >
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
           <div>
@@ -191,12 +190,12 @@ function InvoiceCard({ stage }: { stage: Stage }) {
                       "flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-sm",
                       cause.active
                         ? "bg-white font-medium text-zinc-900 shadow-sm ring-2 ring-emerald-500"
-                        : "text-zinc-400"
+                        : "text-zinc-500"
                     )}
                   >
                     <span className="flex flex-col">
                       {cause.label}
-                      <span className="font-mono text-[11px] font-normal text-zinc-400">{cause.code}</span>
+                      <span className="font-mono text-[11px] font-normal text-zinc-500">{cause.code}</span>
                     </span>
                     <span className="flex shrink-0 items-center gap-1 text-xs">
                       {cause.active ? <Send className="size-3.5" /> : <CalendarClock className="size-3.5" />}
