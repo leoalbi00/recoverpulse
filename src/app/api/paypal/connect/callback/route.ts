@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "@/auth";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { verifyConnectState } from "@/lib/oauth-connect-state";
 import { exchangeAuthorizationCode, getMerchantIdentity, registerMerchantWebhook } from "@/lib/paypal-partner";
@@ -36,6 +37,17 @@ export async function GET(request: Request) {
   const verified = verifyConnectState("paypal", state);
   if (!verified) {
     console.error("[paypal-connect] state OAuth mancante, non valido o scaduto.");
+    return NextResponse.redirect(`${settingsUrl}?provider=paypal&connected=error#metodi-pagamento`);
+  }
+
+  // Lo state firmato dimostra solo che il flusso è partito da OmniRev, non
+  // che a completarlo sia lo stesso utente: senza questo controllo un
+  // attaccante potrebbe far aprire a una vittima il proprio URL di
+  // autorizzazione (con lo state dell'attaccante) e collegare l'account
+  // PayPal della vittima all'account OmniRev dell'attaccante.
+  const session = await auth();
+  if (session?.user?.id !== verified.userId) {
+    console.error("[paypal-connect] state OAuth emesso per un utente diverso da quello della sessione corrente.");
     return NextResponse.redirect(`${settingsUrl}?provider=paypal&connected=error#metodi-pagamento`);
   }
 

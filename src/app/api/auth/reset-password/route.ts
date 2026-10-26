@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
-import { validateAuthToken, markAuthTokenUsed } from "@/lib/auth-tokens";
+import { consumeAuthToken } from "@/lib/auth-tokens";
 import { updatePasswordHash } from "@/lib/users";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -28,14 +28,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const authToken = await validateAuthToken(parsed.data.token, "password_reset");
+    // Hash calcolato prima di consumare il token: se bcrypt fallisse il link
+    // resterebbe ancora valido. Il consumo è atomico (vedi consumeAuthToken):
+    // lo stesso link non può essere usato due volte in parallelo.
+    const newHash = await bcrypt.hash(parsed.data.password, 10);
+    const authToken = await consumeAuthToken(parsed.data.token, "password_reset");
     if (!authToken) {
       return NextResponse.json({ error: "Link non valido o scaduto." }, { status: 400 });
     }
 
-    const newHash = await bcrypt.hash(parsed.data.password, 10);
     await updatePasswordHash(authToken.userId, newHash);
-    await markAuthTokenUsed(parsed.data.token);
 
     return NextResponse.json({ success: true });
   } catch (error) {

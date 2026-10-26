@@ -43,3 +43,10 @@ next-env.d.ts
 # Python ai-service
 ai-service/.venv/
 __pycache__/
+
+# test (Playwright / Vitest / Lighthouse)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+lighthouse-report.json

@@ -160,6 +160,51 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Stesse dichiarazioni di /start-trial: senza, l'account nasce senza accettazione dei Termini/DPA. */}
+          <div className="flex flex-col gap-2.5 border-t border-border pt-4">
+            <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                required
+                className="mt-0.5 size-3.5 shrink-0 rounded border-border bg-card accent-emerald-600"
+              />
+              <span>
+                Accetto i{" "}
+                <Link href="/termini" target="_blank" className="text-foreground hover:underline">
+                  Termini di Servizio
+                </Link>{" "}
+                e la{" "}
+                <Link href="/dpa" target="_blank" className="text-foreground hover:underline">
+                  Nomina a Responsabile del Trattamento (DPA)
+                </Link>{" "}
+                e dichiaro di aver letto la{" "}
+                <Link href="/privacy" target="_blank" className="text-foreground hover:underline">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+
+            <label className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-50 px-3 py-2.5 text-xs text-slate-700">
+              <input
+                type="checkbox"
+                required
+                className="mt-0.5 size-3.5 shrink-0 rounded border-border bg-card accent-emerald-600"
+              />
+              <span>
+                Ai sensi e per gli effetti degli artt. 1341 e 1342 c.c., dichiaro di aver letto e di approvare
+                espressamente gli artt. 3 (Manleva), 4 (Limite di Responsabilità), 5 (Assenza di garanzia di
+                risultato), 6 (Sospensione senza rimborso), 7 (Servizi di terze parti), 9 (Foro esclusivo), 12
+                (Non rimborsabilità), 13 (Rinnovo automatico e risoluzione), 14 (Modifiche unilaterali) e 15.3
+                (Cessione) dei{" "}
+                <Link href="/termini" target="_blank" className="text-foreground hover:underline">
+                  Termini di Servizio
+                </Link>
+                .
+              </span>
+            </label>
+          </div>
+
           {error && <p className="text-sm text-rose-700">{error}</p>}
 
           <button

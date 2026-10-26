@@ -1,41 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import BigNumber from "bignumber.js";
 import { ArrowRight, Calculator } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  DEFAULT_MRR,
+  MAX_MRR,
+  MIN_MRR,
+  MRR_STEP,
+  computeRoi,
+  formatEuro as formatCurrency,
+  sliderProgress,
+} from "@/lib/roi";
+import { cn } from "@/lib/utils";
 
-// Assunzioni usate per la stima, dichiarate esplicitamente sotto al widget:
-// il tasso di pagamenti falliti è una media di settore per business in
-// abbonamento, il tasso di recupero è quello dichiarato in Hero per
-// OmniRev. Numeri indicativi, non una previsione garantita.
-// Tassi come stringhe per BigNumber: 0.09 e 0.4 non sono rappresentabili
-// esattamente in virgola mobile, il calcolo resta in decimale esatto e si
-// arrotonda al centesimo solo alla fine.
-const AVERAGE_FAILED_PAYMENT_RATE = "0.09";
-const RECOVERY_RATE = "0.4";
-
-const MIN_MRR = 1000;
-const MAX_MRR = 200000;
-const DEFAULT_MRR = 20000;
-const STEP = 500;
-
-const CURRENCY_FORMAT = {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-} as const satisfies Intl.NumberFormatOptions;
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("it-IT", CURRENCY_FORMAT).format(value);
-}
-
-/** Importo in euro arrotondato al centesimo (half-even, come in contabilità). */
-function toEuros(value: BigNumber): number {
-  return value.decimalPlaces(2, BigNumber.ROUND_HALF_EVEN).toNumber();
-}
+// Formula, assunzioni e formattazione in src/lib/roi.ts (testate in tests/unit/roi.test.ts).
 
 function Amount({ value, className }: { value: number; className?: string }) {
   return <p className={className}>{formatCurrency(value)}</p>;
@@ -44,17 +25,9 @@ function Amount({ value, className }: { value: number; className?: string }) {
 export function RoiCalculator() {
   const [mrr, setMrr] = useState(DEFAULT_MRR);
 
-  const { atRisk, recoverableMonthly, recoverableYearly } = useMemo(() => {
-    const risk = new BigNumber(mrr).times(AVERAGE_FAILED_PAYMENT_RATE);
-    const monthly = risk.times(RECOVERY_RATE);
-    return {
-      atRisk: toEuros(risk),
-      recoverableMonthly: toEuros(monthly),
-      recoverableYearly: toEuros(monthly.times(12)),
-    };
-  }, [mrr]);
+  const { atRisk, recoverableMonthly, recoverableYearly } = useMemo(() => computeRoi(mrr), [mrr]);
 
-  const progress = ((mrr - MIN_MRR) / (MAX_MRR - MIN_MRR)) * 100;
+  const progress = sliderProgress(mrr);
 
   return (
     <section id="roi-calculator" className="relative scroll-mt-16 py-28 sm:py-32">
@@ -89,8 +62,9 @@ export function RoiCalculator() {
             type="range"
             min={MIN_MRR}
             max={MAX_MRR}
-            step={STEP}
+            step={MRR_STEP}
             value={mrr}
+            aria-valuetext={formatCurrency(mrr)}
             onChange={(event) => setMrr(Number(event.target.value))}
             style={{ "--range-progress": `${progress}%` } as React.CSSProperties}
             className="roi-slider mt-6 w-full"
@@ -124,14 +98,18 @@ export function RoiCalculator() {
               e un tasso di recupero del 40%. I risultati reali variano in base
               al settore e ai canali dunning attivati.
             </p>
-            <Button
-              size="lg"
-              render={<a href="/start-trial" />}
-              className="h-11 shrink-0 gap-2 rounded-full px-6 text-sm font-semibold shadow-lg shadow-slate-900/10"
+            {/* Link stilizzato da bottone: <Button render={<a/>}> di Base UI aggiunge type/role "button"
+                a un <a> (warning in console e semantica errata per gli screen reader). */}
+            <a
+              href="/start-trial"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "h-11 shrink-0 gap-2 rounded-full px-6 text-sm font-semibold shadow-lg shadow-slate-900/10"
+              )}
             >
               Recupera {formatCurrency(recoverableMonthly)}/mese
               <ArrowRight className="size-4" data-icon="inline-end" />
-            </Button>
+            </a>
           </div>
         </div>
       </div>

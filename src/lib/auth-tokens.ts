@@ -69,3 +69,27 @@ export async function markAuthTokenUsed(rawToken: string): Promise<void> {
     throw new Error(`Errore nell'invalidazione del token di autenticazione su Supabase: ${error.message}`);
   }
 }
+
+/**
+ * Valida E consuma il token in un'unica UPDATE condizionale (used=false,
+ * non scaduto): a differenza di validateAuthToken + markAuthTokenUsed,
+ * due richieste concorrenti con lo stesso token non possono entrambe
+ * risultare valide — solo la prima ottiene la riga aggiornata.
+ */
+export async function consumeAuthToken(rawToken: string, purpose: AuthTokenPurpose): Promise<AuthToken | null> {
+  const { data, error } = await supabaseAdmin
+    .from("auth_tokens")
+    .update({ used: true })
+    .eq("token_hash", hashToken(rawToken))
+    .eq("purpose", purpose)
+    .eq("used", false)
+    .gt("expires_at", new Date().toISOString())
+    .select("id, user_id, purpose")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Errore nel consumo del token di autenticazione su Supabase: ${error.message}`);
+  }
+
+  return data ? { id: data.id, userId: data.user_id, purpose: data.purpose } : null;
+}

@@ -11,21 +11,23 @@ type SecurityBadge = {
 // PCI-DSS: i dati carta sono raccolti solo dal PaymentElement di Stripe
 // (update-payment-form.tsx) e non transitano mai dai server OmniRev, quindi
 // il livello 1 è quello di Stripe, e va dichiarato così.
+// GDPR: non esiste una "certificazione GDPR" (né OmniRev ha certificazioni ex
+// art. 42 GDPR): il badge descrive misure concrete (DPA art. 28), non uno status.
 export const SECURITY_BADGES: SecurityBadge[] = [
   {
     icon: ShieldCheck,
-    label: "GDPR Compliant",
-    detail: "DPA per il trattamento dati, minimizzazione e cancellazione su richiesta.",
+    label: "DPA art. 28 GDPR",
+    detail: "Nomina a responsabile del trattamento, minimizzazione dei dati e cancellazione su richiesta.",
   },
   {
     icon: CreditCard,
-    label: "PCI-DSS Level 1 via Stripe",
-    detail: "I numeri di carta restano su Stripe: OmniRev non li vede né li salva.",
+    label: "Carte gestite da Stripe (PCI DSS L1)",
+    detail: "I numeri di carta sono raccolti da Stripe, certificato PCI DSS Livello 1: OmniRev non li vede né li salva.",
   },
   {
     icon: Lock,
-    label: "Crittografia SSL 256-bit",
-    detail: "Traffico TLS end-to-end e token di accesso cifrati a riposo.",
+    label: "Connessioni cifrate TLS",
+    detail: "Traffico cifrato via HTTPS/TLS e token di accesso ai gateway cifrati a riposo.",
   },
 ];
 

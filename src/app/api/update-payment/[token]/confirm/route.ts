@@ -51,7 +51,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
       ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
       : null;
   } catch (error) {
-    console.error(`[update-payment-confirm] errore nella verifica del token "${token}" su Supabase:`, error);
+    console.error("[update-payment-confirm] errore nella verifica del token su Supabase:", error);
     return NextResponse.json(
       { error: "Servizio temporaneamente non disponibile. Riprova tra qualche minuto." },
       { status: 503 }
@@ -129,6 +129,20 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   }
 
   if ("simulate" in parsed.data) {
+    // La conferma simulata segna la fattura come "recuperato" SENZA alcun
+    // pagamento reale: in produzione è ammessa solo per le transazioni di
+    // test generate da /api/test/generate-failed-payment (invoiceId
+    // "test_..."). Senza questo vincolo un debitore reale di un insoluto
+    // SDD/GoCardless (o Stripe durante un disservizio) — per cui
+    // tryCreateSetupIntent qui sotto ritorna null — potrebbe chiudere da sé
+    // il proprio insoluto e fermare il dunning senza pagare.
+    if (process.env.NODE_ENV === "production" && !transaction.invoiceId.startsWith("test_")) {
+      return NextResponse.json(
+        { error: "Conferma simulata non disponibile per questa transazione. Contatta il fornitore del servizio." },
+        { status: 403 }
+      );
+    }
+
     // Consentita solo se un vero SetupIntent Stripe non è comunque ottenibile
     // per questa transazione (stessa verifica che la pagina /pay/[token] fa
     // per decidere se mostrare il form reale o quello simulato): impedisce di

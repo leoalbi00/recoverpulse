@@ -84,7 +84,7 @@ export function PricingPlans() {
         {PLANS.map((plan) => (
           <div key={plan.id} className="relative h-full">
             {plan.popular && (
-              <Badge className="absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-white shadow-md shadow-emerald-600/20">
+              <Badge className="absolute top-0 left-1/2 z-10 h-auto -translate-x-1/2 -translate-y-1/2 gap-1.5 rounded-full bg-emerald-700 px-3 py-1 text-white shadow-md shadow-emerald-600/20">
                 <Sparkles className="size-3.5" />
                 Consigliato
               </Badge>

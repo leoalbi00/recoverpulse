@@ -1,7 +1,8 @@
 import { ArrowRight, Lock, Shield } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { PilotRequestForm } from "@/components/landing/pilot-request-form";
 import { PricingPlans } from "@/components/landing/pricing-plans";
 import { SecurityBadgeRow } from "@/components/landing/security-badges";
@@ -23,14 +24,10 @@ export function Pricing() {
             funzionalità di dunning via Email, nessuna carta di credito
             richiesta.
           </p>
-          <Button
-            size="lg"
-            render={<a href="/start-trial" />}
-            className="mt-8 h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-slate-900/10"
-          >
+          <a href="/start-trial" className={cn(buttonVariants({ size: "lg" }), "mt-8 h-12 gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-slate-900/10")}>
             Inizia il recupero gratuito
             <ArrowRight className="size-4" data-icon="inline-end" />
-          </Button>
+          </a>
           <SecurityBadgeRow className="mt-6" />
         </div>
 
@@ -68,7 +65,7 @@ export function Pricing() {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-base font-semibold text-foreground">Pay for Performance</p>
                 <Badge className="h-auto rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs text-emerald-800 ring-1 ring-emerald-600/20">
-                  Rischio Zero
+                  Nessun canone fisso
                 </Badge>
                 <Badge
                   variant="outline"
@@ -80,19 +77,15 @@ export function Pricing() {
               <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
                 Un&apos;alternativa ai piani mensili qui sopra, pensata per chi
                 gestisce volumi elevati di fatture: niente canone fisso, paghi
-                solo una piccola commissione sul fatturato che recuperiamo per
-                te. Se non recuperiamo nulla, non paghi nulla.
+                solo una commissione, concordata in fase di offerta, sul
+                fatturato effettivamente recuperato tramite OmniRev. Se non
+                viene recuperato nulla, non paghi alcuna commissione.
               </p>
             </div>
           </div>
-          <Button
-            size="lg"
-            variant="outline"
-            render={<a href="#pilot" />}
-            className="h-11 shrink-0 rounded-full border-emerald-600/40 bg-card px-6 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
-          >
+          <a href="#pilot" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 shrink-0 rounded-full border-emerald-600/40 bg-card px-6 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800")}>
             Richiedi Info
-          </Button>
+          </a>
         </div>
 
         <div id="pilot" className="mt-24 scroll-mt-24">

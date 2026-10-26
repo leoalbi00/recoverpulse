@@ -5,7 +5,8 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 
@@ -48,7 +49,7 @@ export function Navbar({ user }: NavbarProps) {
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
             <>
-              <Button render={<a href="/dashboard" />}>Dashboard</Button>
+              <a href="/dashboard" className={buttonVariants()}>Dashboard</a>
               <Button
                 variant="ghost"
                 onClick={() => signOut({ callbackUrl: "/" })}
@@ -59,16 +60,12 @@ export function Navbar({ user }: NavbarProps) {
             </>
           ) : (
             <>
-              <Button
-                variant="ghost"
-                render={<a href="/login" />}
-                className="text-slate-700 hover:text-foreground"
-              >
+              <a href="/login" className={cn(buttonVariants({ variant: "ghost" }), "text-slate-700 hover:text-foreground")}>
                 Accedi
-              </Button>
-              <Button render={<a href="/start-trial" />} className="rounded-full px-4">
+              </a>
+              <a href="/start-trial" className={cn(buttonVariants(), "rounded-full px-4")}>
                 Inizia gratis
-              </Button>
+              </a>
             </>
           )}
         </div>
@@ -101,9 +98,9 @@ export function Navbar({ user }: NavbarProps) {
           <div className="mt-4 flex flex-col gap-2">
             {user ? (
               <>
-                <Button render={<a href="/dashboard" onClick={() => setOpen(false)} />} className="w-full">
+                <a href="/dashboard" onClick={() => setOpen(false)} className={cn(buttonVariants(), "w-full")}>
                   Dashboard
-                </Button>
+                </a>
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -117,19 +114,12 @@ export function Navbar({ user }: NavbarProps) {
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  render={<a href="/login" onClick={() => setOpen(false)} />}
-                  className="w-full"
-                >
+                <a href="/login" onClick={() => setOpen(false)} className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
                   Accedi
-                </Button>
-                <Button
-                  render={<a href="/start-trial" onClick={() => setOpen(false)} />}
-                  className="w-full"
-                >
+                </a>
+                <a href="/start-trial" onClick={() => setOpen(false)} className={cn(buttonVariants(), "w-full")}>
                   Inizia il recupero gratuito
-                </Button>
+                </a>
               </>
             )}
           </div>

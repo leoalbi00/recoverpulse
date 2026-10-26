@@ -21,7 +21,7 @@ const TOC = [
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updatedAt="5 settembre 2026" toc={TOC}>
+    <LegalPage title="Privacy Policy" updatedAt="26 ottobre 2026" toc={TOC}>
       <LegalSection id="titolare" title="1. Titolare del trattamento">
         <p>
           Titolare del trattamento dei dati personali raccolti tramite il sito e la dashboard OmniRev è la
@@ -58,6 +58,15 @@ export default function PrivacyPage() {
             email, importo, stato del pagamento, identificativo abbonamento).
           </li>
           <li>
+            <strong>Dati tecnici legati agli account PayPal e GoCardless eventualmente collegati dal
+            Merchant:</strong> identificativi dell&apos;account/organizzazione collegata ed email associata,
+            limitati a quanto necessario a individuare gli insoluti e contattare il Cliente Finale.
+          </li>
+          <li>
+            <strong>Dati della richiesta di integrazione pilota:</strong> nome e cognome, email aziendale,
+            azienda, MRR stimato e messaggio facoltativo inseriti nel modulo della home page.
+          </li>
+          <li>
             <strong>Dati di navigazione e log tecnici:</strong> indirizzo IP, tipo di browser, pagine visitate,
             timestamp di accesso, raccolti automaticamente per finalità di sicurezza e diagnostica.
           </li>
@@ -73,7 +82,9 @@ export default function PrivacyPage() {
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
             <strong>Esecuzione del contratto (art. 6, par. 1, lett. b, GDPR):</strong> erogazione del Servizio,
-            gestione dell&apos;account, fatturazione, assistenza clienti;
+            gestione dell&apos;account, fatturazione, assistenza clienti, nonché esecuzione di misure
+            precontrattuali adottate su richiesta dell&apos;interessato (risposta alle richieste di integrazione
+            pilota);
           </li>
           <li>
             <strong>Adempimento di obblighi legali (art. 6, par. 1, lett. c, GDPR):</strong> adempimenti fiscali,
@@ -109,8 +120,8 @@ export default function PrivacyPage() {
         <p>
           I dati sono comunicati ai fornitori tecnici necessari all&apos;erogazione del Servizio, nominati, ove
           applicabile, responsabili del trattamento ai sensi dell&apos;art. 28 GDPR, tra cui: Stripe (pagamenti),
-          Resend (invio email), Supabase (archiviazione dati) e Vercel (hosting ed esecuzione
-          dell&apos;applicazione). I dati possono inoltre essere comunicati a consulenti, revisori e autorità
+          PayPal e GoCardless (gateway di pagamento eventualmente collegati dal Merchant), Resend (invio email),
+          Supabase (archiviazione dati) e Vercel (hosting ed esecuzione dell&apos;applicazione). I dati possono inoltre essere comunicati a consulenti, revisori e autorità
           pubbliche, nei limiti previsti dalla legge o per l&apos;esercizio di un diritto in sede giudiziale. I
           dati non sono in alcun caso venduti a terzi né utilizzati per finalità di marketing di soggetti terzi.
         </p>
@@ -132,7 +143,8 @@ export default function PrivacyPage() {
           successivamente alla cessazione, per il periodo necessario ad adempiere agli obblighi fiscali,
           contabili e di legge applicabili (di norma 10 anni per la documentazione contabile e fiscale ai sensi
           della normativa italiana), nonché per il tempo necessario alla difesa di un diritto in sede
-          giudiziale. I log tecnici e di sicurezza sono conservati per un periodo limitato, proporzionato alle
+          giudiziale. I dati delle richieste di integrazione pilota non seguite dall&apos;attivazione di un
+          account sono conservati per il solo tempo necessario a gestire la richiesta. I log tecnici e di sicurezza sono conservati per un periodo limitato, proporzionato alle
           finalità di sicurezza perseguite.
         </p>
       </LegalSection>

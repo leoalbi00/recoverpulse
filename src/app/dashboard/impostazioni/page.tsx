@@ -42,47 +42,55 @@ export default async function ImpostazioniPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const merchantSettings = await getMerchantSettings(session.user.id);
-  const connectedAccount = await getConnectedAccountForUser(session.user.id).catch((error) => {
-    console.error("[impostazioni] errore nel recupero dell'account Stripe collegato:", error);
-    return null;
-  });
+  const userId = session.user.id;
+  // Letture indipendenti tra loro: eseguite in parallelo invece che in 10
+  // round-trip sequenziali verso Supabase/Stripe (stessi fallback di prima).
+  const [
+    merchantSettings,
+    connectedAccount,
+    billingInfo,
+    subscriptionOverview,
+    dunningTemplates,
+    dunningChannelSettings,
+    trial,
+    transactions,
+    merchantApiKey,
+    paypalSettings,
+    gocardlessAccount,
+  ] = await Promise.all([
+    getMerchantSettings(userId),
+    getConnectedAccountForUser(userId).catch((error) => {
+      console.error("[impostazioni] errore nel recupero dell'account Stripe collegato:", error);
+      return null;
+    }),
+    getBillingInfoForUser(userId),
+    getSubscriptionOverview(userId),
+    getDunningTemplates(userId),
+    getDunningSettings(userId),
+    getTrialStatus(userId),
+    listTransactions(userId).catch((error): FailedTransaction[] => {
+      console.error("[impostazioni] errore nel recupero delle transazioni:", error);
+      return [];
+    }),
+    getOrCreateMerchantApiKey(userId).catch((error) => {
+      console.error("[impostazioni] errore nel recupero della API Key SDD:", error);
+      return "";
+    }),
+    getPaypalSettings(userId).catch((error) => {
+      console.error("[impostazioni] errore nel recupero della connessione PayPal:", error);
+      return null;
+    }),
+    getConnectedGoCardlessAccountForUser(userId).catch((error) => {
+      console.error("[impostazioni] errore nel recupero dell'account GoCardless collegato:", error);
+      return null;
+    }),
+  ]);
 
-  const billingInfo = await getBillingInfoForUser(session.user.id);
   const hasActiveSubscription =
     billingInfo.subscriptionStatus === "active" || billingInfo.subscriptionStatus === "trialing";
-  const subscriptionOverview = await getSubscriptionOverview(session.user.id);
-
-  const dunningTemplates = await getDunningTemplates(session.user.id);
-  const dunningChannelSettings = await getDunningSettings(session.user.id);
-
-  const trial = await getTrialStatus(session.user.id);
-  let transactions: FailedTransaction[] = [];
-  try {
-    transactions = await listTransactions(session.user.id);
-  } catch (error) {
-    console.error("[impostazioni] errore nel recupero delle transazioni:", error);
-  }
   const currentPlanId = isPlanId(billingInfo.subscriptionPlan) ? billingInfo.subscriptionPlan : null;
   const planRecommendation = computePlanRecommendation(transactions, trial, currentPlanId);
-
-  let merchantApiKey = "";
-  try {
-    merchantApiKey = await getOrCreateMerchantApiKey(session.user.id);
-  } catch (error) {
-    console.error("[impostazioni] errore nel recupero della API Key SDD:", error);
-  }
   const sddWebhookUrl = `${getAppBaseUrl()}/api/v1/webhooks/sdd`;
-
-  const paypalSettings = await getPaypalSettings(session.user.id).catch((error) => {
-    console.error("[impostazioni] errore nel recupero della connessione PayPal:", error);
-    return null;
-  });
-
-  const gocardlessAccount = await getConnectedGoCardlessAccountForUser(session.user.id).catch((error) => {
-    console.error("[impostazioni] errore nel recupero dell'account GoCardless collegato:", error);
-    return null;
-  });
 
   const profileComplete = isMerchantProfileComplete(merchantSettings);
   const currentPlanName = PLANS.find((plan) => plan.id === billingInfo.subscriptionPlan)?.name ?? null;

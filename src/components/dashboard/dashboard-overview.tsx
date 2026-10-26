@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
+import dynamic from "next/dynamic";
 import { AlertTriangle, Clock, DollarSign, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 import { StatCard } from "@/components/dashboard/stat-card";
-import { RecoveryChart } from "@/components/dashboard/recovery-chart";
 import { PaywallUnlockCard } from "@/components/dashboard/paywall-unlock-card";
 import { cn } from "@/lib/utils";
 import type { FailedTransaction } from "@/lib/transactions";
@@ -22,6 +22,17 @@ import {
   type DunningLogEntry,
   type SequenceStepDefinition,
 } from "@/lib/dashboard-analytics";
+
+// Recharts (~370 kB raw) è caricato on-demand in un chunk separato: le stat
+// card e il resto della pagina diventano interattivi senza attenderlo.
+// ssr:false è sicuro: ResponsiveContainer non misura nulla lato server.
+const RecoveryChart = dynamic(
+  () => import("@/components/dashboard/recovery-chart").then((mod) => mod.RecoveryChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-80 w-full animate-pulse rounded-lg bg-zinc-100" aria-hidden="true" />,
+  },
+);
 
 type DashboardOverviewProps = {
   allTransactions: FailedTransaction[];

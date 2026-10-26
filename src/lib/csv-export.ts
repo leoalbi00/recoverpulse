@@ -12,7 +12,13 @@ const STATUS_LABEL: Record<TransactionStatus, string> = {
 };
 
 export function csvEscape(value: string): string {
-  if (/[",\n;]/.test(value)) {
+  // Nome ed email arrivano dal gateway (controllati dal cliente finale): un
+  // valore che inizia con = + - @ TAB o CR verrebbe eseguito come formula da
+  // Excel/Sheets, quindi lo neutralizziamo con un apostrofo (CSV injection).
+  if (/^[=+\-@\t\r]/.test(value)) {
+    value = `'${value}`;
+  }
+  if (/[",\n\r;]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
   }
   return value;

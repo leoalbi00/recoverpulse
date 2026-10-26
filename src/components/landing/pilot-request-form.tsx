@@ -26,6 +26,9 @@ export function PilotRequestForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, company, estimatedMrr, message, website }),
+      }).catch(() => {
+        // TypeError di rete ("Failed to fetch"): non mostrarlo all'utente.
+        throw new Error("Connessione non riuscita. Controlla la rete e riprova.");
       });
       const data = await response.json().catch(() => null);
 
@@ -154,6 +157,15 @@ export function PilotRequestForm() {
         {submitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         {submitting ? "Invio in corso…" : "Richiedi Integrazione Pilota"}
       </Button>
+
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Useremo i dati inseriti solo per rispondere alla tua richiesta e organizzare l&apos;eventuale
+        integrazione pilota (art. 6, par. 1, lett. b, GDPR), senza invii di marketing. Dettagli nella{" "}
+        <a href="/privacy#dati-raccolti" target="_blank" className="text-foreground underline-offset-2 hover:underline">
+          Privacy Policy
+        </a>
+        .
+      </p>
     </form>
   );
 }

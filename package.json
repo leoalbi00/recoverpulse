@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "video:studio": "remotion studio src/remotion/index.ts",
     "video:render": "remotion render src/remotion/index.ts OmniRevDemo out/omnirev-demo.mp4"
   },
@@ -36,7 +38,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/eslintrc": "^3.3.6",
+    "@playwright/test": "^1.64.1",
     "@remotion/cli": "^4.0.532",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -46,10 +50,12 @@
     "eslint-config-next": "^15.5.23",
     "schema-dts": "^2.0.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.12"
   },
   "allowScripts": {
     "sharp@0.34.5": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "esbuild@0.28.1": true
   }
 }

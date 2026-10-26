@@ -6,7 +6,7 @@ import { z } from "zod";
 import { authConfig } from "@/auth.config";
 import { findUserByEmail, findUserById, verifyPassword } from "@/lib/users";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { validateAuthToken, markAuthTokenUsed } from "@/lib/auth-tokens";
+import { consumeAuthToken } from "@/lib/auth-tokens";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -65,13 +65,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const token = typeof credentials?.token === "string" ? credentials.token : null;
         if (!token) return null;
 
-        const authToken = await validateAuthToken(token, "magic_link");
+        // Validazione + consumo atomici: un token non può aprire due sessioni.
+        const authToken = await consumeAuthToken(token, "magic_link");
         if (!authToken) return null;
 
         const user = await findUserById(authToken.userId);
         if (!user) return null;
 
-        await markAuthTokenUsed(token);
         return { id: user.id, name: user.name, email: user.email };
       },
     }),

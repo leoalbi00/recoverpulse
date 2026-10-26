@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { isCronAuthorized } from "@/lib/cron-auth";
 import {
   claimChargeRetry,
   listDueChargeRetries,
@@ -49,9 +50,7 @@ function formatAttemptDate(date: Date): string {
 }
 
 function isAuthorized(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return false;
-  return request.headers.get("authorization") === `Bearer ${cronSecret}`;
+  return isCronAuthorized(request);
 }
 
 async function markRecovered(transaction: FailedTransaction): Promise<void> {

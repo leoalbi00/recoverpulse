@@ -21,6 +21,9 @@ const merchantSettingsSchema = z.object({
     .trim()
     .url("Inserisci un URL valido per il logo.")
     .max(2048)
+    // Solo https: il logo finisce in <img src> di email e portale /pay
+    // (niente javascript:, data:, http in chiaro).
+    .refine((value) => value.startsWith("https://"), "L'URL del logo deve iniziare con https://.")
     .optional()
     .or(z.literal("")),
   primaryColor: z

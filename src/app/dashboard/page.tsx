@@ -22,23 +22,21 @@ async function loadDashboardData(userId: string): Promise<{
   dunningLogs: DunningLogEntry[];
   sequenceSteps: SequenceStepDefinition[];
 }> {
-  let allTransactions: FailedTransaction[] = [];
-  try {
-    allTransactions = await listTransactions(userId);
-  } catch (error) {
-    console.error("[dashboard] errore nel recupero delle transazioni:", error);
-  }
-
-  let dunningLogs: DunningLogEntry[] = [];
-  try {
-    dunningLogs = await listAllDunningLogs(userId);
-  } catch (error) {
-    console.error("[dashboard] errore nel recupero dello storico solleciti:", error);
-  }
-
-  // getDunningTemplates() non lancia mai (fallback interno ai default),
-  // vedi src/lib/dunning-templates.ts.
-  const templates = await getDunningTemplates(userId);
+  // Le tre letture sono indipendenti: in parallelo per evitare un waterfall
+  // di round-trip verso Supabase (stessi fallback di prima).
+  const [allTransactions, dunningLogs, templates] = await Promise.all([
+    listTransactions(userId).catch((error): FailedTransaction[] => {
+      console.error("[dashboard] errore nel recupero delle transazioni:", error);
+      return [];
+    }),
+    listAllDunningLogs(userId).catch((error): DunningLogEntry[] => {
+      console.error("[dashboard] errore nel recupero dello storico solleciti:", error);
+      return [];
+    }),
+    // getDunningTemplates() non lancia mai (fallback interno ai default),
+    // vedi src/lib/dunning-templates.ts.
+    getDunningTemplates(userId),
+  ]);
   const sequenceSteps: SequenceStepDefinition[] = templates.steps.map((step) => ({
     id: step.id,
     label: step.label,
@@ -53,15 +51,18 @@ export default async function DashboardPage() {
   if (!session?.user) redirect("/login");
   const firstName = session.user.name?.split(" ")[0] ?? "Utente";
 
-  const { allTransactions, dunningLogs, sequenceSteps } = await loadDashboardData(session.user.id);
-  const paywall = await getPaywallStatus(session.user.id);
-
-  const merchantSettings = await getMerchantSettings(session.user.id);
+  // Query indipendenti tra loro: eseguite in parallelo (prima erano sequenziali).
+  const [{ allTransactions, dunningLogs, sequenceSteps }, paywall, merchantSettings, connectedAccount] =
+    await Promise.all([
+      loadDashboardData(session.user.id),
+      getPaywallStatus(session.user.id),
+      getMerchantSettings(session.user.id),
+      getConnectedAccountForUser(session.user.id).catch((error) => {
+        console.error("[dashboard] errore nel recupero dell'account Stripe collegato:", error);
+        return null;
+      }),
+    ]);
   const profileComplete = isMerchantProfileComplete(merchantSettings);
-  const connectedAccount = await getConnectedAccountForUser(session.user.id).catch((error) => {
-    console.error("[dashboard] errore nel recupero dell'account Stripe collegato:", error);
-    return null;
-  });
   const onboardingComplete = profileComplete && connectedAccount !== null;
 
   return (

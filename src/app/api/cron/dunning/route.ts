@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isCronAuthorized } from "@/lib/cron-auth";
 import { listActiveFailedTransactions, markInvoiceLost, clearNextRetryAt, type FailedTransaction } from "@/lib/transactions";
 import { hasDunningLogForStep, recordDunningLog, SMART_RETRY_STEP_DAYS } from "@/lib/dunning-logs";
 import { getDunningTemplates, type DunningTemplateStep } from "@/lib/dunning-templates";
@@ -24,9 +25,7 @@ function daysElapsedSince(iso: string): number {
 }
 
 function isAuthorized(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return false;
-  return request.headers.get("authorization") === `Bearer ${cronSecret}`;
+  return isCronAuthorized(request);
 }
 
 /**

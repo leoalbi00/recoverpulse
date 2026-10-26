@@ -398,14 +398,14 @@ function StepThreePassword({
               Accetto i{" "}
               <Link href="/termini" target="_blank" className="text-foreground hover:underline">
                 Termini di Servizio
-              </Link>
-              , la{" "}
-              <Link href="/privacy" target="_blank" className="text-foreground hover:underline">
-                Privacy Policy
               </Link>{" "}
               e la{" "}
               <Link href="/dpa" target="_blank" className="text-foreground hover:underline">
                 Nomina a Responsabile del Trattamento (DPA)
+              </Link>{" "}
+              e dichiaro di aver letto la{" "}
+              <Link href="/privacy" target="_blank" className="text-foreground hover:underline">
+                Privacy Policy
               </Link>
               .
             </span>
@@ -445,12 +445,36 @@ function StepThreePassword({
                 Art. 4 (Limite Massimo di Responsabilità)
               </Link>
               ,{" "}
+              <Link href="/termini#assenza-garanzia" target="_blank" className="text-foreground hover:underline">
+                Art. 5 (Assenza di garanzia di risultato)
+              </Link>
+              ,{" "}
               <Link href="/termini#aup" target="_blank" className="text-foreground hover:underline">
                 Art. 6 (Acceptable Use Policy e Sospensione Immediata Senza Rimborso)
-              </Link>{" "}
-              e{" "}
+              </Link>
+              ,{" "}
+              <Link href="/termini#servizi-terzi" target="_blank" className="text-foreground hover:underline">
+                Art. 7 (Dipendenza da servizi di terze parti)
+              </Link>
+              ,{" "}
               <Link href="/termini#legge-foro" target="_blank" className="text-foreground hover:underline">
                 Art. 9 (Foro Competente Esclusivo)
+              </Link>
+              ,{" "}
+              <Link href="/termini#corrispettivi" target="_blank" className="text-foreground hover:underline">
+                Art. 12 (Non rimborsabilità dei corrispettivi)
+              </Link>
+              ,{" "}
+              <Link href="/termini#durata-risoluzione" target="_blank" className="text-foreground hover:underline">
+                Art. 13 (Rinnovo automatico e risoluzione)
+              </Link>
+              ,{" "}
+              <Link href="/termini#modifiche" target="_blank" className="text-foreground hover:underline">
+                Art. 14 (Modifiche unilaterali ai Termini)
+              </Link>{" "}
+              e{" "}
+              <Link href="/termini#disposizioni-finali" target="_blank" className="text-foreground hover:underline">
+                Art. 15.3 (Divieto di cessione del contratto)
               </Link>
               .
             </span>

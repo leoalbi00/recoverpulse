@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { isAdminEmail } from "@/lib/admin";
 import {
   getIntegrationSettings,
   updateIntegrationSettings,
@@ -22,6 +23,14 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
+  // Chiavi GLOBALI di piattaforma (riga unica integration_settings, lette da
+  // src/lib/email.ts per TUTTI gli invii, inclusi reset password e Magic
+  // Link): solo l'account Sviluppatore può leggerle/modificarle, altrimenti
+  // un qualunque merchant potrebbe sostituire la Resend API Key con la
+  // propria e intercettare i link di accesso degli altri utenti.
+  if (!isAdminEmail(session.user.email)) {
+    return NextResponse.json({ error: "Accesso negato." }, { status: 403 });
+  }
 
   const settings = await getIntegrationSettings();
   const fields = Object.keys(settings) as (keyof IntegrationSettings)[];
@@ -40,6 +49,14 @@ export async function PATCH(request: Request) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
+  }
+  // Chiavi GLOBALI di piattaforma (riga unica integration_settings, lette da
+  // src/lib/email.ts per TUTTI gli invii, inclusi reset password e Magic
+  // Link): solo l'account Sviluppatore può leggerle/modificarle, altrimenti
+  // un qualunque merchant potrebbe sostituire la Resend API Key con la
+  // propria e intercettare i link di accesso degli altri utenti.
+  if (!isAdminEmail(session.user.email)) {
+    return NextResponse.json({ error: "Accesso negato." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

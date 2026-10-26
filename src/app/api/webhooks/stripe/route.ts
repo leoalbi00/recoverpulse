@@ -26,7 +26,12 @@ export const dynamic = "force-dynamic";
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
 // dunning parte comunque verso questo indirizzo di test.
-const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
+// Solo fuori produzione (o se impostata esplicitamente via env): in
+// produzione i dati di un cliente reale del merchant non devono mai finire
+// in una casella personale hardcoded.
+const FALLBACK_TEST_EMAIL =
+  process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ??
+  (process.env.NODE_ENV !== "production" ? "leo.elox.24@gmail.com" : null);
 
 // Primo riaddebito automatico via stripe.invoices.pay, eseguito dal cron
 // src/app/api/cron/smart-retry/route.ts (backoff successivo: +24h, +48h).
@@ -125,6 +130,12 @@ async function handleInvoicePaymentFailed(
   if (!slots) return;
 
   if (!customer.email) {
+    if (!FALLBACK_TEST_EMAIL) {
+      console.warn(
+        `[stripe-webhook] nessuna email risolta per il cliente ${customer.id || "sconosciuto"}: insoluto non registrato, dunning saltato.`
+      );
+      return;
+    }
     console.warn(
       `[stripe-webhook] ATTENZIONE: nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (probabile evento di test da Stripe CLI). Uso l'email di fallback "${FALLBACK_TEST_EMAIL}" invece di saltare l'invio.`
     );
