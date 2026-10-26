@@ -3,7 +3,7 @@ import type { Organization, SoftwareApplication, WithContext } from "schema-dts"
 import { auth } from "@/auth";
 import { Navbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
-import { MagicLinkPhoneMockup } from "@/components/landing/magic-link-phone-mockup";
+import { MagicLinkSection } from "@/components/landing/magic-link-section";
 import { Features } from "@/components/landing/features";
 import { RoiCalculator } from "@/components/landing/roi-calculator";
 import { Pricing } from "@/components/landing/pricing";
@@ -57,7 +57,7 @@ export default async function Home() {
       <Navbar user={session?.user} />
       <main className="flex-1">
         <Hero />
-        <MagicLinkPhoneMockup />
+        <MagicLinkSection />
         <Features />
         <RoiCalculator />
         <SecuritySection />
