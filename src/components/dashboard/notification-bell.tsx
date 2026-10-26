@@ -125,7 +125,7 @@ export function NotificationBell() {
         aria-label={
           unreadCount > 0 ? `Notifiche (${unreadCount} non lette)` : "Notifiche"
         }
-        className="relative inline-flex size-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
+        className="relative inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
       >
         <Bell className="size-4.5" />
         {unreadCount > 0 && (

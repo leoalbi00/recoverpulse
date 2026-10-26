@@ -21,14 +21,12 @@ export default async function DashboardLayout({
     getConnectedAccountForUser(session.user.id),
   ]);
 
-  // Cornice bicolore: pagina, header e sidebar restano scuri (bg-zinc-950,
-  // testo text-zinc-100), mentre ogni card/tabella/modulo al loro interno è
-  // un riquadro bianco con testo scuro (vedi i singoli componenti sotto
-  // src/components/dashboard/ e le pagine sotto src/app/dashboard/).
-  // L'header desktop è "sticky" con effetto glassmorphism (sfondo
-  // semi-trasparente bg-zinc-950/80 + backdrop-blur-md).
+  // Tema chiaro (scope `light`, vedi globals.css): pagina su bg-muted
+  // (#F8FAFC), sidebar e card bianche con bordo slate-200, così le card si
+  // staccano dallo sfondo senza ombre pesanti. L'header desktop è "sticky"
+  // con effetto glassmorphism (bg-muted/80 + backdrop-blur-md).
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="light min-h-screen bg-muted text-foreground">
       <DashboardSidebar
         user={session.user}
         connectedStripeAccount={
@@ -39,23 +37,23 @@ export default async function DashboardLayout({
       />
       <div className="flex flex-col md:pl-64">
         <TrialBanner trial={trial} />
-        <header className="sticky top-0 z-50 hidden w-full items-center justify-end border-b border-zinc-800/60 bg-zinc-950/80 p-4 backdrop-blur-md transition-all md:flex">
+        <header className="sticky top-0 z-50 hidden w-full items-center justify-end border-b border-border bg-muted/80 p-4 backdrop-blur-md transition-all md:flex">
           <NotificationBell />
         </header>
-        <main className="flex-1 p-6 md:p-8 pt-8 space-y-6 bg-zinc-950">
+        <main className="flex-1 space-y-6 p-6 pt-8 md:p-8">
           {children}
         </main>
-        <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-zinc-800/60 px-6 py-5 text-xs text-zinc-500 md:px-8">
-          <a href="/termini" className="hover:text-zinc-300">
+        <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border px-6 py-5 text-xs text-muted-foreground md:px-8">
+          <a href="/termini" className="hover:text-foreground">
             Termini di servizio
           </a>
-          <a href="/privacy" className="hover:text-zinc-300">
+          <a href="/privacy" className="hover:text-foreground">
             Privacy Policy
           </a>
-          <a href="/dpa" className="hover:text-zinc-300">
+          <a href="/dpa" className="hover:text-foreground">
             DPA
           </a>
-          <a href="/cookie" className="hover:text-zinc-300">
+          <a href="/cookie" className="hover:text-foreground">
             Cookie Policy
           </a>
         </footer>

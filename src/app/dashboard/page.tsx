@@ -67,10 +67,10 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Bentornato, {firstName}
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">Ecco lo stato del recupero abbonamenti.</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">Ecco lo stato del recupero abbonamenti.</p>
       </div>
 
       {!onboardingComplete && (

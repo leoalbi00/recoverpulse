@@ -98,24 +98,24 @@ export default async function ImpostazioniPage() {
         <ConnectStatusToast />
       </Suspense>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Impostazioni
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Collega Stripe, i dati aziendali e gestisci l&apos;abbonamento a
           OmniRev.
         </p>
       </div>
 
       {!profileComplete && (
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-200">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-600/20 bg-rose-50 px-5 py-4 text-sm text-rose-700">
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
             <div>
-              <p className="font-semibold text-rose-100">
+              <p className="font-semibold text-rose-800">
                 Completa i dati aziendali obbligatori
               </p>
-              <p className="mt-0.5 text-xs text-rose-200/80">
+              <p className="mt-0.5 text-xs text-rose-700">
                 Nome azienda, email aziendale e numero di telefono sono
                 richiesti per completare il profilo.
               </p>
@@ -123,7 +123,7 @@ export default async function ImpostazioniPage() {
           </div>
           <a
             href="#profilo-azienda"
-            className="shrink-0 rounded-lg bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-100 transition-colors hover:bg-rose-500/30"
+            className="shrink-0 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-rose-700"
           >
             Completa ora
           </a>
@@ -134,20 +134,20 @@ export default async function ImpostazioniPage() {
         <AccordionItem
           id="profilo-azienda"
           value="legal"
-          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+          className="rounded-xl border border-border bg-card px-5"
         >
-          <AccordionTrigger className="py-4 text-zinc-100">
+          <AccordionTrigger className="py-4 text-foreground">
             <div className="flex items-center gap-2">
               Profilo Merchant &amp; Dati Legali/Fiscali
               {!profileComplete && (
-                <Badge className="h-auto bg-rose-500/20 px-2 py-0.5 text-rose-200">
+                <Badge className="h-auto bg-rose-50 px-2 py-0.5 text-rose-700 ring-1 ring-rose-600/20">
                   Dati incompleti
                 </Badge>
               )}
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Nome, cognome, ragione sociale, Partita IVA/Codice Fiscale,
               indirizzo di sede legale, email di contatto e telefono:
               obbligatori per la fatturazione e per i contratti (Termini di
@@ -162,11 +162,11 @@ export default async function ImpostazioniPage() {
         <AccordionItem
           id="metodi-pagamento"
           value="payments"
-          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+          className="rounded-xl border border-border bg-card px-5"
         >
-          <AccordionTrigger className="py-4 text-zinc-100">Metodi di Pagamento</AccordionTrigger>
+          <AccordionTrigger className="py-4 text-foreground">Metodi di Pagamento</AccordionTrigger>
           <AccordionContent>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Stripe (1-click via OAuth), PayPal Subscriptions e il webhook universale SDD/SEPA: OmniRev intercetta
               e recupera automaticamente gli insoluti di ciascun gateway collegato.
             </p>
@@ -191,13 +191,13 @@ export default async function ImpostazioniPage() {
         <AccordionItem
           id="solleciti-dunning"
           value="dunning"
-          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+          className="rounded-xl border border-border bg-card px-5"
         >
-          <AccordionTrigger className="py-4 text-zinc-100">
+          <AccordionTrigger className="py-4 text-foreground">
             Regole Solleciti Dunning
           </AccordionTrigger>
           <AccordionContent>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Intervallo di giorni e numero di tentativi della sequenza
               automatica dopo un pagamento fallito: la stessa configurazione
               di &quot;Sequenze Dunning&quot; nel menu laterale, qui a portata
@@ -212,12 +212,12 @@ export default async function ImpostazioniPage() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="brand" className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5">
-          <AccordionTrigger className="py-4 text-zinc-100">
+        <AccordionItem value="brand" className="rounded-xl border border-border bg-card px-5">
+          <AccordionTrigger className="py-4 text-foreground">
             Brand &amp; Personalizzazione
           </AccordionTrigger>
           <AccordionContent>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-muted-foreground">
               Facoltativi: logo aziendale, colore primario del brand e nome
               mittente mostrati nelle email di sollecito e nel portale di
               aggiornamento carta.
@@ -231,13 +231,13 @@ export default async function ImpostazioniPage() {
         <AccordionItem
           id="abbonamento"
           value="subscription"
-          className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5"
+          className="rounded-xl border border-border bg-card px-5"
         >
-          <AccordionTrigger className="py-4 text-zinc-100">Abbonamento</AccordionTrigger>
+          <AccordionTrigger className="py-4 text-foreground">Abbonamento</AccordionTrigger>
           <AccordionContent>
             {isLegacyPaidSubscriber ? (
               <>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-muted-foreground">
                   Stato del piano, prossimo rinnovo, fatture e un consiglio su
                   upgrade/downgrade in base al volume gestito.
                 </p>
@@ -287,16 +287,16 @@ export default async function ImpostazioniPage() {
                         <span className="text-2xl font-semibold text-zinc-900">
                           {plan.price}
                         </span>
-                        <span className="text-xs text-zinc-600">{plan.period}</span>
+                        <span className="text-xs text-muted-foreground">{plan.period}</span>
                       </div>
-                      <p className="mt-2 text-xs text-zinc-600">{plan.description}</p>
+                      <p className="mt-2 text-xs text-muted-foreground">{plan.description}</p>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
               <>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-muted-foreground">
                   Stato del programma Beta Gratuita e anteprima dei piani Pro futuri.
                 </p>
                 <div className="mt-3">

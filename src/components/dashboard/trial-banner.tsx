@@ -17,7 +17,7 @@ export function TrialBanner({ trial }: { trial: TrialStatus }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-center text-xs text-emerald-200 md:px-8">
+    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b border-emerald-600/15 bg-emerald-50 px-4 py-2 text-center text-xs text-emerald-800 md:px-8">
       <Sparkles className="size-3.5 shrink-0" />
       <span className="font-semibold">{BETA_HEADLINE}</span>
       <span>{BETA_SUBHEADLINE}</span>

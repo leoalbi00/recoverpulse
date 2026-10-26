@@ -15,10 +15,10 @@ import { BETA_HEADLINE, BETA_SUBHEADLINE } from "@/lib/beta";
 export function BetaStatusCard() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6">
+      <div className="rounded-xl border border-emerald-600/25 bg-emerald-50 p-6">
         <div className="flex items-center gap-3">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-            <Sparkles className="size-4 text-emerald-400" />
+            <Sparkles className="size-4 text-emerald-700" />
           </span>
           <div>
             <div className="flex items-center gap-2">

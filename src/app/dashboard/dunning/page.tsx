@@ -17,10 +17,10 @@ export default async function DunningPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Sequenze Dunning
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Automazione dei solleciti dopo un pagamento fallito, su Email, SMS e
           WhatsApp: attiva o disattiva ogni passaggio e personalizza il
           modello di ciascun messaggio.
