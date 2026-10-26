@@ -40,19 +40,19 @@ async function postJson<T>(url: string, body: unknown): Promise<{ ok: true; data
 
 function TrialInfoPanel() {
   return (
-    <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
-      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-300">
+    <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-xl shadow-slate-900/5">
+      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700">
         Beta Gratuita
       </span>
-      <h1 className="mt-4 text-xl font-semibold text-zinc-100">Prova OmniRev senza rischi</h1>
-      <p className="mt-1.5 text-sm text-zinc-400">
+      <h1 className="mt-4 text-xl font-semibold text-foreground">Prova OmniRev senza rischi</h1>
+      <p className="mt-1.5 text-sm text-muted-foreground">
         Recupera i pagamenti falliti in automatico, senza impegno e senza costi di abbonamento.
       </p>
 
       <ul className="mt-8 flex flex-col gap-3.5">
         {TRIAL_BENEFITS.map((benefit) => (
-          <li key={benefit} className="flex items-start gap-2.5 text-sm text-zinc-300">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-400" />
+          <li key={benefit} className="flex items-start gap-2.5 text-sm text-slate-700">
+            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-700" />
             <span>{benefit}</span>
           </li>
         ))}
@@ -94,13 +94,13 @@ function StepOneForm({
 
   return (
     <>
-      <h2 className="text-xl font-semibold text-zinc-100">Inizia la prova gratuita</h2>
-      <p className="mt-1.5 text-sm text-zinc-400">Compila i tuoi dati per creare l&apos;account.</p>
+      <h2 className="text-xl font-semibold text-foreground">Inizia la prova gratuita</h2>
+      <p className="mt-1.5 text-sm text-muted-foreground">Compila i tuoi dati per creare l&apos;account.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="firstName" className="text-sm font-medium text-zinc-300">
+            <label htmlFor="firstName" className="text-sm font-medium text-slate-700">
               Nome
             </label>
             <input
@@ -110,12 +110,12 @@ function StepOneForm({
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
               placeholder="Mario"
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="lastName" className="text-sm font-medium text-zinc-300">
+            <label htmlFor="lastName" className="text-sm font-medium text-slate-700">
               Cognome
             </label>
             <input
@@ -125,13 +125,13 @@ function StepOneForm({
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
               placeholder="Rossi"
-              className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+              className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="email" className="text-sm font-medium text-slate-700">
             Email aziendale
           </label>
           <input
@@ -141,12 +141,12 @@ function StepOneForm({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="tu@azienda.com"
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="phone" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="phone" className="text-sm font-medium text-slate-700">
             Numero di telefono
           </label>
           <input
@@ -156,25 +156,25 @@ function StepOneForm({
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
             placeholder="+39 333 1234567"
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-rose-700">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 text-base font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-slate-900/10 transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {loading ? "Invio in corso..." : "Continua"}
           {!loading && <ArrowRight className="size-4" />}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-zinc-400">
+      <p className="mt-6 text-center text-sm text-muted-foreground">
         Hai già un account?{" "}
-        <Link href="/login" className="font-medium text-zinc-100 hover:underline">
+        <Link href="/login" className="font-medium text-foreground hover:underline">
           Accedi
         </Link>
       </p>
@@ -236,20 +236,20 @@ function StepTwoOtp({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200"
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" />
         Modifica dati
       </button>
 
-      <h2 className="mt-4 text-xl font-semibold text-zinc-100">Inserisci il codice</h2>
-      <p className="mt-1.5 text-sm text-zinc-400">
-        Abbiamo inviato un codice di attivazione a <span className="text-zinc-200">{email}</span>.
+      <h2 className="mt-4 text-xl font-semibold text-foreground">Inserisci il codice</h2>
+      <p className="mt-1.5 text-sm text-muted-foreground">
+        Abbiamo inviato un codice di attivazione a <span className="text-foreground">{email}</span>.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="otp" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="otp" className="text-sm font-medium text-slate-700">
             Codice di attivazione
           </label>
           <input
@@ -262,17 +262,17 @@ function StepTwoOtp({
             value={code}
             onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
             placeholder="123456"
-            className="h-12 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-center text-xl font-semibold tracking-[0.4em] text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="h-12 rounded-lg border border-slate-300 bg-card px-3 text-center text-xl font-semibold tracking-[0.4em] text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        {resent && <p className="text-sm text-emerald-400">Nuovo codice inviato.</p>}
+        {error && <p className="text-sm text-rose-700">{error}</p>}
+        {resent && <p className="text-sm text-emerald-700">Nuovo codice inviato.</p>}
 
         <button
           type="submit"
           disabled={loading || code.length !== 6}
-          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 text-base font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-slate-900/10 transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {loading ? "Verifica in corso..." : "Verifica codice"}
           {!loading && <ArrowRight className="size-4" />}
@@ -282,7 +282,7 @@ function StepTwoOtp({
           type="button"
           onClick={handleResend}
           disabled={resending}
-          className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-60"
+          className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-60"
         >
           {resending ? "Invio in corso..." : "Non hai ricevuto il codice? Invialo di nuovo"}
         </button>
@@ -349,12 +349,12 @@ function StepThreePassword({
 
   return (
     <>
-      <h2 className="text-xl font-semibold text-zinc-100">Crea la tua password</h2>
-      <p className="mt-1.5 text-sm text-zinc-400">Ultimo passaggio: scegli una password per il tuo account.</p>
+      <h2 className="text-xl font-semibold text-foreground">Crea la tua password</h2>
+      <p className="mt-1.5 text-sm text-muted-foreground">Ultimo passaggio: scegli una password per il tuo account.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="password" className="text-sm font-medium text-slate-700">
             Password
           </label>
           <input
@@ -365,12 +365,12 @@ function StepThreePassword({
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-zinc-300">
+          <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">
             Conferma password
           </label>
           <input
@@ -381,43 +381,43 @@ function StepThreePassword({
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             placeholder="••••••••"
-            className="h-10 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
+            className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 
-        <div className="flex flex-col gap-2.5 border-t border-zinc-800 pt-4">
-          <label className="flex items-start gap-2.5 text-xs text-zinc-400">
+        <div className="flex flex-col gap-2.5 border-t border-border pt-4">
+          <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
               required
               checked={acceptedLegal}
               onChange={(event) => setAcceptedLegal(event.target.checked)}
-              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+              className="mt-0.5 size-3.5 shrink-0 rounded border-border bg-card accent-emerald-600"
             />
             <span>
               Accetto i{" "}
-              <Link href="/termini" target="_blank" className="text-zinc-200 hover:underline">
+              <Link href="/termini" target="_blank" className="text-foreground hover:underline">
                 Termini di Servizio
               </Link>
               , la{" "}
-              <Link href="/privacy" target="_blank" className="text-zinc-200 hover:underline">
+              <Link href="/privacy" target="_blank" className="text-foreground hover:underline">
                 Privacy Policy
               </Link>{" "}
               e la{" "}
-              <Link href="/dpa" target="_blank" className="text-zinc-200 hover:underline">
+              <Link href="/dpa" target="_blank" className="text-foreground hover:underline">
                 Nomina a Responsabile del Trattamento (DPA)
               </Link>
               .
             </span>
           </label>
 
-          <label className="flex items-start gap-2.5 text-xs text-zinc-400">
+          <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
               required
               checked={acceptedDataAccuracy}
               onChange={(event) => setAcceptedDataAccuracy(event.target.checked)}
-              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+              className="mt-0.5 size-3.5 shrink-0 rounded border-border bg-card accent-emerald-600"
             />
             <span>
               Dichiaro che i dati aziendali forniti sono veritieri e di avere
@@ -425,31 +425,31 @@ function StepThreePassword({
             </span>
           </label>
 
-          <label className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-xs text-zinc-300">
+          <label className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-50 px-3 py-2.5 text-xs text-slate-700">
             <input
               type="checkbox"
               required
               checked={acceptedVexatiousClauses}
               onChange={(event) => setAcceptedVexatiousClauses(event.target.checked)}
-              className="mt-0.5 size-3.5 shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-500"
+              className="mt-0.5 size-3.5 shrink-0 rounded border-border bg-card accent-emerald-600"
             />
             <span>
               Ai sensi e per gli effetti degli artt. 1341 e 1342 c.c.,
               dichiaro di aver letto e di approvare espressamente le
               seguenti clausole dei Termini di Servizio:{" "}
-              <Link href="/termini#manleva" target="_blank" className="text-zinc-100 hover:underline">
+              <Link href="/termini#manleva" target="_blank" className="text-foreground hover:underline">
                 Art. 3 (Manleva e Garanzia sui Crediti)
               </Link>
               ,{" "}
-              <Link href="/termini#limitazione-responsabilita" target="_blank" className="text-zinc-100 hover:underline">
+              <Link href="/termini#limitazione-responsabilita" target="_blank" className="text-foreground hover:underline">
                 Art. 4 (Limite Massimo di Responsabilità)
               </Link>
               ,{" "}
-              <Link href="/termini#aup" target="_blank" className="text-zinc-100 hover:underline">
+              <Link href="/termini#aup" target="_blank" className="text-foreground hover:underline">
                 Art. 6 (Acceptable Use Policy e Sospensione Immediata Senza Rimborso)
               </Link>{" "}
               e{" "}
-              <Link href="/termini#legge-foro" target="_blank" className="text-zinc-100 hover:underline">
+              <Link href="/termini#legge-foro" target="_blank" className="text-foreground hover:underline">
                 Art. 9 (Foro Competente Esclusivo)
               </Link>
               .
@@ -457,12 +457,12 @@ function StepThreePassword({
           </label>
         </div>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-rose-700">{error}</p>}
 
         <button
           type="submit"
           disabled={loading || !acceptedLegal || !acceptedDataAccuracy || !acceptedVexatiousClauses}
-          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 text-base font-semibold text-zinc-950 shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-slate-900/10 transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
           {loading ? "Creazione account..." : "Crea account e accedi"}
           {!loading && <ArrowRight className="size-4" />}
@@ -479,10 +479,10 @@ export default function StartTrialPage() {
   const [stepError, setStepError] = useState<string | null>(null);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-zinc-950 px-6 py-16">
+    <div className="light flex min-h-screen flex-col items-center bg-muted px-6 py-16">
       <div
         aria-hidden
-        className="pointer-events-none fixed -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/15 blur-[120px]"
+        className="pointer-events-none fixed -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]"
       />
 
       <Link href="/" className="mb-8">
@@ -492,9 +492,9 @@ export default function StartTrialPage() {
       <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
         <TrialInfoPanel />
 
-        <div className="w-full max-w-sm rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
+        <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-xl shadow-slate-900/5">
           {stepError && (
-            <p className="mb-4 rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2.5 text-sm text-red-300">
+            <p className="mb-4 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700">
               {stepError}
             </p>
           )}

@@ -27,7 +27,7 @@ const DEMO_TRANSACTION = {
 
 function ActionRequiredBadge() {
   return (
-    <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+    <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-800">
       <AlertTriangle className="size-3" />
       Azione Richiesta: Aggiorna Metodo di Pagamento
     </span>
@@ -45,7 +45,7 @@ function Shell({ children, merchant }: { children: React.ReactNode; merchant: Me
   const accentTextColor = getReadableTextColor(merchant.primaryColor);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-4 py-12">
+    <main className="relative flex min-h-screen items-center justify-center light overflow-hidden bg-muted px-4 py-12">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-32 left-1/2 -z-10 h-[560px] w-[560px] -translate-x-1/2 rounded-full opacity-10 blur-[120px]"
@@ -69,10 +69,10 @@ function Shell({ children, merchant }: { children: React.ReactNode; merchant: Me
               <LogoGlyph size={18} color={accentTextColor} />
             </span>
           )}
-          <span className="text-base font-semibold tracking-tight text-white">{merchant.companyName}</span>
+          <span className="text-base font-semibold tracking-tight text-foreground">{merchant.companyName}</span>
         </div>
 
-        <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-sm">
+        <div className="mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-slate-900/5">
           <div className="h-1 w-full" style={{ backgroundColor: merchant.primaryColor }} aria-hidden />
           <div className="min-w-0 p-6 sm:p-8">{children}</div>
         </div>
@@ -87,12 +87,12 @@ function InvalidLink({ merchant }: { merchant: MerchantSettings }) {
   return (
     <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
-          <XCircle className="size-7 text-red-400" />
+        <span className="flex size-14 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-500/30">
+          <XCircle className="size-7 text-rose-700" />
         </span>
         <div>
-          <p className="text-lg font-semibold text-white">Link non valido o scaduto</p>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="text-lg font-semibold text-foreground">Link non valido o scaduto</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Questo link di aggiornamento carta non è più attivo. Contatta il tuo fornitore per riceverne uno nuovo.
           </p>
         </div>
@@ -105,12 +105,12 @@ function ConnectionError({ merchant }: { merchant: MerchantSettings }) {
   return (
     <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
-          <XCircle className="size-7 text-red-400" />
+        <span className="flex size-14 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-500/30">
+          <XCircle className="size-7 text-rose-700" />
         </span>
         <div>
-          <p className="text-lg font-semibold text-white">Servizio temporaneamente non disponibile</p>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="text-lg font-semibold text-foreground">Servizio temporaneamente non disponibile</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Non siamo riusciti a verificare questo link in questo momento. Riprova tra qualche minuto o contatta il
             tuo fornitore se il problema persiste.
           </p>
@@ -124,13 +124,13 @@ function AlreadyRecovered({ transaction, merchant }: { transaction: FailedTransa
   return (
     <Shell merchant={merchant}>
       <div className="flex flex-col items-center gap-4 py-4 text-center">
-        <span className="flex size-14 items-center justify-center rounded-full bg-emerald-400/10 ring-1 ring-emerald-400/30">
-          <ShieldCheck className="size-7 text-emerald-400" />
+        <span className="flex size-14 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/30">
+          <ShieldCheck className="size-7 text-emerald-700" />
         </span>
         <div>
-          <p className="text-lg font-semibold text-white">Abbonamento già attivo</p>
-          <p className="mt-1.5 text-sm text-zinc-400">
-            Il pagamento per <span className="text-white">{transaction.planName}</span> è già stato recuperato con
+          <p className="text-lg font-semibold text-foreground">Abbonamento già attivo</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Il pagamento per <span className="text-foreground">{transaction.planName}</span> è già stato recuperato con
             successo. Non è necessaria nessuna altra azione.
           </p>
         </div>
@@ -148,25 +148,25 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return (
       <Shell merchant={DEFAULT_MERCHANT_SETTINGS}>
         <div className="mb-6 text-center">
-          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+          <p className="text-xs font-medium tracking-wide text-emerald-700 uppercase">
             Demo · Portale 1-Click
           </p>
-          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Riattiva il tuo abbonamento
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Ciao {DEMO_TRANSACTION.customerName}, questa è un&apos;anteprima con dati simulati del portale di
             aggiornamento carta.
           </p>
         </div>
 
-        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+        <div className="mb-6 rounded-xl border border-border bg-muted p-4">
           <ActionRequiredBadge />
           <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">{DEMO_TRANSACTION.planName}</p>
-            <p className="text-sm font-semibold text-white">{amountFormatted}/mese</p>
+            <p className="text-sm text-muted-foreground">{DEMO_TRANSACTION.planName}</p>
+            <p className="text-sm font-semibold text-foreground">{amountFormatted}/mese</p>
           </div>
-          <p className="mt-1 text-xs text-zinc-500">{DEMO_TRANSACTION.reason}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{DEMO_TRANSACTION.reason}</p>
         </div>
 
         <DemoCardForm
@@ -218,12 +218,12 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
       return (
         <Shell merchant={preventiveMerchant}>
           <div className="flex flex-col items-center gap-4 py-4 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
-              <XCircle className="size-7 text-red-400" />
+            <span className="flex size-14 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-500/30">
+              <XCircle className="size-7 text-rose-700" />
             </span>
             <div>
-              <p className="text-lg font-semibold text-white">Servizio non disponibile</p>
-              <p className="mt-1.5 text-sm text-zinc-400">
+              <p className="text-lg font-semibold text-foreground">Servizio non disponibile</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
                 Non riusciamo ad aggiornare la carta in questo momento. Contatta il tuo fornitore per assistenza.
               </p>
             </div>
@@ -242,11 +242,11 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return (
       <Shell merchant={preventiveMerchant}>
         <div className="mb-6 text-center">
-          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">Aggiornamento carta</p>
-          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <p className="text-xs font-medium tracking-wide text-emerald-700 uppercase">Aggiornamento carta</p>
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Aggiorna il tuo metodo di pagamento
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             La tua carta salvata sta per scadere: aggiornala per evitare interruzioni al prossimo rinnovo.
           </p>
         </div>
@@ -286,12 +286,12 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
       return (
         <Shell merchant={merchant}>
           <div className="flex flex-col items-center gap-4 py-4 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-red-400/10 ring-1 ring-red-400/30">
-              <XCircle className="size-7 text-red-400" />
+            <span className="flex size-14 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-500/30">
+              <XCircle className="size-7 text-rose-700" />
             </span>
             <div>
-              <p className="text-lg font-semibold text-white">Servizio non disponibile</p>
-              <p className="mt-1.5 text-sm text-zinc-400">
+              <p className="text-lg font-semibold text-foreground">Servizio non disponibile</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
                 Non riusciamo ad aggiornare il tuo abbonamento PayPal in questo momento. Contatta il tuo fornitore
                 per assistenza.
               </p>
@@ -304,25 +304,25 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return (
       <Shell merchant={merchant}>
         <div className="mb-6 text-center">
-          <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+          <p className="text-xs font-medium tracking-wide text-emerald-700 uppercase">
             Aggiornamento metodo di pagamento
           </p>
-          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Riattiva il tuo abbonamento
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Ciao {transaction.customerName}, il tuo ultimo pagamento su PayPal non è andato a buon fine. Aggiorna il
             metodo su PayPal per continuare senza interruzioni.
           </p>
         </div>
 
-        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+        <div className="mb-6 rounded-xl border border-border bg-muted p-4">
           <ActionRequiredBadge />
           <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">{transaction.planName}</p>
-            <p className="text-sm font-semibold text-white">{amountFormatted}</p>
+            <p className="text-sm text-muted-foreground">{transaction.planName}</p>
+            <p className="text-sm font-semibold text-foreground">{amountFormatted}</p>
           </div>
-          <p className="mt-1 text-xs text-zinc-500">{transaction.reason}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{transaction.reason}</p>
         </div>
 
         <PaypalUpdateForm
@@ -347,25 +347,25 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
     return (
       <Shell merchant={merchant}>
         <div className="mb-6 text-center">
-          <p className="text-xs font-medium tracking-wide text-amber-400 uppercase">
+          <p className="text-xs font-medium tracking-wide text-amber-800 uppercase">
             Modalità Simulazione
           </p>
-          <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+          <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             Riattiva il tuo abbonamento
           </h1>
-          <p className="mt-1.5 text-sm text-zinc-400">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Ciao {transaction.customerName}, per questa transazione non è disponibile un vero addebito Stripe: usa
             la conferma simulata per proseguire il test del flusso di recupero.
           </p>
         </div>
 
-        <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+        <div className="mb-6 rounded-xl border border-border bg-muted p-4">
           <ActionRequiredBadge />
           <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">{transaction.planName}</p>
-            <p className="text-sm font-semibold text-white">{amountFormatted}</p>
+            <p className="text-sm text-muted-foreground">{transaction.planName}</p>
+            <p className="text-sm font-semibold text-foreground">{amountFormatted}</p>
           </div>
-          <p className="mt-1 text-xs text-zinc-500">{transaction.reason}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{transaction.reason}</p>
         </div>
 
         <SimulatedPaymentForm
@@ -384,25 +384,25 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   return (
     <Shell merchant={merchant}>
       <div className="mb-6 text-center">
-        <p className="text-xs font-medium tracking-wide text-emerald-400 uppercase">
+        <p className="text-xs font-medium tracking-wide text-emerald-700 uppercase">
           Aggiornamento metodo di pagamento
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           Riattiva il tuo abbonamento
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Ciao {transaction.customerName}, il tuo ultimo pagamento non è andato a buon fine. Aggiorna la carta per
           continuare senza interruzioni.
         </p>
       </div>
 
-      <div className="mb-6 rounded-xl border border-white/10 bg-zinc-950/60 p-4">
+      <div className="mb-6 rounded-xl border border-border bg-muted p-4">
         <ActionRequiredBadge />
         <div className="flex items-center justify-between">
-          <p className="text-sm text-zinc-400">{transaction.planName}</p>
-          <p className="text-sm font-semibold text-white">{amountFormatted}</p>
+          <p className="text-sm text-muted-foreground">{transaction.planName}</p>
+          <p className="text-sm font-semibold text-foreground">{amountFormatted}</p>
         </div>
-        <p className="mt-1 text-xs text-zinc-500">{transaction.reason}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{transaction.reason}</p>
       </div>
 
       <UpdatePaymentForm

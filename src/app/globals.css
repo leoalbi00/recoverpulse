@@ -53,9 +53,10 @@
 /*
  * Tema base scuro, senza switcher: `:root` porta i valori scuri come
  * fallback, `.dark` li ripete identici perché <html> ha la classe "dark"
- * fissa (src/app/layout.tsx). Landing e dashboard si ritagliano lo scope
- * chiaro `.light` (più sotto); le altre pagine (login, registrazione,
- * portale /pay, pagine legali) restano scure.
+ * fissa (src/app/layout.tsx). Landing, dashboard, pagine di accesso
+ * (login, registrazione, prova, reset password) e portale /pay si
+ * ritagliano lo scope chiaro `.light` (più sotto); restano scure solo le
+ * pagine legali.
  */
 :root {
   color-scheme: dark;
@@ -129,8 +130,8 @@
 }
 
 /*
- * Scope "Light Mode Enterprise" di Landing (src/app/page.tsx) e dashboard
- * (src/app/dashboard/layout.tsx): stessa
+ * Scope "Light Mode Enterprise" di Landing, dashboard, pagine di accesso e
+ * portale /pay: stessa
  * palette shadcn, ma su base slate chiara — #FFFFFF sfondo, #F8FAFC superfici
  * secondarie, #0F172A testo, #64748B testo secondario (4.76:1 su bianco, AA).
  * Il primario passa a slate-900 per CTA ad alto contrasto; lo smeraldo resta
