@@ -1,7 +1,7 @@
 import { Bell, ShieldCheck, TrendingUp } from "lucide-react";
 
-// Anteprima statica della dashboard usata dalla Hero in scrollytelling
-// (hero-scroll.tsx): solo markup e Tailwind, nessuna immagine.
+// Anteprima statica della dashboard usata dalla Hero (hero.tsx): solo
+// markup e Tailwind, nessuna immagine.
 const MOCK_TRANSACTIONS = [
   { name: "Nova Studio SRL", amount: "€89,00", status: "recuperato" as const },
   { name: "Blue Ocean Agency", amount: "€199,00", status: "in_corso" as const },
@@ -39,7 +39,7 @@ export function DashboardMockup() {
         className="absolute inset-x-5 top-8 bottom-2 -z-10 rotate-2 rounded-2xl border border-border bg-card"
       />
 
-      <div className="-rotate-1 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-slate-900/10 transition-transform duration-500 ease-out hover:rotate-0">
+      <div className="-rotate-1 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-slate-900/10">
         <div className="flex items-center gap-1.5 border-b border-border bg-muted px-4 py-3">
           <span className="size-2.5 rounded-full bg-slate-300" />
           <span className="size-2.5 rounded-full bg-slate-300" />
@@ -106,7 +106,6 @@ export function DashboardMockup() {
             alla lista transazioni qui sopra a nessuna larghezza di schermo. */}
         <div className="flex items-center gap-3 border-t border-border bg-muted px-5 py-4">
           <span className="relative flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-            <span className="absolute inline-flex size-2 animate-ping rounded-full bg-emerald-400 -top-0.5 -right-0.5" />
             <span className="absolute size-2 rounded-full bg-emerald-400 -top-0.5 -right-0.5" />
             <ShieldCheck className="size-4 text-emerald-700" />
           </span>

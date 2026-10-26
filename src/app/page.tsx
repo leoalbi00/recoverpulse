@@ -2,7 +2,7 @@ import type { Organization, SoftwareApplication, WithContext } from "schema-dts"
 
 import { auth } from "@/auth";
 import { Navbar } from "@/components/landing/navbar";
-import { HeroScroll } from "@/components/landing/hero-scroll";
+import { Hero } from "@/components/landing/hero";
 import { SimulationSection } from "@/components/landing/simulation-section";
 import { MagicLinkPhoneMockup } from "@/components/landing/magic-link-phone-mockup";
 import { Features } from "@/components/landing/features";
@@ -58,7 +58,7 @@ export default async function Home() {
       />
       <Navbar user={session?.user} />
       <main className="flex-1">
-        <HeroScroll />
+        <Hero />
         <SimulationSection />
         <MagicLinkPhoneMockup />
         <Features />

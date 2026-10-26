@@ -95,7 +95,7 @@ export function Features() {
             <Card
               key={feature.title}
               className={cn(
-                "group h-full border border-border py-7 shadow-sm ring-0 transition-[box-shadow,border-color] hover:border-emerald-600/30 hover:shadow-md",
+                "group h-full border border-border py-7 shadow-sm ring-0",
                 feature.span
               )}
             >

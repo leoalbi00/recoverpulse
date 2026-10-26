@@ -31,7 +31,7 @@ export function Navbar({ user }: NavbarProps) {
       </div>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" aria-label="OmniRev — home">
-          <Logo />
+          <Logo animated={false} />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -39,7 +39,7 @@ export function Navbar({ user }: NavbarProps) {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               {link.label}
             </a>

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import BigNumber from "bignumber.js";
-import NumberFlow from "@number-flow/react";
 import { ArrowRight, Calculator } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -38,8 +37,8 @@ function toEuros(value: BigNumber): number {
   return value.decimalPlaces(2, BigNumber.ROUND_HALF_EVEN).toNumber();
 }
 
-function AnimatedAmount({ value, className }: { value: number; className?: string }) {
-  return <NumberFlow value={value} locales="it-IT" format={CURRENCY_FORMAT} className={className} willChange />;
+function Amount({ value, className }: { value: number; className?: string }) {
+  return <p className={className}>{formatCurrency(value)}</p>;
 }
 
 export function RoiCalculator() {
@@ -82,7 +81,7 @@ export function RoiCalculator() {
             <label htmlFor="mrr-input" className="text-sm font-medium text-slate-700">
               Il tuo fatturato mensile ricorrente (MRR)
             </label>
-            <AnimatedAmount value={mrr} className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl" />
+            <Amount value={mrr} className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl" />
           </div>
 
           <input
@@ -104,17 +103,17 @@ export function RoiCalculator() {
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border bg-muted p-5 text-center">
               <p className="text-xs text-muted-foreground">Fatturato a rischio / mese</p>
-              <AnimatedAmount value={atRisk} className="mt-2 text-2xl font-semibold text-foreground" />
+              <Amount value={atRisk} className="mt-2 text-2xl font-semibold text-foreground" />
               <p className="mt-1 text-[11px] text-muted-foreground">~9% del MRR in media</p>
             </div>
             <div className="rounded-xl border border-emerald-600/25 bg-emerald-50 p-5 text-center">
               <p className="text-xs font-medium text-emerald-800">Recuperabile / mese con OmniRev</p>
-              <AnimatedAmount value={recoverableMonthly} className="mt-2 text-3xl font-semibold text-emerald-700" />
+              <Amount value={recoverableMonthly} className="mt-2 text-3xl font-semibold text-emerald-700" />
               <p className="mt-1 text-[11px] text-emerald-800">fino al 40% recuperato</p>
             </div>
             <div className="rounded-xl border border-border bg-muted p-5 text-center">
               <p className="text-xs text-muted-foreground">Recuperabile / anno</p>
-              <AnimatedAmount value={recoverableYearly} className="mt-2 text-2xl font-semibold text-foreground" />
+              <Amount value={recoverableYearly} className="mt-2 text-2xl font-semibold text-foreground" />
               <p className="mt-1 text-[11px] text-muted-foreground">proiezione a 12 mesi</p>
             </div>
           </div>

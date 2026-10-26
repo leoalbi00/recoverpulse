@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import BigNumber from "bignumber.js";
-import NumberFlow from "@number-flow/react";
 import { Check, Percent, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +60,7 @@ export function PricingPlans() {
               aria-checked={period === option.id}
               onClick={() => setPeriod(option.id)}
               className={cn(
-                "flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500/60 focus-visible:outline-none",
+                "flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium focus-visible:ring-2 focus-visible:ring-emerald-500/60 focus-visible:outline-none",
                 period === option.id ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -93,7 +92,7 @@ export function PricingPlans() {
 
             <div
               className={cn(
-                "flex h-full flex-col rounded-2xl border p-8 shadow-xl shadow-slate-900/5 transition-transform duration-300 hover:-translate-y-1",
+                "flex h-full flex-col rounded-2xl border p-8 shadow-xl shadow-slate-900/5",
                 plan.popular
                   ? "border-emerald-600/40 bg-gradient-to-b from-emerald-50 to-card ring-1 ring-emerald-600/30"
                   : "border-border bg-card"
@@ -103,12 +102,9 @@ export function PricingPlans() {
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{plan.description}</p>
 
               <div className="mt-8 flex items-baseline gap-1">
-                <NumberFlow
-                  value={monthlyPrice(plan.priceInCents, period)}
-                  locales="en-US"
-                  format={PRICE_FORMAT}
-                  className="text-5xl font-semibold tracking-tight text-foreground"
-                />
+                <span className="text-5xl font-semibold tracking-tight text-foreground">
+                  {new Intl.NumberFormat("en-US", PRICE_FORMAT).format(monthlyPrice(plan.priceInCents, period))}
+                </span>
                 <span className="text-sm text-muted-foreground">/mese</span>
               </div>
               <p className="mt-1 h-5 text-xs text-muted-foreground">

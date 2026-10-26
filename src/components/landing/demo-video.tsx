@@ -1,7 +1,6 @@
 "use client";
 
 import { Player } from "@remotion/player";
-import { useReducedMotion } from "framer-motion";
 import { PlayCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +13,6 @@ import { DEMO_VIDEO, VideoComposition } from "@/remotion/video-composition";
  * esporta in MP4 con `npm run video:render`.
  */
 export function DemoVideo() {
-  const reduceMotion = useReducedMotion();
-
   return (
     <section id="demo" aria-labelledby="demo-title" className="relative scroll-mt-16 py-28 sm:py-32">
       <div className="mx-auto max-w-5xl px-6">
@@ -48,7 +45,6 @@ export function DemoVideo() {
               style={{ width: "100%", aspectRatio: `${DEMO_VIDEO.width} / ${DEMO_VIDEO.height}` }}
               controls
               loop
-              autoPlay={!reduceMotion}
               initiallyMuted
               clickToPlay
             />
