@@ -17,7 +17,7 @@ import { createPaymentToken } from "@/lib/tokens";
 import { notifyPaymentFailed, notifyPaymentRecovered } from "@/lib/notifications";
 import { sendCardExpiringEmail } from "@/lib/email";
 import { getAppBaseUrl } from "@/lib/app-url";
-import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-idempotency";
 import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 import { requirePaymentSlots } from "@/lib/guardrails";
 
@@ -26,6 +26,7 @@ export const dynamic = "force-dynamic";
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
 // dunning parte comunque verso questo indirizzo di test.
+// Solo per eventi in test mode (event.livemode false), vedi handleInvoicePaymentFailed.
 const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
 
 // Primo riaddebito automatico via stripe.invoices.pay, eseguito dal cron
@@ -53,10 +54,6 @@ async function resolveCustomer(
     console.log(`[stripe-webhook] cliente ${customerId} risulta eliminato su Stripe: email non disponibile.`);
     return { id: customer.id, name: "Cliente eliminato", email: "" };
   }
-
-  console.log(
-    `[stripe-webhook] cliente ${customer.id} risolto da Stripe: email="${customer.email ?? ""}" name="${customer.name ?? ""}"`
-  );
 
   return { id: customer.id, name: customer.name ?? "Gentile cliente", email: customer.email ?? "" };
 }
@@ -105,11 +102,9 @@ async function handleInvoicePaymentFailed(
   stripe: Stripe,
   invoice: Stripe.Invoice,
   userId: string,
-  connectedAccountId: string
+  connectedAccountId: string,
+  livemode: boolean
 ) {
-  console.log(
-    `[stripe-webhook] invoice.payment_failed: invoice.customer_email (raw dall'evento) = "${invoice.customer_email ?? ""}"`
-  );
 
   const customer = await resolveCustomer(stripe, invoice.customer);
 
@@ -125,8 +120,17 @@ async function handleInvoicePaymentFailed(
   if (!slots) return;
 
   if (!customer.email) {
+    // In live mode i dati del cliente di un merchant non devono mai finire
+    // in una casella diversa da quella del cliente stesso: niente fallback,
+    // l'insoluto non viene registrato senza un destinatario reale.
+    if (livemode) {
+      console.warn(
+        `[stripe-webhook] nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (live mode): insoluto ${invoice.id} non registrato.`
+      );
+      return;
+    }
     console.warn(
-      `[stripe-webhook] ATTENZIONE: nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (probabile evento di test da Stripe CLI). Uso l'email di fallback "${FALLBACK_TEST_EMAIL}" invece di saltare l'invio.`
+      `[stripe-webhook] nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (test mode): uso l'email di fallback di test.`
     );
     customer.email = FALLBACK_TEST_EMAIL;
   }
@@ -160,7 +164,7 @@ async function handleInvoicePaymentFailed(
   // riporta tutti i dati chiave estratti dal payload prima di procedere con
   // la registrazione su Supabase e l'avvio del dunning.
   console.log(
-    `[stripe-webhook] === invoice.payment_failed ricevuto === accountId=${connectedAccountId} invoiceId=${invoiceId} customerEmail="${customer.email}" amount=${invoice.amount_due} ${invoice.currency.toUpperCase()}`
+    `[stripe-webhook] === invoice.payment_failed ricevuto === accountId=${connectedAccountId} invoiceId=${invoiceId} amount=${invoice.amount_due} ${invoice.currency.toUpperCase()}`
   );
 
   // Token monouso valido 7 giorni per il portale 1-click di aggiornamento carta:
@@ -191,7 +195,7 @@ async function handleInvoicePaymentFailed(
     `[stripe-webhook] invoice.payment_failed ricevuto per fattura ${invoiceId} (cliente ${customer.id}): token di recupero generato su Supabase, valido 7 giorni.`
   );
   console.log(
-    `[stripe-webhook] avvio dunning per fattura ${invoiceId}: customerEmail="${transaction.customerEmail}" paymentLinkToken=${paymentLinkToken ? "presente" : "assente"}`
+    `[stripe-webhook] avvio dunning per fattura ${invoiceId}.`
   );
 
   if (!retryBypassed) {
@@ -446,7 +450,7 @@ export async function POST(request: Request) {
       console.error("Stripe webhook signature verification failed:", error);
       return NextResponse.json({ error: "Firma webhook non valida." }, { status: 400 });
     }
-  } else if (process.env.NODE_ENV !== "production") {
+  } else if (!hasAnySecret && process.env.NODE_ENV !== "production") {
     // Fallback dev/test: se nessun secret è ancora stato configurato in .env
     // (o la richiesta arriva senza firma, es. da un test locale con
     // curl/Postman), accettiamo il payload senza verificarne l'autenticità
@@ -507,7 +511,7 @@ export async function POST(request: Request) {
 
       switch (event.type) {
         case "invoice.payment_failed":
-          await handleInvoicePaymentFailed(stripe, event.data.object, userId, connectedAccountId);
+          await handleInvoicePaymentFailed(stripe, event.data.object, userId, connectedAccountId, event.livemode);
           break;
         case "invoice.payment_succeeded":
         case "invoice.paid":
@@ -543,6 +547,7 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error(`Errore durante la gestione dell'evento Stripe ${event.type}:`, error);
+    await releaseWebhookEvent("stripe", event.id);
     return NextResponse.json({ error: "Errore interno durante la gestione dell'evento." }, { status: 500 });
   }
 

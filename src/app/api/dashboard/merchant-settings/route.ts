@@ -21,6 +21,7 @@ const merchantSettingsSchema = z.object({
     .trim()
     .url("Inserisci un URL valido per il logo.")
     .max(2048)
+    .refine((value) => value.startsWith("https://"), "Il logo deve essere un URL https://.")
     .optional()
     .or(z.literal("")),
   primaryColor: z
@@ -28,7 +29,14 @@ const merchantSettingsSchema = z.object({
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/, "Il colore deve essere un esadecimale valido, es. #10b981.")
     .optional(),
-  senderName: z.string().trim().max(120).optional().or(z.literal("")),
+  // Finisce nell'header From: niente caratteri che possano alterarne la sintassi.
+  senderName: z
+    .string()
+    .trim()
+    .max(120)
+    .regex(/^[^<>"\r\n]*$/, "Il nome mittente non può contenere < > o virgolette.")
+    .optional()
+    .or(z.literal("")),
 });
 
 export async function GET() {

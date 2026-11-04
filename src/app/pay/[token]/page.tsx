@@ -6,7 +6,7 @@ import { validatePaymentToken } from "@/lib/tokens";
 import { getTransactionByCustomerId, type FailedTransaction } from "@/lib/transactions";
 import { getMerchantSettings, DEFAULT_MERCHANT_SETTINGS, type MerchantSettings } from "@/lib/merchant-settings";
 import { getReadableTextColor } from "@/lib/color";
-import { tryCreateSetupIntent } from "@/lib/payment-portal";
+import { isSimulatableTransaction, tryCreateSetupIntent } from "@/lib/payment-portal";
 import { getPaypalSettings } from "@/lib/paypal-settings";
 import { UpdatePaymentForm } from "@/components/update-payment/update-payment-form";
 import { DemoCardForm } from "@/components/update-payment/demo-card-form";
@@ -191,7 +191,7 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
       ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
       : null;
   } catch (error) {
-    console.error(`[pay-portal] errore nella verifica del token "${token}" su Supabase:`, error);
+    console.error("[pay-portal] errore nella verifica del token su Supabase:", error);
     return <ConnectionError merchant={DEFAULT_MERCHANT_SETTINGS} />;
   }
 
@@ -343,6 +343,41 @@ export default async function UpdatePaymentPage({ params }: PageProps<"/pay/[tok
   // da /api/test/generate-failed-payment (customer Stripe inesistente) o
   // chiavi Stripe mancanti/non valide. Invece di bloccare l'utente su un
   // errore Stripe, il portale entra in modalità "Simulazione".
+  // Insoluto reale (SDD, merchant senza Stripe collegato, Stripe non
+  // raggiungibile): nessuna conferma simulata, che chiuderebbe la fattura
+  // senza un incasso reale — il cliente viene indirizzato al merchant.
+  if (!clientSecret && !isSimulatableTransaction(transaction)) {
+    return (
+      <Shell merchant={merchant}>
+        <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-amber-400/10 ring-1 ring-amber-400/30">
+            <AlertTriangle className="size-7 text-amber-400" />
+          </span>
+          <div>
+            <p className="text-lg font-semibold text-white">Contatta {merchant.companyName}</p>
+            <p className="mt-1.5 text-sm text-zinc-400">
+              Il pagamento di <span className="text-white">{amountFormatted}</span> per{" "}
+              <span className="text-white">{transaction.planName}</span> non è andato a buon fine e non può essere
+              saldato online da questa pagina.
+              {merchant.supportEmail ? (
+                <>
+                  {" "}
+                  Scrivi a{" "}
+                  <a className="text-white underline" href={`mailto:${merchant.supportEmail}`}>
+                    {merchant.supportEmail}
+                  </a>{" "}
+                  per regolarizzare la tua posizione.
+                </>
+              ) : (
+                " Contatta il tuo fornitore per regolarizzare la tua posizione."
+              )}
+            </p>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
+
   if (!clientSecret) {
     return (
       <Shell merchant={merchant}>

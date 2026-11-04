@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getTransaction } from "@/lib/transactions";
 import { startDunningSequence } from "@/lib/dunning";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(
   request: Request,
@@ -14,6 +15,12 @@ export async function POST(
   }
 
   const { invoiceId } = await context.params;
+
+  // Ogni reinvio è un'email reale al cliente finale: limite per fattura
+  // contro click ripetuti o uso del pulsante come strumento di spam.
+  if (!checkRateLimit(`resend:${session.user.id}:${invoiceId}`, 3, 60 * 60).allowed) {
+    return NextResponse.json({ error: "Troppi reinvii per questa fattura. Riprova più tardi." }, { status: 429 });
+  }
   const transaction = await getTransaction(decodeURIComponent(invoiceId), session.user.id);
 
   if (!transaction) {

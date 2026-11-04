@@ -156,6 +156,22 @@ export async function recordFailedPayment(input: {
   /** true per expired_card/invalid_card: il cron non pianifica ulteriori solleciti a giorni fissi per questa fattura. */
   retryBypassed?: boolean;
 }): Promise<FailedTransaction> {
+  // invoice_id è unico su TUTTA la tabella, e l'upsert sotto riscrive anche
+  // user_id: senza questo controllo una fattura con lo stesso id già di un
+  // altro merchant verrebbe riassegnata (e i suoi dati sovrascritti) da chi
+  // la registra per secondo.
+  const { data: existing, error: existingError } = await supabaseAdmin
+    .from("failed_transactions")
+    .select("user_id")
+    .eq("invoice_id", input.invoiceId)
+    .maybeSingle();
+  if (existingError) {
+    throw new Error(`Errore nella verifica della fattura esistente su Supabase: ${existingError.message}`);
+  }
+  if (existing && existing.user_id !== input.userId) {
+    throw new Error(`La fattura ${input.invoiceId} appartiene a un altro account: registrazione rifiutata.`);
+  }
+
   const { data, error } = await supabaseAdmin
     .from("failed_transactions")
     .upsert(

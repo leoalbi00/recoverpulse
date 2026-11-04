@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
-import { validateAuthToken, markAuthTokenUsed } from "@/lib/auth-tokens";
+import { consumeAuthToken } from "@/lib/auth-tokens";
 import { updatePasswordHash } from "@/lib/users";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const schema = z.object({
   token: z.string().min(1),
-  password: z.string().min(6, "La password deve avere almeno 6 caratteri."),
+  password: z.string().min(8, "La password deve avere almeno 8 caratteri.").max(128),
 });
 
 export async function POST(request: Request) {
@@ -28,14 +28,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const authToken = await validateAuthToken(parsed.data.token, "password_reset");
+    // Hash calcolato prima del consumo: se fallisse dopo, il link sarebbe
+    // già bruciato senza aver cambiato la password.
+    const newHash = await bcrypt.hash(parsed.data.password, 10);
+    const authToken = await consumeAuthToken(parsed.data.token, "password_reset");
     if (!authToken) {
       return NextResponse.json({ error: "Link non valido o scaduto." }, { status: 400 });
     }
 
-    const newHash = await bcrypt.hash(parsed.data.password, 10);
     await updatePasswordHash(authToken.userId, newHash);
-    await markAuthTokenUsed(parsed.data.token);
 
     return NextResponse.json({ success: true });
   } catch (error) {

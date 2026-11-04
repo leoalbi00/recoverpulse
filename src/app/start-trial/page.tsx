@@ -361,7 +361,7 @@ function StepThreePassword({
             id="password"
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
@@ -377,7 +377,7 @@ function StepThreePassword({
             id="confirmPassword"
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             placeholder="••••••••"

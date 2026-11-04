@@ -12,6 +12,7 @@ import { getPaypalSettings, isPaypalConfigured } from "@/lib/paypal-settings";
 import { getValidPaypalAccessToken } from "@/lib/paypal-partner";
 import { getPaypalSubscription } from "@/lib/paypal";
 import { sendRecoveryConfirmationEmail } from "@/lib/email";
+import { isSimulatableTransaction } from "@/lib/payment-portal";
 
 const confirmSchema = z.union([
   z.object({ setupIntentId: z.string().min(1) }),
@@ -51,7 +52,7 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
       ? await getTransactionByCustomerId(paymentToken.customerId, paymentToken.userId ?? undefined)
       : null;
   } catch (error) {
-    console.error(`[update-payment-confirm] errore nella verifica del token "${token}" su Supabase:`, error);
+    console.error("[update-payment-confirm] errore nella verifica del token su Supabase:", error);
     return NextResponse.json(
       { error: "Servizio temporaneamente non disponibile. Riprova tra qualche minuto." },
       { status: 503 }
@@ -129,6 +130,16 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   }
 
   if ("simulate" in parsed.data) {
+    // La conferma simulata segna la fattura come "recuperata" SENZA alcun
+    // incasso reale: ammessa solo per le transazioni di prova generate da
+    // /api/test/generate-failed-payment (invoice_id "test_..."). Prima
+    // bastava che Stripe non fosse disponibile (merchant solo PayPal/SDD,
+    // errore di rete) perché il cliente stesso potesse chiudere il proprio
+    // insoluto e fermare il dunning senza pagare.
+    if (!isSimulatableTransaction(transaction)) {
+      return NextResponse.json({ error: "Conferma simulata non disponibile per questa fattura." }, { status: 403 });
+    }
+
     // Consentita solo se un vero SetupIntent Stripe non è comunque ottenibile
     // per questa transazione (stessa verifica che la pagina /pay/[token] fa
     // per decidere se mostrare il form reale o quello simulato): impedisce di

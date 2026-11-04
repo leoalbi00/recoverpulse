@@ -10,7 +10,7 @@ import { createPaymentToken } from "@/lib/tokens";
 import { startDunningSequence } from "@/lib/dunning";
 import { notifyPaymentFailed } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-idempotency";
 import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 
 export const dynamic = "force-dynamic";
@@ -219,6 +219,7 @@ export async function POST(request: Request, context: RouteContext<"/api/v1/webh
     return NextResponse.json({ success: true, invoiceId });
   } catch (error) {
     console.error("[webhooks/paypal] errore nella gestione dell'insoluto PayPal:", error);
+    if (event.id) await releaseWebhookEvent("paypal", event.id);
     return NextResponse.json({ error: "Errore interno durante la registrazione dell'insoluto." }, { status: 500 });
   }
 }

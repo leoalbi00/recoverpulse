@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { isAdminEmail } from "@/lib/admin";
 import {
   getIntegrationSettings,
   updateIntegrationSettings,
@@ -22,6 +23,14 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
+  // Credenziali di invio GLOBALI della piattaforma (singleton condiviso da
+  // tutti gli account, vedi src/lib/integration-settings.ts): solo l'admin
+  // può leggerle o cambiarle. Prima bastava un account qualsiasi (anche
+  // self-serve da /start-trial) per sostituire la Resend API Key e dirottare
+  // le email di reset password/magic link di ogni utente.
+  if (!isAdminEmail(session.user.email)) {
+    return NextResponse.json({ error: "Accesso riservato all'amministratore." }, { status: 403 });
+  }
 
   const settings = await getIntegrationSettings();
   const fields = Object.keys(settings) as (keyof IntegrationSettings)[];
@@ -40,6 +49,14 @@ export async function PATCH(request: Request) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
+  }
+  // Credenziali di invio GLOBALI della piattaforma (singleton condiviso da
+  // tutti gli account, vedi src/lib/integration-settings.ts): solo l'admin
+  // può leggerle o cambiarle. Prima bastava un account qualsiasi (anche
+  // self-serve da /start-trial) per sostituire la Resend API Key e dirottare
+  // le email di reset password/magic link di ogni utente.
+  if (!isAdminEmail(session.user.email)) {
+    return NextResponse.json({ error: "Accesso riservato all'amministratore." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

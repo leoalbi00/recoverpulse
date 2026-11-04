@@ -13,7 +13,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const completeSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email non valida."),
   code: z.string().trim().regex(/^\d{6}$/, "Il codice deve avere 6 cifre."),
-  password: z.string().min(6, "La password deve avere almeno 6 caratteri."),
+  password: z.string().min(8, "La password deve avere almeno 8 caratteri.").max(128),
 });
 
 // Step 3 di /start-trial: ri-verifica il codice OTP (lo Step 2 lo ha solo

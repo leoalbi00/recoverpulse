@@ -11,7 +11,6 @@ const ACCEPTED_LOGO_TYPES = [
   "image/png",
   "image/jpeg",
   "image/webp",
-  "image/svg+xml",
 ];
 const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -78,7 +77,7 @@ export function BrandSettingsPanel({
     setUploadError(null);
 
     if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
-      setUploadError("Formato non supportato. Usa PNG, JPG, WebP o SVG.");
+      setUploadError("Formato non supportato. Usa PNG, JPG o WebP.");
       return;
     }
     if (file.size > MAX_LOGO_SIZE_BYTES) {
@@ -239,7 +238,7 @@ export function BrandSettingsPanel({
                     </span>
                   </p>
                   <p className="text-[11px] text-zinc-600">
-                    PNG, JPG, WebP o SVG · max 5MB
+                    PNG, JPG o WebP · max 5MB
                   </p>
                 </>
               )}

@@ -38,3 +38,17 @@ export async function claimWebhookEvent(
   console.error(`[webhook-idempotency] impossibile registrare l'evento ${provider}/${eventId}:`, error);
   return true;
 }
+
+/**
+ * Annulla il claim di un evento la cui elaborazione è fallita: il chiamante
+ * risponde poi 5xx e il gateway ri-consegna l'evento, che deve poter essere
+ * elaborato di nuovo. Senza questo rilascio il claim fatto PRIMA
+ * dell'elaborazione farebbe scartare il retry come "duplicato", perdendo
+ * per sempre l'insoluto.
+ */
+export async function releaseWebhookEvent(provider: WebhookProvider, eventId: string): Promise<void> {
+  const { error } = await supabaseAdmin.from("webhook_events").delete().eq("provider", provider).eq("event_id", eventId);
+  if (error) {
+    console.error(`[webhook-idempotency] impossibile rilasciare l'evento ${provider}/${eventId}:`, error);
+  }
+}
