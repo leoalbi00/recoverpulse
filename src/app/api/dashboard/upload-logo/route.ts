@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const BUCKET = "merchant-logos";
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -38,6 +39,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
 
+  if (!checkRateLimit(`upload-logo:${session.user.id}`, 10, 60 * 60).allowed) {
+    return NextResponse.json({ error: "Troppi caricamenti. Riprova più tardi." }, { status: 429 });
+  }
+
   const formData = await request.formData().catch(() => null);
   const file = formData?.get("file");
 
@@ -59,7 +64,7 @@ export async function POST(request: Request) {
 
   // Nome univoco per ogni upload: evita di servire una versione del logo
   // messa in cache (CDN o client email) dopo che il merchant ne carica una nuova.
-  const path = `logo-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
+  const path = `${session.user.id}/logo-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   if (!matchesMagicBytes(buffer, file.type)) {
     return NextResponse.json({ error: "Il contenuto del file non corrisponde al formato dichiarato." }, { status: 400 });

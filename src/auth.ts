@@ -10,7 +10,7 @@ import { consumeAuthToken } from "@/lib/auth-tokens";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
+  password: z.string().min(6).max(128),
 });
 
 // Hash fittizio (nessuna password reale lo produce) usato per far eseguire a

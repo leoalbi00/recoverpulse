@@ -12,6 +12,7 @@ import { getPaypalSettings, isPaypalConfigured } from "@/lib/paypal-settings";
 import { getValidPaypalAccessToken } from "@/lib/paypal-partner";
 import { getPaypalSubscription } from "@/lib/paypal";
 import { sendRecoveryConfirmationEmail } from "@/lib/email";
+import { isSimulatableTransaction } from "@/lib/payment-portal";
 
 const confirmSchema = z.union([
   z.object({ setupIntentId: z.string().min(1) }),
@@ -129,18 +130,14 @@ export async function POST(request: Request, context: RouteContext<"/api/update-
   }
 
   if ("simulate" in parsed.data) {
-    // La conferma simulata segna la fattura come "recuperato" SENZA alcun
-    // pagamento reale: in produzione è ammessa solo per le transazioni di
-    // test generate da /api/test/generate-failed-payment (invoiceId
-    // "test_..."). Senza questo vincolo un debitore reale di un insoluto
-    // SDD/GoCardless (o Stripe durante un disservizio) — per cui
-    // tryCreateSetupIntent qui sotto ritorna null — potrebbe chiudere da sé
-    // il proprio insoluto e fermare il dunning senza pagare.
-    if (process.env.NODE_ENV === "production" && !transaction.invoiceId.startsWith("test_")) {
-      return NextResponse.json(
-        { error: "Conferma simulata non disponibile per questa transazione. Contatta il fornitore del servizio." },
-        { status: 403 }
-      );
+    // La conferma simulata segna la fattura come "recuperata" SENZA alcun
+    // incasso reale: ammessa solo per le transazioni di prova generate da
+    // /api/test/generate-failed-payment (invoice_id "test_..."). Prima
+    // bastava che Stripe non fosse disponibile (merchant solo PayPal/SDD,
+    // errore di rete) perché il cliente stesso potesse chiudere il proprio
+    // insoluto e fermare il dunning senza pagare.
+    if (!isSimulatableTransaction(transaction)) {
+      return NextResponse.json({ error: "Conferma simulata non disponibile per questa fattura." }, { status: 403 });
     }
 
     // Consentita solo se un vero SetupIntent Stripe non è comunque ottenibile

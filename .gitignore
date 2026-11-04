@@ -50,3 +50,7 @@ __pycache__/
 /blob-report/
 /playwright/.cache/
 lighthouse-report.json
+
+# graphify (cache e snapshot locali)
+/graphify-out/cache/
+/graphify-out/2026-*/

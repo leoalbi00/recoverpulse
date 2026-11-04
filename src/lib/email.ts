@@ -26,18 +26,20 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? "OmniRev <onboarding@resen
  * Ricade sul nome azienda se senderName è vuoto.
  */
 function buildFromHeader(senderName: string | null, companyName: string): string {
-  const displayName = (senderName || companyName || DEFAULT_MERCHANT_SETTINGS.companyName).trim();
+  const displayName = (senderName || companyName || DEFAULT_MERCHANT_SETTINGS.companyName)
+    .replace(/[<>"\r\n]/g, "")
+    .trim();
   const emailMatch = FROM_ADDRESS.match(/<([^>]+)>/);
   const email = emailMatch ? emailMatch[1] : FROM_ADDRESS;
   return `${displayName} <${email}>`;
 }
 
-// Usa la Resend API Key salvata da /dashboard/impostazioni su Supabase se
-// presente, altrimenti RESEND_API_KEY da env: una chiave salvata dalla
-// dashboard ha così effetto immediato sull'invio, senza toccare .env.
+// RESEND_API_KEY da env ha la precedenza; la chiave salvata su Supabase
+// (modificabile solo dall'admin, vedi /api/dashboard/integration-settings)
+// resta un fallback per gli ambienti senza variabile configurata.
 async function getResendClient(): Promise<Resend | null> {
   const settings = await getIntegrationSettings();
-  const apiKey = settings.resendApiKey || process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || settings.resendApiKey;
   if (!apiKey) return null;
   return new Resend(apiKey);
 }

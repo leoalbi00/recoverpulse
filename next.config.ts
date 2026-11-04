@@ -18,7 +18,19 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Il token del portale è nel path: nessun Referer verso risorse terze
+      // (logo del merchant, Stripe, PayPal) che lo esporrebbe nei loro log.
+      {
+        source: "/pay/:path*",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+    ];
   },
 };
 

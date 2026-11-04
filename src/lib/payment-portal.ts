@@ -2,6 +2,17 @@ import "server-only";
 
 import { getStripeClientForAccount } from "@/lib/stripe";
 import { getStripeAccountIdForUser } from "@/lib/connected-stripe-accounts";
+import type { FailedTransaction } from "@/lib/transactions";
+
+/**
+ * Solo le transazioni di prova create da /api/test/generate-failed-payment
+ * (invoice_id con prefisso "test_") possono usare la conferma simulata del
+ * portale: per ogni insoluto reale serve un incasso verificato lato server
+ * (SetupIntent Stripe + invoices.pay, subscription PayPal ACTIVE).
+ */
+export function isSimulatableTransaction(transaction: Pick<FailedTransaction, "invoiceId">): boolean {
+  return transaction.invoiceId.startsWith("test_");
+}
 
 /**
  * Prova a creare un SetupIntent Stripe reale per un customer, usando il

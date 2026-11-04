@@ -133,10 +133,10 @@ export default function RegisterPage() {
               id="password"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Almeno 6 caratteri"
+              placeholder="Almeno 8 caratteri"
               className="h-10 rounded-lg border border-slate-300 bg-card px-3 text-sm text-foreground placeholder:text-slate-400 outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
@@ -152,7 +152,7 @@ export default function RegisterPage() {
               id="confirmPassword"
               type="password"
               required
-              minLength={6}
+              minLength={8}
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Ripeti la password"

@@ -18,6 +18,10 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Skill per agenti AI installate con `npx skills`: non è codice dell'app.
+      ".claude/**",
+      ".agents/**",
+      "graphify-out/**",
     ],
   },
 ];

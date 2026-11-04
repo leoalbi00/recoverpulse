@@ -111,7 +111,7 @@ function SetNewPasswordForm({ token }: { token: string }) {
           id="password"
           type="password"
           required
-          minLength={6}
+          minLength={8}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="••••••••"

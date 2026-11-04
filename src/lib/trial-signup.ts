@@ -4,7 +4,8 @@ import crypto from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minuti
-const MAX_ATTEMPTS = 5;
+// Include le due verifiche corrette del flusso (Step 2 e Step 3).
+const MAX_ATTEMPTS = 7;
 
 export type PendingTrialSignup = {
   firstName: string;
@@ -80,9 +81,9 @@ export async function startTrialSignup(input: {
  * Verifica il codice OTP per `email` senza consumarlo: chiamata sia da
  * /api/trial-signup/verify-otp (solo per sbloccare lo step Password nella
  * UI) sia, una seconda volta, da /api/trial-signup/complete (che ri-valida
- * prima di creare l'account — vedi commento lì). Incrementa il contatore
- * tentativi solo sui codici errati, per bloccare il brute force sullo
- * spazio ridotto di un OTP a 6 cifre senza penalizzare i retry legittimi.
+ * prima di creare l'account — vedi commento lì). Ogni chiamata consuma un
+ * tentativo (MAX_ATTEMPTS tiene conto delle due verifiche corrette), per
+ * bloccare il brute force sullo spazio ridotto di un OTP a 6 cifre.
  */
 export async function verifyTrialSignupOtp(email: string, code: string): Promise<VerifyOtpResult> {
   const normalizedEmail = email.toLowerCase();
@@ -101,6 +102,22 @@ export async function verifyTrialSignupOtp(email: string, code: string): Promise
   if (new Date(data.expires_at).getTime() < Date.now()) return { ok: false, reason: "expired" };
   if (data.attempts >= MAX_ATTEMPTS) return { ok: false, reason: "too_many_attempts" };
 
+  // Ogni verifica (anche corretta) consuma un tentativo con un'UPDATE
+  // condizionata al valore appena letto: N richieste parallele non possono
+  // più leggere tutte lo stesso `attempts` e provare N codici diversi
+  // oltre il limite. Chi perde la corsa conta come tentativo non valido.
+  const { data: claimed, error: claimError } = await supabaseAdmin
+    .from("trial_signups")
+    .update({ attempts: data.attempts + 1 })
+    .eq("id", data.id)
+    .eq("attempts", data.attempts)
+    .select("id")
+    .maybeSingle();
+  if (claimError) {
+    throw new Error(`Errore nella registrazione del tentativo su Supabase: ${claimError.message}`);
+  }
+  if (!claimed) return { ok: false, reason: "invalid" };
+
   // Confronto a tempo costante: stesso principio di isValidInviteCode in
   // src/app/api/register/route.ts. I due hash SHA-256 hanno sempre la
   // stessa lunghezza (64 caratteri hex), quindi il confronto di lunghezza
@@ -109,16 +126,7 @@ export async function verifyTrialSignupOtp(email: string, code: string): Promise
   const expectedHash = Buffer.from(data.otp_hash);
   const isValid = providedHash.length === expectedHash.length && crypto.timingSafeEqual(providedHash, expectedHash);
 
-  if (!isValid) {
-    const { error: updateError } = await supabaseAdmin
-      .from("trial_signups")
-      .update({ attempts: data.attempts + 1 })
-      .eq("id", data.id);
-    if (updateError) {
-      console.error("[trial-signup] errore nell'incremento dei tentativi su Supabase:", updateError.message);
-    }
-    return { ok: false, reason: "invalid" };
-  }
+  if (!isValid) return { ok: false, reason: "invalid" };
 
   return { ok: true };
 }

@@ -59,11 +59,18 @@ export function checkRateLimit(key: string, limit: number, windowSeconds: number
 
 /** Estrae l'IP client dagli header standard impostati dal proxy (Vercel/altri). */
 export function getClientIp(request: Request): string {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  // Header impostati da Vercel (sovrascrivono qualunque valore inviato dal
+  // client) prima di x-forwarded-for, il cui primo elemento è falsificabile
+  // dove il proxy si limita ad accodare l'IP: con quello un attaccante
+  // otterrebbe un bucket di rate limit nuovo a ogni richiesta.
+  const vercelIp = request.headers.get("x-vercel-forwarded-for");
+  if (vercelIp) return vercelIp.split(",")[0].trim();
 
   const realIp = request.headers.get("x-real-ip");
   if (realIp) return realIp.trim();
+
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",").at(-1)!.trim();
 
   return "unknown";
 }

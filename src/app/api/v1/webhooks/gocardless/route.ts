@@ -8,7 +8,7 @@ import { createPaymentToken } from "@/lib/tokens";
 import { startDunningSequence } from "@/lib/dunning";
 import { notifyPaymentFailed } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { claimWebhookEvent } from "@/lib/webhook-idempotency";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhook-idempotency";
 import { categorizeGatewayError, computeNextRetryAt, isRetryBypassCategory } from "@/lib/dunning-error-categorization";
 
 export const dynamic = "force-dynamic";
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
   }
 
   const events = payload?.events ?? [];
+  let failedEvents = 0;
 
   for (const event of events) {
     if (event.resource_type !== "payments" || !HANDLED_ACTIONS.has(event.action)) continue;
@@ -167,7 +168,15 @@ export async function POST(request: Request) {
       await startDunningSequence(transaction);
     } catch (error) {
       console.error(`[webhooks/gocardless] errore nella gestione dell'evento ${event.id}:`, error);
+      await releaseWebhookEvent("gocardless", event.id);
+      failedEvents++;
     }
+  }
+
+  // 5xx se almeno un evento è fallito: GoCardless ri-consegna l'intera
+  // notifica, gli eventi già elaborati vengono scartati come duplicati.
+  if (failedEvents > 0) {
+    return NextResponse.json({ error: `${failedEvents} eventi non elaborati.` }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

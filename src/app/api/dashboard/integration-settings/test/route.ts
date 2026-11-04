@@ -88,6 +88,11 @@ export async function POST(request: Request) {
   if (!/^AC[0-9a-fA-F]{32}$/.test(sid)) {
     return NextResponse.json({ ok: false, message: "Account SID Twilio non valido." } satisfies TestResult);
   }
+  // Il SID finisce nel path dell'URL Twilio: formato ufficiale "AC" + 32 hex,
+  // nient'altro (niente "/", "?", "..").
+  if (!/^AC[0-9a-fA-F]{32}$/.test(sid)) {
+    return NextResponse.json({ ok: false, message: "Account SID Twilio non valido." } satisfies TestResult);
+  }
   const basicAuth = Buffer.from(`${sid}:${token}`).toString("base64");
   return NextResponse.json(
     await testAuthenticatedEndpoint(`https://api.twilio.com/2010-04-01/Accounts/${sid}.json`, {
