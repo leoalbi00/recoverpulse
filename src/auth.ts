@@ -65,6 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const token = typeof credentials?.token === "string" ? credentials.token : null;
         if (!token) return null;
 
+        // Validazione + consumo atomici: un token non può aprire due sessioni.
         const authToken = await consumeAuthToken(token, "magic_link");
         if (!authToken) return null;
 

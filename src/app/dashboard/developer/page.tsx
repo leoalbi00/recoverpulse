@@ -53,30 +53,30 @@ export default async function DeveloperPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Vista Sviluppatore
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Richieste di integrazione pilota ricevute e log di sistema globali, su tutti gli account.
         </p>
       </div>
 
       <section>
-        <h2 className="text-lg font-semibold text-zinc-100">
+        <h2 className="text-lg font-semibold text-foreground">
           Richieste Integrazione Pilota{" "}
-          <span className="text-sm font-normal text-zinc-500">({pilotRequests.length})</span>
+          <span className="text-sm font-normal text-muted-foreground">({pilotRequests.length})</span>
         </h2>
 
         <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white p-4 text-zinc-900 shadow-md sm:p-6">
           {pilotRequests.length === 0 ? (
-            <p className="py-8 text-center text-sm text-zinc-600">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               Nessuna richiesta pilota ricevuta al momento.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
+                  <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-3 pb-3 font-medium first:pl-0">Nome</th>
                     <th className="px-3 pb-3 font-medium">Email</th>
                     <th className="px-3 pb-3 font-medium">Azienda</th>
@@ -88,10 +88,10 @@ export default async function DeveloperPage() {
                   {pilotRequests.map((request) => (
                     <tr key={request.id} className="transition-colors hover:bg-zinc-100">
                       <td className="px-3 py-3 font-medium text-zinc-900 first:pl-0">{request.name}</td>
-                      <td className="px-3 py-3 text-zinc-600">{request.email}</td>
-                      <td className="px-3 py-3 text-zinc-600">{request.company}</td>
-                      <td className="px-3 py-3 text-zinc-600">{request.estimatedMrr ?? "—"}</td>
-                      <td className="px-3 py-3 text-zinc-600 last:pr-0">
+                      <td className="px-3 py-3 text-muted-foreground">{request.email}</td>
+                      <td className="px-3 py-3 text-muted-foreground">{request.company}</td>
+                      <td className="px-3 py-3 text-muted-foreground">{request.estimatedMrr ?? "—"}</td>
+                      <td className="px-3 py-3 text-muted-foreground last:pr-0">
                         {formatDateTime(request.createdAt)}
                       </td>
                     </tr>
@@ -104,21 +104,21 @@ export default async function DeveloperPage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-zinc-100">
+        <h2 className="text-lg font-semibold text-foreground">
           Log di Sistema{" "}
-          <span className="text-sm font-normal text-zinc-500">({systemLogs.length})</span>
+          <span className="text-sm font-normal text-muted-foreground">({systemLogs.length})</span>
         </h2>
 
         <div className="mt-4 rounded-xl border border-zinc-200/80 bg-white p-4 text-zinc-900 shadow-md sm:p-6">
           {systemLogs.length === 0 ? (
-            <p className="py-8 text-center text-sm text-zinc-600">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               Nessun log di sistema registrato al momento.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-zinc-600">
+                  <tr className="border-b border-zinc-200/80 text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-3 pb-3 font-medium first:pl-0">Fattura</th>
                     <th className="px-3 pb-3 font-medium">Destinatario</th>
                     <th className="px-3 pb-3 font-medium">Canale</th>
@@ -133,15 +133,15 @@ export default async function DeveloperPage() {
                       <td className="px-3 py-3 font-mono text-xs text-zinc-700 first:pl-0">
                         {log.invoiceId}
                       </td>
-                      <td className="px-3 py-3 text-zinc-600">{log.customerEmail}</td>
-                      <td className="px-3 py-3 text-zinc-600">
+                      <td className="px-3 py-3 text-muted-foreground">{log.customerEmail}</td>
+                      <td className="px-3 py-3 text-muted-foreground">
                         {CHANNEL_LABEL[log.channel] ?? log.channel}
                       </td>
-                      <td className="px-3 py-3 text-zinc-600">Giorno {log.stepDays}</td>
-                      <td className="px-3 py-3 text-zinc-600">
+                      <td className="px-3 py-3 text-muted-foreground">Giorno {log.stepDays}</td>
+                      <td className="px-3 py-3 text-muted-foreground">
                         {STATUS_LABEL[log.status] ?? log.status}
                       </td>
-                      <td className="px-3 py-3 text-zinc-600 last:pr-0">
+                      <td className="px-3 py-3 text-muted-foreground last:pr-0">
                         {formatDateTime(log.sentAt)}
                       </td>
                     </tr>

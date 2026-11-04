@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPlatformStripeClient } from "@/lib/stripe";
 import { getStripeCustomerForUser } from "@/lib/billing";
+import { getAppBaseUrl } from "@/lib/app-url";
 
-export async function POST(request: Request) {
+export async function POST() {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
@@ -18,7 +19,9 @@ export async function POST(request: Request) {
     );
   }
 
-  const origin = request.headers.get("origin") ?? new URL(request.url).origin;
+  // URL di ritorno fisso (non dall'header Origin, controllabile dal client):
+  // evita che il portale Stripe rimandi l'utente su un dominio arbitrario.
+  const origin = getAppBaseUrl();
 
   try {
     const stripe = await getPlatformStripeClient();

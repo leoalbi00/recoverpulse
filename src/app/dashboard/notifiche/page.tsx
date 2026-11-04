@@ -18,10 +18,10 @@ export default async function NotifichePage() {
   return (
     <div className="mx-auto max-w-5xl">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Notifiche
         </h1>
-        <p className="mt-1.5 text-sm text-zinc-400">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Nuovi lead pilota, pagamenti recuperati e avvisi di sistema, in un
           unico posto.
         </p>

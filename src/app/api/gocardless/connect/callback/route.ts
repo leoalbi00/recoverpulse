@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "@/auth";
 import { getAppBaseUrl } from "@/lib/app-url";
 import { verifyConnectState } from "@/lib/oauth-connect-state";
 import { exchangeAuthorizationCode, getOrganisation, resolveGoCardlessEnvironment } from "@/lib/gocardless";
@@ -32,6 +33,17 @@ export async function GET(request: Request) {
   const verified = verifyConnectState("gocardless", state);
   if (!verified) {
     console.error("[gocardless-connect] state OAuth mancante, non valido o scaduto.");
+    return NextResponse.redirect(`${settingsUrl}?provider=gocardless&connected=error#metodi-pagamento`);
+  }
+
+  // Lo state firmato dimostra solo che il flusso è partito da OmniRev, non
+  // che a completarlo sia lo stesso utente: senza questo controllo un
+  // attaccante potrebbe far aprire a una vittima il proprio URL di
+  // autorizzazione (con lo state dell'attaccante) e collegare l'account
+  // GoCardless della vittima all'account OmniRev dell'attaccante.
+  const session = await auth();
+  if (session?.user?.id !== verified.userId) {
+    console.error("[gocardless-connect] state OAuth emesso per un utente diverso da quello della sessione corrente.");
     return NextResponse.redirect(`${settingsUrl}?provider=gocardless&connected=error#metodi-pagamento`);
   }
 

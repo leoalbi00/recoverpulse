@@ -45,9 +45,9 @@ export function OnboardingChecklist({
   ];
 
   return (
-    <section className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 sm:p-6">
-      <p className="text-sm font-semibold text-zinc-100">Completa la configurazione</p>
-      <p className="mt-1 text-xs text-zinc-400">3 passaggi per iniziare a recuperare pagamenti falliti.</p>
+    <section className="mt-6 rounded-xl border border-border bg-card p-5 sm:p-6">
+      <p className="text-sm font-semibold text-foreground">Completa la configurazione</p>
+      <p className="mt-1 text-xs text-muted-foreground">3 passaggi per iniziare a recuperare pagamenti falliti.</p>
 
       <ol className="mt-4 flex flex-col gap-3">
         {steps.map((step) => {
@@ -57,22 +57,22 @@ export function OnboardingChecklist({
                 "flex items-start gap-3 rounded-lg border px-3.5 py-3 transition-colors",
                 step.done
                   ? "border-emerald-500/20 bg-emerald-500/5"
-                  : "border-zinc-800 bg-zinc-950/40 hover:border-zinc-700",
+                  : "border-border bg-muted hover:border-border",
               )}
             >
               <span
                 className={cn(
                   "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full",
-                  step.done ? "bg-emerald-500 text-zinc-950" : "bg-zinc-800 text-zinc-500",
+                  step.done ? "bg-emerald-500 text-zinc-950" : "bg-border text-muted-foreground",
                 )}
               >
                 {step.done ? <Check className="size-3.5" /> : <CircleDashed className="size-3.5" />}
               </span>
               <div className="min-w-0">
-                <p className={cn("text-sm font-medium", step.done ? "text-emerald-200" : "text-zinc-200")}>
+                <p className={cn("text-sm font-medium", step.done ? "text-emerald-700" : "text-foreground")}>
                   {step.label}
                 </p>
-                <p className="mt-0.5 text-xs text-zinc-500">{step.description}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{step.description}</p>
               </div>
             </div>
           );
@@ -91,7 +91,7 @@ export function OnboardingChecklist({
         })}
       </ol>
 
-      <p className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500">
+      <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
         <Mail className="size-3.5 shrink-0" />
         Solo il canale Email è attivo in Beta — SMS e WhatsApp arrivano nella versione Pro.
       </p>

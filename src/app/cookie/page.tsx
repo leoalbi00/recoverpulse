@@ -15,7 +15,7 @@ const TOC = [
 
 export default function CookiePage() {
   return (
-    <LegalPage title="Cookie Policy" updatedAt="5 settembre 2026" toc={TOC}>
+    <LegalPage title="Cookie Policy" updatedAt="26 ottobre 2026" toc={TOC}>
       <LegalSection id="cosa-sono" title="1. Cosa sono i cookie">
         <p>
           I cookie sono piccoli file di testo che i siti visitati inviano al dispositivo dell&apos;utente, dove
@@ -29,19 +29,33 @@ export default function CookiePage() {
         <p>Il sito e la dashboard OmniRev utilizzano esclusivamente le seguenti categorie di cookie tecnici:</p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>
-            <strong>Cookie di autenticazione di sessione:</strong> necessari a mantenere l&apos;utente
-            autenticato dopo il login e a consentire l&apos;accesso alle aree riservate della dashboard.
+            <strong>Cookie di autenticazione di sessione</strong> (<code>authjs.session-token</code>, con
+            prefisso <code>__Secure-</code> in produzione): necessari a mantenere l&apos;utente autenticato
+            dopo il login e a consentire l&apos;accesso alle aree riservate della dashboard; durata massima 30
+            giorni o fino al logout.
           </li>
           <li>
-            <strong>Cookie di sicurezza:</strong> utilizzati per la protezione da richieste fraudolente
-            (es. protezione CSRF) e per garantire l&apos;integrità delle sessioni utente.
+            <strong>Cookie di sicurezza</strong> (<code>authjs.csrf-token</code> e{" "}
+            <code>authjs.callback-url</code>, con prefisso <code>__Host-</code>/<code>__Secure-</code> in
+            produzione): utilizzati per la protezione da richieste fraudolente (protezione CSRF) e per il
+            corretto reindirizzamento dopo il login; durata di sessione.
           </li>
         </ul>
+        <p>
+          La dashboard memorizza inoltre nel <em>localStorage</em> del browser una sola preferenza di
+          visualizzazione (<code>omnirev:dev-view</code>), che non contiene dati personali e non viene
+          trasmessa a OmniRev né a terzi.
+        </p>
         <p>
           Ai sensi dell&apos;art. 122 del Codice Privacy (D.Lgs. 196/2003) e delle linee guida
           dell&apos;Autorità Garante in materia di cookie, i cookie tecnici sopra descritti, essendo strettamente
           necessari all&apos;erogazione del Servizio richiesto dall&apos;utente, <strong>non richiedono il
-          preventivo consenso dell&apos;utente</strong>.
+          preventivo consenso dell&apos;utente</strong>. Per lo stesso motivo, in conformità alle &quot;Linee
+          guida cookie e altri strumenti di tracciamento&quot; del Garante (provvedimento del 10 giugno 2021), il
+          sito non mostra un banner di consenso: l&apos;informativa è resa tramite la presente pagina, raggiungibile
+          dal footer di ogni pagina. Qualora in futuro venissero introdotti cookie analitici non anonimizzati, di
+          profilazione o di terze parti non tecnici, verrà implementato un meccanismo di raccolta del
+          consenso.
         </p>
       </LegalSection>
 
@@ -49,9 +63,11 @@ export default function CookiePage() {
         <p>
           OmniRev <strong>non utilizza cookie di profilazione, analytics di terze parti o cookie
           pubblicitari</strong> di alcun tipo, né propri né di terze parti. Alcune pagine possono caricare
-          risorse necessarie all&apos;erogazione del Servizio da fornitori terzi (es. Stripe per
-          l&apos;elaborazione dei pagamenti), i quali potrebbero impostare propri cookie tecnici secondo le
-          rispettive privacy policy, richiamate nelle relative interfacce.
+          risorse necessarie all&apos;erogazione del Servizio da fornitori terzi (Stripe e PayPal nel portale di
+          aggiornamento del metodo di pagamento), i quali possono impostare propri cookie tecnici e di
+          prevenzione frodi secondo le rispettive cookie e privacy policy, richiamate nelle relative
+          interfacce. I font del sito sono serviti direttamente dai server di OmniRev, senza richieste a
+          servizi di terze parti.
         </p>
       </LegalSection>
 

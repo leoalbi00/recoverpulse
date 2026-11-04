@@ -19,6 +19,6 @@ export type DunningTemplateVariables = {
  */
 export function renderDunningTemplate(template: string, vars: DunningTemplateVariables): string {
   return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) =>
-    key in vars ? vars[key as keyof DunningTemplateVariables] : match
+    Object.hasOwn(vars, key) ? vars[key as keyof DunningTemplateVariables] : match
   );
 }

@@ -26,8 +26,13 @@ export const dynamic = "force-dynamic";
 // Usata quando l'evento Stripe non porta un'email cliente risolvibile (tipico dei
 // test lanciati con `stripe trigger`): invece di saltare l'invio, la sequenza di
 // dunning parte comunque verso questo indirizzo di test.
-// Solo per eventi in test mode (event.livemode false), vedi handleInvoicePaymentFailed.
-const FALLBACK_TEST_EMAIL = process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ?? "leo.elox.24@gmail.com";
+// Solo per eventi in test mode (event.livemode false, vedi
+// handleInvoicePaymentFailed) e fuori produzione, salvo override esplicito via
+// env: i dati di un cliente reale non devono mai finire in una casella
+// personale hardcoded.
+const FALLBACK_TEST_EMAIL =
+  process.env.STRIPE_WEBHOOK_FALLBACK_EMAIL ??
+  (process.env.NODE_ENV !== "production" ? "leo.elox.24@gmail.com" : null);
 
 // Primo riaddebito automatico via stripe.invoices.pay, eseguito dal cron
 // src/app/api/cron/smart-retry/route.ts (backoff successivo: +24h, +48h).
@@ -123,9 +128,9 @@ async function handleInvoicePaymentFailed(
     // In live mode i dati del cliente di un merchant non devono mai finire
     // in una casella diversa da quella del cliente stesso: niente fallback,
     // l'insoluto non viene registrato senza un destinatario reale.
-    if (livemode) {
+    if (livemode || !FALLBACK_TEST_EMAIL) {
       console.warn(
-        `[stripe-webhook] nessuna email risolta per il cliente ${customer.id || "sconosciuto"} (live mode): insoluto ${invoice.id} non registrato.`
+        `[stripe-webhook] nessuna email risolta per il cliente ${customer.id || "sconosciuto"}${livemode ? " (live mode)" : ""}: insoluto ${invoice.id} non registrato.`
       );
       return;
     }

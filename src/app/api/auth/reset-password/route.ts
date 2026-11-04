@@ -28,8 +28,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Hash calcolato prima del consumo: se fallisse dopo, il link sarebbe
-    // già bruciato senza aver cambiato la password.
+    // Hash calcolato prima di consumare il token: se bcrypt fallisse il link
+    // resterebbe ancora valido. Il consumo è atomico (vedi consumeAuthToken):
+    // lo stesso link non può essere usato due volte in parallelo.
     const newHash = await bcrypt.hash(parsed.data.password, 10);
     const authToken = await consumeAuthToken(parsed.data.token, "password_reset");
     if (!authToken) {

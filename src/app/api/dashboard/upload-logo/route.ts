@@ -7,27 +7,30 @@ import { checkRateLimit } from "@/lib/rate-limit";
 const BUCKET = "merchant-logos";
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
-// Formati raster accettati. SVG escluso di proposito: è un documento XML che
-// può contenere <script>, e il bucket è pubblico — un "logo" SVG diventerebbe
-// una pagina con JavaScript arbitrario ospitata sul dominio di Storage.
+// Estensioni per tipo MIME accettato: usate solo per dare un nome file
+// leggibile all'oggetto in Storage, la validazione del formato è sul tipo MIME.
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",
 };
 
-// Il tipo MIME arriva dal client: verifichiamo anche i magic bytes reali.
+// SVG escluso di proposito: è un documento attivo (può contenere <script>) e
+// il bucket è pubblico, quindi un SVG caricato diventerebbe XSS memorizzato
+// sul dominio Supabase Storage; in più Gmail/Outlook non mostrano SVG nelle
+// email di dunning. Il tipo MIME arriva dal client (falsificabile): lo
+// verifichiamo anche sui magic bytes del contenuto reale.
 function matchesMagicBytes(buffer: Buffer, mimeType: string): boolean {
-  if (mimeType === "image/png") {
-    return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  switch (mimeType) {
+    case "image/png":
+      return buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    case "image/jpeg":
+      return buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    case "image/webp":
+      return buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+    default:
+      return false;
   }
-  if (mimeType === "image/jpeg") {
-    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-  }
-  if (mimeType === "image/webp") {
-    return buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
-  }
-  return false;
 }
 
 export async function POST(request: Request) {
@@ -63,9 +66,8 @@ export async function POST(request: Request) {
   // messa in cache (CDN o client email) dopo che il merchant ne carica una nuova.
   const path = `${session.user.id}/logo-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${extension}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-
   if (!matchesMagicBytes(buffer, file.type)) {
-    return NextResponse.json({ error: "Il file non è un'immagine valida." }, { status: 400 });
+    return NextResponse.json({ error: "Il contenuto del file non corrisponde al formato dichiarato." }, { status: 400 });
   }
 
   const { error: uploadError } = await supabaseAdmin.storage

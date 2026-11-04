@@ -7,27 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "video:studio": "remotion studio src/remotion/index.ts --port=3001",
     "video:render": "remotion render src/remotion/index.ts OmniRevDemo out/omnirev-demo.mp4",
     "video:audio": "node scripts/generate-spot-audio.mjs",
-    "video:render:spots": "node scripts/render-videos.mjs",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "video:render:spots": "node scripts/render-videos.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@number-flow/react": "^0.6.2",
-    "@radix-ui/react-dialog": "^1.1.23",
-    "@radix-ui/react-tabs": "^1.1.21",
-    "@radix-ui/react-tooltip": "^1.2.16",
     "@react-email/components": "^1.0.12",
     "@remotion/google-fonts": "^4.0.540",
-    "@remotion/media-utils": "^4.0.540",
-    "@remotion/motion-blur": "^4.0.540",
-    "@remotion/noise": "^4.0.540",
-    "@remotion/player": "^4.0.540",
-    "@remotion/shapes": "^4.0.540",
-    "@remotion/transitions": "^4.0.540",
     "@stripe/react-stripe-js": "^6.8.1",
     "@stripe/stripe-js": "^9.13.0",
     "@supabase/supabase-js": "^2.112.3",
@@ -35,7 +26,6 @@
     "bignumber.js": "^11.1.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^13.4.6",
     "lucide-react": "^1.31.0",
     "next": "^15.5.23",
     "next-auth": "^5.0.0-beta.32",
@@ -52,7 +42,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/eslintrc": "^3.3.6",
+    "@playwright/test": "^1.64.1",
     "@remotion/cli": "^4.0.540",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -63,10 +55,11 @@
     "schema-dts": "^2.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.12"
   },
   "allowScripts": {
     "sharp@0.34.5": true,
-    "unrs-resolver@1.12.2": true
+    "unrs-resolver@1.12.2": true,
+    "esbuild@0.28.1": true
   }
 }

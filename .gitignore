@@ -44,6 +44,13 @@ next-env.d.ts
 ai-service/.venv/
 __pycache__/
 
+# test (Playwright / Vitest / Lighthouse)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+lighthouse-report.json
+
 # graphify (cache e snapshot locali)
 /graphify-out/cache/
 /graphify-out/2026-*/

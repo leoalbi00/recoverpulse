@@ -114,12 +114,12 @@ function SidebarContent({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-emerald-500/10 text-emerald-400 font-semibold"
-                  : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100",
+                  ? "bg-emerald-50 text-emerald-700 font-semibold"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               <item.icon
-                className={cn("size-4", isActive && "text-emerald-400")}
+                className={cn("size-4", isActive && "text-emerald-700")}
               />
               {item.label}
             </a>
@@ -171,30 +171,30 @@ function ProfileSwitcher({
   }, [open]);
 
   return (
-    <div className="relative border-t border-zinc-800 p-4" ref={containerRef}>
+    <div className="relative border-t border-border p-4" ref={containerRef}>
       {open && (
-        <div className="absolute bottom-full left-4 right-4 z-50 mb-2 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-xl">
-          <div className="flex items-center gap-3 border-b border-zinc-800 px-4 py-3">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-400">
+        <div className="absolute bottom-full left-4 right-4 z-50 mb-2 overflow-hidden rounded-xl border border-border bg-card shadow-xl">
+          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-700">
               {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-zinc-100">
+              <p className="truncate text-sm font-medium text-foreground">
                 {user.name ?? "Utente"}
               </p>
-              <p className="truncate text-xs text-zinc-400">{user.email}</p>
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
 
           {isAdmin && (
-            <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
               <div className="flex items-center gap-2 min-w-0">
-                <ShieldCheck className="size-4 shrink-0 text-emerald-400" />
+                <ShieldCheck className="size-4 shrink-0 text-emerald-700" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-zinc-100">
+                  <p className="text-sm font-medium text-foreground">
                     {devView ? "Vista Sviluppatore" : "Vista Cliente"}
                   </p>
-                  <p className="truncate text-xs text-zinc-500">
+                  <p className="truncate text-xs text-muted-foreground">
                     Richieste pilota e log di sistema
                   </p>
                 </div>
@@ -208,24 +208,24 @@ function ProfileSwitcher({
           )}
 
           <div className="px-4 py-3">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <ArrowLeftRight className="size-3.5" />
               Cambia Profilo / Account
             </p>
 
-            <div className="flex items-center gap-2.5 rounded-lg bg-zinc-800/60 px-3 py-2">
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-[11px] font-medium text-emerald-400">
+            <div className="flex items-center gap-2.5 rounded-lg bg-border/60 px-3 py-2">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-[11px] font-medium text-emerald-700">
                 {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
               </span>
-              <span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-100">
+              <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
                 {user.name ?? user.email}
               </span>
-              <span className="shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
+              <span className="shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
                 Attivo
               </span>
             </div>
 
-            <div className="mt-1.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-zinc-500">
+            <div className="mt-1.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-muted-foreground">
               <CreditCard className="size-3.5 shrink-0" />
               {connectedStripeAccount ? (
                 <span className="min-w-0 flex-1 truncate text-xs">
@@ -237,7 +237,7 @@ function ProfileSwitcher({
               )}
             </div>
 
-            <p className="mt-2.5 text-[11px] text-zinc-600">
+            <p className="mt-2.5 text-[11px] text-muted-foreground">
               Gestione multi-account in arrivo: qui potrai passare tra più profili OmniRev o account Stripe collegati.
             </p>
           </div>
@@ -245,7 +245,7 @@ function ProfileSwitcher({
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex w-full items-center gap-3 border-t border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800/60 hover:text-zinc-100"
+            className="flex w-full items-center gap-3 border-t border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LogOut className="size-4" />
             Esci
@@ -257,18 +257,18 @@ function ProfileSwitcher({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-zinc-800/60"
+        className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-muted"
       >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-400">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-sm font-medium text-emerald-700">
           {(user.name ?? user.email ?? "?").charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-zinc-100">
+          <p className="truncate text-sm font-medium text-foreground">
             {user.name ?? "Utente"}
           </p>
-          <p className="truncate text-xs text-zinc-400">{user.email}</p>
+          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </div>
-        <ChevronsUpDown className="size-4 shrink-0 text-zinc-500" />
+        <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
       </button>
     </div>
   );
@@ -279,11 +279,11 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
 
   return (
     <>
-      <div className="hidden border-r border-zinc-800 bg-zinc-900 md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
+      <div className="hidden border-r border-border bg-card md:fixed md:inset-y-0 md:z-40 md:flex md:w-64 md:flex-col">
         <SidebarContent user={user} connectedStripeAccount={connectedStripeAccount} />
       </div>
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 md:hidden">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card px-4 md:hidden">
         <Link href="/" aria-label="OmniRev — home">
           <Logo size="sm" />
         </Link>
@@ -292,7 +292,7 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex size-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
+            className="flex size-9 items-center justify-center rounded-lg text-slate-700 hover:bg-muted"
             aria-label="Apri menu"
           >
             <Menu className="size-5" />
@@ -303,15 +303,15 @@ export function DashboardSidebar({ user, connectedStripeAccount }: SidebarProps)
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/90"
+            className="absolute inset-0 bg-slate-900/40"
             onClick={() => setOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 w-72 border-r border-zinc-800 bg-zinc-900">
+          <div className="absolute inset-y-0 left-0 w-72 border-r border-border bg-card">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-800/60"
+              className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-lg text-slate-700 hover:bg-muted"
               aria-label="Chiudi menu"
             >
               <X className="size-4" />

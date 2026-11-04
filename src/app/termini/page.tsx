@@ -24,7 +24,7 @@ const TOC = [
 
 export default function TerminiPage() {
   return (
-    <LegalPage title="Termini e Condizioni di Servizio" updatedAt="7 settembre 2026" toc={TOC}>
+    <LegalPage title="Termini e Condizioni di Servizio" updatedAt="26 ottobre 2026" toc={TOC}>
       <LegalSection id="definizioni" title="1. Definizioni">
         <p>Ai fini del presente documento (i &quot;Termini&quot;), i seguenti termini assumono il significato indicato:</p>
         <ul className="list-disc space-y-1.5 pl-5">
@@ -44,7 +44,8 @@ export default function TerminiPage() {
           </li>
           <li>
             <strong>&quot;Cliente Finale&quot;</strong>: il soggetto terzo, cliente del Merchant, i cui dati di
-            pagamento sono trattati tramite Stripe e verso il quale il Servizio invia comunicazioni di
+            pagamento sono trattati tramite Stripe o gli altri gateway collegati dal Merchant (PayPal,
+            GoCardless) e verso il quale il Servizio invia comunicazioni di
             sollecito per conto del Merchant.
           </li>
           <li>
@@ -53,8 +54,8 @@ export default function TerminiPage() {
           </li>
           <li>
             <strong>&quot;Sub-fornitori&quot;</strong>: i fornitori tecnologici terzi di cui OmniRev si
-            avvale per l&apos;erogazione del Servizio (a titolo esemplificativo Stripe, Resend, Supabase,
-            Vercel/AWS).
+            avvale per l&apos;erogazione del Servizio (a titolo esemplificativo Stripe, PayPal, GoCardless,
+            Resend, Supabase, Vercel/AWS).
           </li>
         </ul>
       </LegalSection>
@@ -226,6 +227,7 @@ export default function TerminiPage() {
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li><strong>Stripe, Inc.</strong> — elaborazione dei pagamenti e fonte dei dati relativi ai pagamenti falliti;</li>
+          <li><strong>PayPal e GoCardless</strong> — gateway di pagamento alternativi, ove collegati dal Merchant;</li>
           <li><strong>Resend, Inc.</strong> — infrastruttura di invio delle comunicazioni email transazionali;</li>
           <li><strong>Supabase, Inc.</strong> — infrastruttura di archiviazione dati;</li>
           <li><strong>Vercel, Inc. / Amazon Web Services (AWS)</strong> — infrastruttura di hosting, calcolo e rete.</li>

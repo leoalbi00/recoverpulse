@@ -49,7 +49,7 @@ export function DunningChannelTabs({
 
   return (
     <div className="mt-8">
-      <div className="flex items-center gap-1 border-b border-zinc-800" role="tablist">
+      <div className="flex items-center gap-1 border-b border-border" role="tablist">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -61,7 +61,7 @@ export function DunningChannelTabs({
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 "relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-                isActive ? "text-emerald-400" : "text-zinc-400 hover:text-zinc-100",
+                isActive ? "text-emerald-700" : "text-muted-foreground hover:text-foreground",
               )}
             >
               <tab.icon className="size-4" />
@@ -69,14 +69,14 @@ export function DunningChannelTabs({
               {tab.comingSoon && (
                 <Badge
                   variant="outline"
-                  className="border-amber-400/30 bg-amber-400/10 text-amber-300"
+                  className="border-amber-500/30 bg-amber-50 text-amber-800"
                 >
                   Pro
                 </Badge>
               )}
               {isActive && (
                 <span
-                  className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-emerald-400"
+                  className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-emerald-600"
                   aria-hidden
                 />
               )}
@@ -104,17 +104,17 @@ function ChannelComingSoon({ channel }: { channel: "sms" | "whatsapp" }) {
   return (
     <div className="rounded-xl border border-zinc-200/80 bg-white text-zinc-900 p-10 text-center shadow-md">
       <span className="mx-auto flex size-12 items-center justify-center rounded-lg bg-zinc-100">
-        <copy.icon className="size-6 text-zinc-500" />
+        <copy.icon className="size-6 text-muted-foreground" />
       </span>
       <p className="mt-4 text-lg font-semibold text-zinc-900">{copy.title}</p>
-      <p className="mx-auto mt-1.5 max-w-sm text-sm text-zinc-600">{copy.description}</p>
+      <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted-foreground">{copy.description}</p>
       <Badge
         variant="outline"
         className="mt-4 border-amber-400/30 bg-amber-50 text-amber-700"
       >
         In arrivo nella versione Pro a pagamento
       </Badge>
-      <p className="mx-auto mt-5 max-w-sm text-xs text-zinc-500">
+      <p className="mx-auto mt-5 max-w-sm text-xs text-muted-foreground">
         Durante la Beta Gratuita solo il canale Email è attivo e completamente incluso, senza costi. Il tab
         &quot;Email&quot; resta l&apos;unico canale che invia davvero i solleciti.
       </p>

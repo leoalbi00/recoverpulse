@@ -27,7 +27,7 @@ export default function DpaPage() {
   return (
     <LegalPage
       title="Data Processing Agreement (Nomina a Responsabile del Trattamento)"
-      updatedAt="5 settembre 2026"
+      updatedAt="26 ottobre 2026"
       toc={TOC}
     >
       <LegalSection id="premessa" title="1. Premessa e ambito di applicazione">
@@ -77,7 +77,8 @@ export default function DpaPage() {
       <LegalSection id="oggetto-durata" title="4. Oggetto, natura e durata del trattamento">
         <p>
           OmniRev tratta i dati personali dei Clienti Finali del Merchant esclusivamente per individuare i
-          pagamenti Stripe non andati a buon fine, generare e inviare le comunicazioni di sollecito (dunning)
+          pagamenti non andati a buon fine sui gateway collegati dal Merchant (Stripe, PayPal, GoCardless o
+          addebiti SDD/SEPA notificati tramite webhook), generare e inviare le comunicazioni di sollecito (dunning)
           configurate dal Merchant e rendere disponibile il portale self-service di aggiornamento del metodo di
           pagamento. Il trattamento ha natura automatizzata (rilevazione di eventi webhook, generazione e invio
           di comunicazioni, archiviazione di log) e ha durata pari alla durata del contratto di Servizio in
@@ -88,14 +89,15 @@ export default function DpaPage() {
       <LegalSection id="categorie-dati" title="5. Categorie di interessati e di dati">
         <p>
           <strong>Interessati:</strong> i Clienti Finali del Merchant i cui abbonamenti/pagamenti ricorrenti sono
-          gestiti tramite Stripe e collegati al Servizio.
+          gestiti tramite Stripe, PayPal, GoCardless o addebito diretto SDD/SEPA e collegati al Servizio.
         </p>
         <p><strong>Categorie di dati personali trattati:</strong></p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>dati identificativi e di contatto (nome, cognome, indirizzo email);</li>
           <li>
             dati relativi al pagamento fallito (importo insoluto, valuta, causale, data e stato del tentativo di
-            addebito, identificativo dell&apos;abbonamento/subscription ID Stripe);
+            addebito, identificativo dell&apos;abbonamento/subscription ID del gateway e, per gli addebiti SDD/SEPA, le
+            sole ultime 4 cifre dell&apos;IBAN, ove comunicate dal Merchant);
           </li>
           <li>
             dati tecnici di interazione con le comunicazioni inviate (es. apertura, click sul link di
@@ -103,9 +105,10 @@ export default function DpaPage() {
           </li>
         </ul>
         <p>
-          Non sono trattati, nell&apos;ambito del Servizio, dati relativi a strumenti di pagamento (numeri di
-          carta, IBAN) né categorie particolari di dati ai sensi dell&apos;art. 9 GDPR: tali dati restano
-          gestiti esclusivamente da Stripe secondo i propri standard di sicurezza (PCI-DSS).
+          Non sono trattati, nell&apos;ambito del Servizio, dati completi relativi a strumenti di pagamento
+          (numeri di carta, IBAN completi) né categorie particolari di dati ai sensi dell&apos;art. 9 GDPR: i
+          dati delle carte restano gestiti esclusivamente da Stripe secondo i propri standard di sicurezza
+          (PCI DSS) e quelli degli altri strumenti di pagamento dai rispettivi gateway.
         </p>
       </LegalSection>
 
@@ -164,6 +167,8 @@ export default function DpaPage() {
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li><strong>Stripe, Inc.</strong> — elaborazione dei pagamenti e sorgente dati sui pagamenti falliti;</li>
+          <li><strong>PayPal</strong> — sorgente dati sugli abbonamenti PayPal falliti e aggiornamento del metodo di pagamento, ove collegato dal Merchant;</li>
+          <li><strong>GoCardless</strong> — sorgente dati sugli addebiti diretti SDD/SEPA falliti, ove collegato dal Merchant;</li>
           <li><strong>Resend, Inc.</strong> — invio delle comunicazioni email transazionali di dunning;</li>
           <li><strong>Supabase, Inc.</strong> — infrastruttura di archiviazione e gestione del database;</li>
           <li><strong>Vercel, Inc.</strong> — hosting dell&apos;applicazione ed esecuzione delle funzioni automatizzate (incluso il cron di dunning);</li>

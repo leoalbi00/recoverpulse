@@ -53,7 +53,7 @@ export function SimulatedPaymentForm({ token, planName, amountFormatted, primary
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-300">
+      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
         <ShieldAlert className="mt-0.5 size-4 shrink-0" />
         <span>
           Modalità Simulazione: nessun addebito reale verrà effettuato su Stripe. Il pulsante simula l&apos;esito
@@ -62,7 +62,7 @@ export function SimulatedPaymentForm({ token, planName, amountFormatted, primary
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2.5 text-sm text-red-400">
+        <div className="flex items-start gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700">
           <XCircle className="mt-0.5 size-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -73,13 +73,13 @@ export function SimulatedPaymentForm({ token, planName, amountFormatted, primary
         disabled={submitting}
         onClick={handleConfirm}
         style={{ backgroundColor: primaryColor, color: getReadableTextColor(primaryColor) }}
-        className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+        className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-lg transition-all hover:brightness-[1.05] focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? "Simulazione in corso…" : `Paga e Aggiorna Carta (${amountFormatted})`}
       </button>
 
-      <p className="flex items-center justify-center gap-1.5 text-xs text-zinc-500">
+      <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         I tuoi dati sono elaborati in modo sicuro da Stripe · nessun addebito reale (modalità simulazione)
       </p>
     </div>

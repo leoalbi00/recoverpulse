@@ -46,13 +46,13 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Non autenticato." }, { status: 401 });
   }
-  // Credenziali di invio GLOBALI della piattaforma (singleton condiviso da
-  // tutti gli account, vedi src/lib/integration-settings.ts): solo l'admin
-  // può leggerle o cambiarle. Prima bastava un account qualsiasi (anche
-  // self-serve da /start-trial) per sostituire la Resend API Key e dirottare
-  // le email di reset password/magic link di ogni utente.
+  // Chiavi GLOBALI di piattaforma (riga unica integration_settings, lette da
+  // src/lib/email.ts per TUTTI gli invii, inclusi reset password e Magic
+  // Link): solo l'account Sviluppatore può leggerle/modificarle, altrimenti
+  // un qualunque merchant potrebbe sostituire la Resend API Key con la
+  // propria e intercettare i link di accesso degli altri utenti.
   if (!isAdminEmail(session.user.email)) {
-    return NextResponse.json({ error: "Accesso riservato all'amministratore." }, { status: 403 });
+    return NextResponse.json({ error: "Accesso negato." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);
@@ -82,6 +82,16 @@ export async function POST(request: Request) {
   const token = (parsed.data.twilioAuthToken?.trim() || saved.twilioAuthToken).trim();
   if (!sid || !token) {
     return NextResponse.json({ ok: false, message: "Inserisci Account SID e Auth Token." } satisfies TestResult);
+  }
+  // Il SID finisce nel path dell'URL Twilio: formato ufficiale "AC" + 32 hex,
+  // nient'altro (niente "/", "?", "..").
+  if (!/^AC[0-9a-fA-F]{32}$/.test(sid)) {
+    return NextResponse.json({ ok: false, message: "Account SID Twilio non valido." } satisfies TestResult);
+  }
+  // Il SID finisce nel path dell'URL Twilio: formato ufficiale "AC" + 32 hex,
+  // nient'altro (niente "/", "?", "..").
+  if (!/^AC[0-9a-fA-F]{32}$/.test(sid)) {
+    return NextResponse.json({ ok: false, message: "Account SID Twilio non valido." } satisfies TestResult);
   }
   const basicAuth = Buffer.from(`${sid}:${token}`).toString("base64");
   return NextResponse.json(

@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OmniRev — Recupera i pagamenti falliti in automatico",
   description:
-    "Smart dunning per SaaS e abbonamenti: OmniRev intercetta ogni pagamento fallito, ritenta l'addebito al momento giusto e invia al cliente un link 1-click per aggiornare la carta.",
+    "Smart dunning per SaaS: OmniRev intercetta i pagamenti falliti, ritenta l'addebito al momento giusto e invia al cliente un link 1-click per aggiornare la carta.",
   openGraph: {
     title: "OmniRev — Recupera i pagamenti falliti in automatico",
     description:
-      "Recupera fino al 40% del fatturato perso per carte scadute e fondi insufficienti, senza inseguire i clienti.",
+      "Recupera il fatturato perso per carte scadute e fondi insufficienti, senza inseguire i clienti.",
     type: "website",
     locale: "it_IT",
     siteName: "OmniRev",
@@ -27,15 +27,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  colorScheme: "light",
-  themeColor: "#fafaf9",
+  colorScheme: "dark",
+  themeColor: "#09090b",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="it"
-      className={`scroll-smooth ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark scroll-smooth ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background">{children}</body>
     </html>

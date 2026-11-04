@@ -71,10 +71,10 @@ export async function markAuthTokenUsed(rawToken: string): Promise<void> {
 }
 
 /**
- * Valida E consuma il token in un'unica UPDATE condizionata (used=false,
- * non scaduto): due richieste concorrenti con lo stesso link non possono
- * più passare entrambe la validazione prima che una delle due lo segni come
- * usato (race del vecchio validate → markUsed separati).
+ * Valida E consuma il token in un'unica UPDATE condizionale (used=false,
+ * non scaduto): a differenza di validateAuthToken + markAuthTokenUsed,
+ * due richieste concorrenti con lo stesso token non possono entrambe
+ * risultare valide — solo la prima ottiene la riga aggiornata.
  */
 export async function consumeAuthToken(rawToken: string, purpose: AuthTokenPurpose): Promise<AuthToken | null> {
   const { data, error } = await supabaseAdmin
