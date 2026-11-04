@@ -43,3 +43,7 @@ next-env.d.ts
 # Python ai-service
 ai-service/.venv/
 __pycache__/
+
+# graphify (cache e snapshot locali)
+/graphify-out/cache/
+/graphify-out/2026-*/
